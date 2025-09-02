@@ -1,0 +1,93 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // 針對低使用量但需要高穩定性的優化配置
+  
+  // 實驗性功能 - 提升性能和穩定性
+  experimental: {
+    // 暫時關閉實驗性功能以提升穩定性
+    // reactCompiler: false,
+    // optimizePackageImports: ['react', 'react-dom'],
+  },
+
+  // 編譯器選項 - 提升代碼品質
+  compiler: {
+    // 移除 console.log（生產環境）
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // 性能優化
+  poweredByHeader: false, // 移除 X-Powered-By 標頭
+  generateEtags: true, // 啟用 ETags 快取
+  compress: true, // 啟用 gzip 壓縮
+
+  // 圖片優化
+  images: {
+    formats: ['image/webp', 'image/avif'], // 使用現代圖片格式
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30天快取
+    dangerouslyAllowSVG: false, // 安全考量
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+
+  // 安全標頭
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+        ],
+      },
+    ];
+  },
+
+  // 重寫規則 - 提升 SEO 和用戶體驗
+  async rewrites() {
+    return [
+      // 可以在此添加 API 重寫規則
+    ];
+  },
+
+  // 重定向規則
+  async redirects() {
+    return [
+      // 可以在此添加重定向規則
+    ];
+  },
+
+  // 環境變數驗證
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+
+  // 輸出配置 - 針對部署優化
+  output: 'standalone', // 生成獨立部署包
+  trailingSlash: false, // 統一 URL 格式
+  
+  // 開發環境優化
+  ...(process.env.NODE_ENV === 'development' && {
+    // 開發環境特定配置
+    onDemandEntries: {
+      // 頁面在記憶體中保留的時間
+      maxInactiveAge: 25 * 1000,
+      // 同時保留的頁面數量
+      pagesBufferLength: 2,
+    },
+  }),
+};
+
+export default nextConfig;

@@ -1,0 +1,94 @@
+/* OBS 嵌入優化樣式 */
+
+/* 確保填滿整個瀏覽器視窗 */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent !important; /* 讓 OBS 透過背景 */
+}
+
+/* 移除所有邊距和填充 */
+* {
+  box-sizing: border-box;
+}
+
+/* 確保主容器填滿整個視窗 */
+#__next {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+/* 優化文字渲染 */
+body {
+  font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 確保所有元素都在視窗內 */
+.obs-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+/* 響應式文字大小 */
+@media (max-width: 1920px) {
+  .obs-text-large {
+    font-size: 6rem;
+  }
+  .obs-text-medium {
+    font-size: 4rem;
+  }
+  .obs-text-small {
+    font-size: 2rem;
+  }
+}
+
+@media (min-width: 1921px) {
+  .obs-text-large {
+    font-size: 8rem;
+  }
+  .obs-text-medium {
+    font-size: 6rem;
+  }
+  .obs-text-small {
+    font-size: 3rem;
+  }
+}
+
+/* 高對比度模式 */
+.obs-high-contrast {
+  filter: contrast(1.2) brightness(1.1);
+}
+
+/* 動畫優化 */
+.obs-animation {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* 確保文字清晰可見 */
+.obs-text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* 邊框優化 */
+.obs-border {
+  border: 3px solid;
+  border-radius: 8px;
+}
+
+/* 背景模糊效果 */
+.obs-backdrop {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}

@@ -1,0 +1,89 @@
+{
+  "dashboard:bracket": {
+    "qf": [
+      {
+        "a": {
+          "team": "",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "",
+          "score": "n/a"
+        }
+      },
+      {
+        "a": {
+          "team": "",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "",
+          "score": "n/a"
+        }
+      },
+      {
+        "a": {
+          "team": "",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "",
+          "score": "n/a"
+        }
+      },
+      {
+        "a": {
+          "team": "",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "",
+          "score": "n/a"
+        }
+      }
+    ],
+    "sf": [
+      {
+        "a": {
+          "team": "",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "",
+          "score": "n/a"
+        }
+      },
+      {
+        "a": {
+          "team": "",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "",
+          "score": "n/a"
+        }
+      }
+    ],
+    "f": [
+      {
+        "a": {
+          "team": "",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "",
+          "score": "n/a"
+        }
+      }
+    ],
+    "champ": {
+      "team": "",
+      "score": "n/a"
+    }
+  },
+  "dashboard:currentBroadcast": {
+    "stage": "qf",
+    "index": 0
+  },
+  "dashboard:currentDisplay": "map-score"
+}

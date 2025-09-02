@@ -1,0 +1,30 @@
+{
+  "name": "aet2025-web-test",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "npm run lint && next build",
+    "start": "next start",
+    "lint": "eslint . --ext .js,.jsx --max-warnings 0",
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "type-check": "echo 'No TypeScript in this project'",
+    "analyze": "ANALYZE=true npm run build",
+    "clean": "rm -rf .next out",
+    "prebuild": "npm run clean",
+    "postbuild": "echo 'Build completed successfully'",
+    "health-check": "curl -f http://localhost:3000/api/health || exit 1"
+  },
+  "dependencies": {
+    "next": "15.5.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.2",
+    "tailwindcss": "^4"
+  }
+}
