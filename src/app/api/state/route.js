@@ -31,8 +31,30 @@ export async function POST(request) {
     const body = await request.json();
     const { bracket, currentBroadcast, currentDisplay } = body || {};
 
-    if (bracket !== undefined) kvSet(KEYS.bracket, JSON.stringify(bracket));
-    if (currentBroadcast !== undefined) kvSet(KEYS.broadcast, JSON.stringify(currentBroadcast));
+    if (bracket !== undefined) {
+      kvSet(KEYS.bracket, JSON.stringify(bracket));
+      // 廣播 bracket 更新，讓 OBS 即時同步
+      try {
+        sseBroadcast({
+          action: 'broadcast',
+          type: 'bracket-update',
+          data: { bracket },
+          timestamp: Date.now(),
+        });
+      } catch {}
+    }
+    if (currentBroadcast !== undefined) {
+      kvSet(KEYS.broadcast, JSON.stringify(currentBroadcast));
+      // 廣播目前播報對戰更新，供 OBS 高亮顯示
+      try {
+        sseBroadcast({
+          action: 'broadcast',
+          type: 'current-broadcast-update',
+          data: { currentBroadcast },
+          timestamp: Date.now(),
+        });
+      } catch {}
+    }
     if (currentDisplay !== undefined) {
       kvSet(KEYS.display, String(currentDisplay));
       // 同步透過 SSE 廣播顯示切換，確保 OBS 即時更新

@@ -1,8 +1,8 @@
 // 以 Server-Sent Events 提供單向即時訊息
-import { subscribe } from '@/lib/sse';
+import { subscribe, getSince, getLastEventId } from '@/lib/sse';
 import { kvGet } from '@/lib/db';
 
-export async function GET() {
+export async function GET(request) {
   const encoder = new TextEncoder();
   let isClosed = false;
   let heartbeat;
@@ -26,6 +26,7 @@ export async function GET() {
       // 初始訊息
       try {
         controller.enqueue(encoder.encode(`event: connected\n`));
+        controller.enqueue(encoder.encode(`id: ${getLastEventId()}\n`));
         controller.enqueue(encoder.encode(`data: {"message":"SSE connected"}\n\n`));
       } catch {
         isClosed = true;
@@ -41,15 +42,17 @@ export async function GET() {
             data: { displayId: currentDisplay },
             timestamp: Date.now(),
           });
+          controller.enqueue(encoder.encode(`id: ${getLastEventId()}\n`));
           controller.enqueue(encoder.encode(`data: ${snapshot}\n\n`));
         }
       } catch {}
 
       // 推送函式
-      const send = (payload) => {
+      const send = (record) => {
         if (isClosed) return;
         try {
-          controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+          controller.enqueue(encoder.encode(`id: ${record.id}\n`));
+          controller.enqueue(encoder.encode(`data: ${record.payload}\n\n`));
         } catch {
           isClosed = true;
           try { clearInterval(heartbeat); } catch {}
@@ -61,10 +64,21 @@ export async function GET() {
       // 訂閱
       unsubscribe = subscribe(send);
 
-      // 嘗試監聽 abort（某些環境不提供 signal）
+      // 斷線回放：如客戶端帶 Last-Event-ID，回補缺漏事件
       try {
-        // @ts-ignore
-        controller.signal?.addEventListener?.('abort', () => {
+        const lastId = request.headers.get('last-event-id') || request.headers.get('Last-Event-ID');
+        const missed = getSince(lastId);
+        if (missed?.length) {
+          for (const record of missed) {
+            controller.enqueue(encoder.encode(`id: ${record.id}\n`));
+            controller.enqueue(encoder.encode(`data: ${record.payload}\n\n`));
+          }
+        }
+      } catch {}
+
+      // 嘗試監聽 abort（改用 request.signal）
+      try {
+        request?.signal?.addEventListener?.('abort', () => {
           if (isClosed) return;
           isClosed = true;
           try { clearInterval(heartbeat); } catch {}

@@ -3,41 +3,41 @@
     "qf": [
       {
         "a": {
-          "team": "",
+          "team": "Angelic But Bullied Megu",
+          "score": "3"
+        },
+        "b": {
+          "team": "秦始皇騎熊貓",
+          "score": "1"
+        }
+      },
+      {
+        "a": {
+          "team": "Team BIG MOM",
           "score": "n/a"
         },
         "b": {
-          "team": "",
+          "team": "123 (1)",
           "score": "n/a"
         }
       },
       {
         "a": {
-          "team": "",
+          "team": "boogiebandit",
           "score": "n/a"
         },
         "b": {
-          "team": "",
+          "team": "bp不重要",
           "score": "n/a"
         }
       },
       {
         "a": {
-          "team": "",
+          "team": "Tom and Jerry",
           "score": "n/a"
         },
         "b": {
-          "team": "",
-          "score": "n/a"
-        }
-      },
-      {
-        "a": {
-          "team": "",
-          "score": "n/a"
-        },
-        "b": {
-          "team": "",
+          "team": "HuyaTang",
           "score": "n/a"
         }
       }
@@ -45,7 +45,7 @@
     "sf": [
       {
         "a": {
-          "team": "",
+          "team": "Angelic But Bullied Megu",
           "score": "n/a"
         },
         "b": {
@@ -83,7 +83,7 @@
   },
   "dashboard:currentBroadcast": {
     "stage": "qf",
-    "index": 0
+    "index": 2
   },
-  "dashboard:currentDisplay": "map-score"
+  "dashboard:currentDisplay": "bracket"
 }

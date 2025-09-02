@@ -7,6 +7,8 @@ import './obs.css';
 export default function OBSLiveUI() {
   const [currentDisplay, setCurrentDisplay] = useState(null);
   const [displayData, setDisplayData] = useState({});
+  const [bracket, setBracket] = useState(null); // 從後端載入並由 SSE 即時更新
+  const [currentBroadcast, setCurrentBroadcast] = useState({ stage: null, index: null });
   const [isConnected, setIsConnected] = useState(false);
   
   // 以 SSE 取代輪詢（僅在掛載時建立一次連線）
@@ -33,14 +35,21 @@ export default function OBSLiveUI() {
             console.log('[OBS] set currentDisplay from state:', d.currentDisplay);
             setCurrentDisplay(d.currentDisplay);
           }
+          if (d?.bracket) {
+            setBracket(d.bracket);
+          }
+          if (d?.currentBroadcast) {
+            setCurrentBroadcast(d.currentBroadcast);
+          }
         }
       } catch (e) {
         console.warn('[OBS] /api/state failed:', e);
       }
     })();
 
-    // 後備：每 3 秒輪詢一次狀態以矯正畫面（SSE 失效或漏訊息時）
+    // 後備：每 3 秒輪詢一次狀態以矯正畫面（當 SSE 未連線時才輪詢）
     const poll = setInterval(async () => {
+      if (esRef.current) return; // SSE 正常時暫停輪詢
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (!res.ok) return;
@@ -50,6 +59,12 @@ export default function OBSLiveUI() {
         if (srv && srv !== currentDisplayRef.current) {
           console.log('[OBS] POLL sync display ->', srv, '(was:', currentDisplayRef.current, ')');
           setCurrentDisplay(srv);
+        }
+        if (d?.bracket) {
+          setBracket(d.bracket);
+        }
+        if (d?.currentBroadcast) {
+          setCurrentBroadcast(d.currentBroadcast);
         }
       } catch {}
     }, 3000);
@@ -96,6 +111,17 @@ export default function OBSLiveUI() {
                 ...latestMessage.data,
                 lastUpdate: lastUpdateRef.current
               });
+            } else if (latestMessage.type === 'bracket-update') {
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              console.log('[OBS] bracket-update');
+              if (latestMessage?.data?.bracket) {
+                setBracket(latestMessage.data.bracket);
+              }
+            } else if (latestMessage.type === 'current-broadcast-update') {
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              if (latestMessage?.data?.currentBroadcast) {
+                setCurrentBroadcast(latestMessage.data.currentBroadcast);
+              }
             } else if (latestMessage.type === 'custom-message') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
               console.log('[OBS] custom-message ->', latestMessage.data);
@@ -163,7 +189,7 @@ export default function OBSLiveUI() {
       case 'welcome':
         return <OBSWelcomeDisplay data={displayData} />;
       case 'bracket':
-        return <OBSBracketDisplay data={displayData} />;
+        return <OBSBracketDisplay data={{ bracket, currentBroadcast }} />;
       case 'banpick':
         return <OBSBanpickDisplay data={displayData} />;
       case 'map-score':
@@ -175,8 +201,8 @@ export default function OBSLiveUI() {
 
   return (
     <div className="obs-container bg-transparent text-white">
-      {/* 主要顯示區域 - 填滿整個容器 */}
-      <div className="w-full h-full flex items-center justify-center">
+      {/* 主要顯示區域 - 限制在 800x600 */}
+      <div className="w-[800px] h-[600px] flex items-center justify-center overflow-hidden">
         {renderDisplay()}
       </div>
     </div>
@@ -204,24 +230,40 @@ function OBSWelcomeDisplay({ data }) {
 
 // OBS Bracket 顯示
 function OBSBracketDisplay({ data }) {
-  // 顯示結構化對戰樹（八強→四強→冠亞→冠軍），僅視覺化，不含編輯
+  const bracket = data?.bracket;
+  const currentBroadcast = data?.currentBroadcast;
+  const qf = bracket?.qf || Array.from({ length: 4 }).map(() => ({ a: { team: '隊伍 A', score: 'n/a' }, b: { team: '隊伍 B', score: 'n/a' } }));
+  const sf = bracket?.sf || Array.from({ length: 2 }).map(() => ({ a: { team: '勝者', score: 'n/a' }, b: { team: '勝者', score: 'n/a' } }));
+  const f = bracket?.f || [{ a: { team: '勝者', score: 'n/a' }, b: { team: '勝者', score: 'n/a' } }];
+  const champ = bracket?.champ || { team: '最終勝者', score: 'n/a' };
+  const isLive = (stage, idx) => currentBroadcast && currentBroadcast.stage === stage && currentBroadcast.index === idx;
+
   return (
     <div className="w-full h-full flex items-center justify-center p-3">
       <div className="w-full max-w-[760px]">
         <h2 className="text-2xl font-bold mb-4 text-white">目前賽程 Bracket</h2>
-        <div className="relative w-full overflow-x-auto">
-          <div className="min-w-[720px] grid grid-cols-4 gap-4">
+        <div className="relative w-full overflow-hidden">
+          <div className="w-full grid grid-cols-4 gap-3">
             {/* 八強（4 場） */}
             <div className="space-y-6 flex flex-col justify-center">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {qf.map((m, i) => (
                 <div key={`qf-${i}`} className="relative">
                   {/* 往四強的水平連接線 */}
-                  <div className="hidden md:block absolute right-[-18px] top-1/2 w-5 border-t border-white"></div>
-                  <div className="rounded-xl bg-white border border-white p-3 min-w-[160px]">
-                    <div className="text-xs text-black mb-1">八強 {i + 1}</div>
+                  <div className="hidden md:block absolute right-[-8px] top-1/2 w-2 border-t border-white"></div>
+                  <div className={`relative rounded-xl bg-white p-2 min-w-0 ${isLive('qf', i) ? 'border-2 border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.3)]' : 'border border-white'}`}>
+                    {isLive('qf', i) ? (
+                      <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">LIVE</div>
+                    ) : null}
+                    <div className="text-[10px] leading-none text-black mb-2 text-left">八強 {i + 1}</div>
                     <div className="flex flex-col gap-1.5">
-                      <div className="rounded-md bg-white px-2 py-1 text-black text-sm">隊伍 A</div>
-                      <div className="rounded-md bg-white px-2 py-1 text-black text-sm">隊伍 B</div>
+                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-emerald-50">
+                        <span className="text-black text-sm truncate">{m?.a?.team || '隊伍 A'}</span>
+                        <span className="text-emerald-700 font-extrabold text-lg ml-2">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-sky-50">
+                        <span className="text-black text-sm truncate">{m?.b?.team || '隊伍 B'}</span>
+                        <span className="text-sky-700 font-extrabold text-lg ml-2">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -229,17 +271,26 @@ function OBSBracketDisplay({ data }) {
             </div>
 
             {/* 四強（2 場） */}
-            <div className="space-y-10 flex flex-col justify-center">
-              {Array.from({ length: 2 }).map((_, i) => (
+            <div className="space-y-6 flex flex-col justify-center">
+              {sf.map((m, i) => (
                 <div key={`sf-${i}`} className="relative">
                   {/* 左右匯入/導向的水平連接線 */}
-                  <div className="hidden md:block absolute left-[-18px] top-1/2 w-5 border-t border-white"></div>
-                  <div className="hidden md:block absolute right-[-18px] top-1/2 w-5 border-t border-white"></div>
-                  <div className="rounded-xl bg-white border border-white p-3 min-w-[160px]">
-                    <div className="text-xs text-black mb-1">四強 {i + 1}</div>
+                  <div className="hidden md:block absolute left-[-8px] top-1/2 w-2 border-t border-white"></div>
+                  <div className="hidden md:block absolute right-[-8px] top-1/2 w-2 border-t border-white"></div>
+                  <div className={`relative rounded-xl bg-white p-2 min-w-0 ${isLive('sf', i) ? 'border-2 border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.3)]' : 'border border-white'}`}>
+                    {isLive('sf', i) ? (
+                      <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">LIVE</div>
+                    ) : null}
+                    <div className="text-[10px] leading-none text-black mb-2 text-left">四強 {i + 1}</div>
                     <div className="flex flex-col gap-1.5">
-                      <div className="rounded-md bg-white px-2 py-1 text-black text-sm">勝者</div>
-                      <div className="rounded-md bg-white px-2 py-1 text-black text-sm">勝者</div>
+                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-emerald-50">
+                        <span className="text-black text-sm truncate">{m?.a?.team || '勝者'}</span>
+                        <span className="text-emerald-700 font-extrabold text-lg ml-2">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-sky-50">
+                        <span className="text-black text-sm truncate">{m?.b?.team || '勝者'}</span>
+                        <span className="text-sky-700 font-extrabold text-lg ml-2">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -248,16 +299,27 @@ function OBSBracketDisplay({ data }) {
 
             {/* 冠亞（1 場） */}
             <div className="flex flex-col justify-center">
-              <div className="relative">
-                <div className="hidden md:block absolute left-[-18px] top-1/2 w-5 border-t border-white"></div>
-                <div className="rounded-xl bg-white border border-white p-3 min-w-[160px]">
-                  <div className="text-xs text-black mb-1">冠亞賽</div>
-                  <div className="flex flex-col gap-1.5">
-                    <div className="rounded-md bg-white px-2 py-1 text-black text-sm">勝者</div>
-                    <div className="rounded-md bg-white px-2 py-1 text-black text-sm">勝者</div>
+              {f.map((m, i) => (
+                <div key={`f-${i}`} className="relative">
+                  <div className="hidden md:block absolute left-[-8px] top-1/2 w-2 border-t border-white"></div>
+                  <div className={`relative rounded-xl bg-white p-2 min-w-0 ${isLive('f', i) ? 'border-2 border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.3)]' : 'border border-white'}`}>
+                    {isLive('f', i) ? (
+                      <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">LIVE</div>
+                    ) : null}
+                    <div className="text-[10px] leading-none text-black mb-2 text-left">冠亞賽</div>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-emerald-50">
+                        <span className="text-black text-sm truncate">{m?.a?.team || '勝者'}</span>
+                        <span className="text-emerald-700 font-extrabold text-lg ml-2">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-sky-50">
+                        <span className="text-black text-sm truncate">{m?.b?.team || '勝者'}</span>
+                        <span className="text-sky-700 font-extrabold text-lg ml-2">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
 
             {/* 冠軍（單一） */}
@@ -266,7 +328,7 @@ function OBSBracketDisplay({ data }) {
                 <div className="hidden md:block absolute left-[-18px] top-1/2 w-5 border-t border-amber-300"></div>
                 <div className="rounded-xl bg-amber-300 border border-amber-300 p-3 min-w-[160px]">
                   <div className="text-xs font-semibold text-amber-900 mb-1">冠軍</div>
-                  <div className="rounded-md bg-amber-200 px-2 py-2 text-amber-900 text-sm">最終勝者</div>
+                  <div className="rounded-md bg-amber-200 px-2 py-2 text-amber-900 text-sm">{champ?.team || '最終勝者'}{champ?.score && champ.score !== 'n/a' ? `（${champ.score}）` : ''}</div>
                 </div>
               </div>
             </div>

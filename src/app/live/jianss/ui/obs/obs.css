@@ -4,8 +4,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
+  width: 800px;   /* 固定 OBS 畫面寬度 */
+  height: 600px;  /* 固定 OBS 畫面高度 */
   overflow: hidden;
   background: transparent !important; /* 讓 OBS 透過背景 */
 }
@@ -17,8 +17,8 @@ html, body {
 
 /* 確保主容器填滿整個視窗 */
 #__next {
-  width: 100vw;
-  height: 100vh;
+  width: 800px;   /* 固定寬度 */
+  height: 600px;  /* 固定高度 */
   overflow: hidden;
   background: transparent !important;
 }
@@ -33,8 +33,8 @@ body {
 
 /* 確保所有元素都在視窗內 */
 .obs-container {
-  width: 100vw;
-  height: 100vh;
+  width: 800px;   /* 固定寬度 */
+  height: 600px;  /* 固定高度 */
   position: relative;
   overflow: hidden;
   background: transparent !important;
