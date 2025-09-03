@@ -6,6 +6,7 @@ const KEYS = {
   bracket: 'dashboard:bracket',
   broadcast: 'dashboard:currentBroadcast',
   display: 'dashboard:currentDisplay',
+  mapScores: 'dashboard:mapScores',
 };
 
 export async function GET() {
@@ -13,12 +14,14 @@ export async function GET() {
     const bracket = kvGet(KEYS.bracket);
     const broadcast = kvGet(KEYS.broadcast);
     const display = kvGet(KEYS.display);
+    const mapScores = kvGet(KEYS.mapScores);
     return NextResponse.json({
       ok: true,
       data: {
         bracket: bracket ?? null,
         currentBroadcast: broadcast ?? null,
         currentDisplay: display ?? null,
+        mapScores: mapScores ?? null,
       },
     }, { status: 200 });
   } catch (e) {
@@ -29,7 +32,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { bracket, currentBroadcast, currentDisplay } = body || {};
+    const { bracket, currentBroadcast, currentDisplay, mapScores } = body || {};
 
     if (bracket !== undefined) {
       kvSet(KEYS.bracket, JSON.stringify(bracket));
@@ -63,6 +66,19 @@ export async function POST(request) {
           action: 'broadcast',
           type: 'display-change',
           data: { displayId: String(currentDisplay) },
+          timestamp: Date.now(),
+        });
+      } catch {}
+    }
+
+    if (mapScores !== undefined) {
+      kvSet(KEYS.mapScores, JSON.stringify(mapScores));
+      // 廣播地圖與比數更新，提供 OBS 或其他客戶端同步
+      try {
+        sseBroadcast({
+          action: 'broadcast',
+          type: 'map-score-update',
+          data: { mapScores },
           timestamp: Date.now(),
         });
       } catch {}

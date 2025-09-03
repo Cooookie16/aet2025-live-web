@@ -28,7 +28,8 @@ export default function OBSLiveUI() {
         const res = await fetch('/api/state', { cache: 'no-store' });
         console.log('[OBS] /api/state status:', res.status);
         if (res.ok) {
-          const json = await res.json();
+          let json = null;
+          try { json = await res.json(); } catch { json = null; }
           const d = json?.data || {};
           console.log('[OBS] /api/state data:', d);
           if (typeof d?.currentDisplay === 'string' && d.currentDisplay) {
@@ -53,7 +54,8 @@ export default function OBSLiveUI() {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (!res.ok) return;
-        const json = await res.json();
+        let json = null;
+        try { json = await res.json(); } catch { json = null; }
         const d = json?.data || {};
         const srv = typeof d?.currentDisplay === 'string' ? d.currentDisplay : null;
         if (srv && srv !== currentDisplayRef.current) {

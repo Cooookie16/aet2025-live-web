@@ -7,6 +7,8 @@ export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false);
   // 從檔案載入隊伍清單
   const [teamOptions, setTeamOptions] = useState([]);
+  // 每場對戰（依 stage-index）對應 5 張地圖（含模式與地圖名）
+  const [mapScores, setMapScores] = useState({});
   // 8 強到決賽（配對制）對戰樹狀態：每場比賽上下兩方與各自分數
   const [bracket, setBracket] = useState({
     qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
@@ -42,7 +44,8 @@ export default function Dashboard() {
   const STORAGE_KEYS = {
     bracket: 'dashboard:bracket',
     broadcast: 'dashboard:currentBroadcast',
-    display: 'dashboard:currentDisplay'
+    display: 'dashboard:currentDisplay',
+    mapScores: 'dashboard:mapScores'
   };
 
   // 可用的顯示介面選項
@@ -79,13 +82,17 @@ export default function Dashboard() {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (res.ok) {
-          const json = await res.json();
+          let json = null;
+          try { json = await res.json(); } catch { json = null; }
           const d = json?.data || {};
           if (d.bracket) {
             setBracket(d.bracket);
           }
           if (d.currentBroadcast) {
             setCurrentBroadcast(d.currentBroadcast);
+          }
+          if (d.mapScores) {
+            setMapScores(d.mapScores || {});
           }
           // 先嘗試使用後端值；若沒有再嘗試 localStorage
           let nextDisplay = sanitizeDisplay(d.currentDisplay);
@@ -116,6 +123,12 @@ export default function Dashboard() {
         const rawBroadcast = localStorage.getItem(STORAGE_KEYS.broadcast);
         if (rawBroadcast) {
           setCurrentBroadcast(JSON.parse(rawBroadcast));
+        }
+      } catch {}
+      try {
+        const rawMapScores = localStorage.getItem(STORAGE_KEYS.mapScores);
+        if (rawMapScores) {
+          setMapScores(JSON.parse(rawMapScores));
         }
       } catch {}
       try {
@@ -172,6 +185,20 @@ export default function Dashboard() {
       } catch {}
     })();
   }, [currentDisplay, displayLoaded]);
+
+  // 當地圖與比數變更時同步到後端（亦寫入 localStorage 當作後備）
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEYS.mapScores, JSON.stringify(mapScores)); } catch {}
+    (async () => {
+      try {
+        await fetch('/api/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mapScores })
+        });
+      } catch {}
+    })();
+  }, [mapScores]);
 
   // 載入隊伍清單
   useEffect(() => {
@@ -289,6 +316,57 @@ export default function Dashboard() {
     return { a, b };
   };
 
+  // 重置整個賽程表為初始狀態
+  const buildInitialBracket = () => ({
+    qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
+    sf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
+    f:  Array.from({ length: 1 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
+    champ: { team: '', score: 'n/a' }
+  });
+
+  const handleResetBrackets = () => {
+    try {
+      const ok = window.confirm('確認要清空所有賽程表資料嗎？此動作無法復原。');
+      if (!ok) return;
+    } catch {}
+    setBracket(buildInitialBracket());
+  };
+
+  // 目前播報對戰的地圖鍵值與資料（避免在 render 內 setState）
+  const currentMatchKey = useMemo(() => {
+    const { stage, index } = currentBroadcast || {};
+    if (!stage && stage !== 0) return null;
+    if (typeof index !== 'number') return null;
+    return `${stage}:${index}`;
+  }, [currentBroadcast]);
+
+  // 若當前對戰尚未有地圖資料，於 effect 中初始化
+  useEffect(() => {
+    if (!currentMatchKey) return;
+    const entry = mapScores[currentMatchKey];
+    if (Array.isArray(entry) && entry.length === 5) return;
+    const init = Array.from({ length: 5 }, () => ({ mode: '', map: '' }));
+    setMapScores(prev => ({ ...prev, [currentMatchKey]: init }));
+  }, [currentMatchKey]);
+
+  const currentMatchMaps = useMemo(() => {
+    if (!currentMatchKey) return [];
+    const entry = mapScores[currentMatchKey];
+    if (Array.isArray(entry) && entry.length === 5) return entry;
+    return Array.from({ length: 5 }, () => ({ mode: '', map: '' }));
+  }, [mapScores, currentMatchKey]);
+
+  const updateCurrentMatchMap = (idx, field, value) => {
+    const key = currentMatchKey;
+    if (!key) return;
+    setMapScores(prev => {
+      const current = Array.isArray(prev[key]) ? [...prev[key]] : Array.from({ length: 5 }, () => ({ mode: '', map: '' }));
+      const item = { ...current[idx], [field]: value };
+      current[idx] = item;
+      return { ...prev, [key]: current };
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* 標題列 */}
@@ -316,6 +394,55 @@ export default function Dashboard() {
                  <span>{isConnected ? '已連線' : '未連線'}</span>
                </div>
              </div>
+          </div>
+        </div>
+
+        {/* 地圖與比數 區域 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">地圖與比數</h2>
+          <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            目前播報對戰：
+            <span className="ml-1 font-medium text-gray-900 dark:text-gray-200">
+              {getStageLabel(currentBroadcast.stage) || '未選擇'}
+              {typeof currentBroadcast.index === 'number' ? ` 第 ${currentBroadcast.index + 1} 場` : ''}
+            </span>
+            <span className="ml-3">{getCurrentBroadcastTeams().a || '—'} vs {getCurrentBroadcastTeams().b || '—'}</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            {currentMatchMaps.map((m, i) => (
+              <div
+                key={`map-${i}`}
+                className={
+                  `p-4 rounded-lg border-2 text-left transition-all ` +
+                  `border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600`
+                }
+              >
+                <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">地圖 {i + 1}</div>
+                <div className="space-y-2">
+                  {/* 模式選擇 */}
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                    value={m.mode}
+                    onChange={(e) => updateCurrentMatchMap(i, 'mode', e.target.value)}
+                  >
+                    <option value="">選擇模式</option>
+                    <option value="控制 Control">控制 Control</option>
+                    <option value="佔領 Assault">佔領 Assault</option>
+                    <option value="推車 Payload">推車 Payload</option>
+                    <option value="混合 Hybrid">混合 Hybrid</option>
+                    <option value="其他 Other">其他 Other</option>
+                  </select>
+                  {/* 地圖名稱 */}
+                  <input
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                    type="text"
+                    placeholder="輸入地圖名稱"
+                    value={m.map}
+                    onChange={(e) => updateCurrentMatchMap(i, 'map', e.target.value)}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -351,7 +478,16 @@ export default function Dashboard() {
 
           {/* 賽程表 Brackets 區域 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">賽程表 Brackets</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">賽程表 Brackets</h2>
+              <button
+                onClick={handleResetBrackets}
+                className="px-3 py-1.5 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400"
+                title="清空所有賽程表資料"
+              >
+                RESET ALL
+              </button>
+            </div>
 
             {/* 對戰樹佈局：四欄（八強/四強/冠亞/冠軍） */}
             <div className="w-full overflow-x-auto">
