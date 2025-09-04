@@ -630,7 +630,22 @@ export default function Dashboard() {
 
           {/* 地圖與比數 區域 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">地圖與比數</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">地圖與比數</h2>
+              <button
+                onClick={() => {
+                  try {
+                    const ok = window.confirm('確認要重置所有地圖與比數資料嗎？此動作無法復原。');
+                    if (!ok) return;
+                  } catch {}
+                  setMapScores({});
+                }}
+                className="px-3 py-1.5 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400"
+                title="清空所有地圖與比數資料"
+              >
+                RESET ALL
+              </button>
+            </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               目前播報對戰：
               <span className="ml-1 font-medium text-gray-900 dark:text-gray-200">
@@ -680,21 +695,21 @@ export default function Dashboard() {
                         <option key={`map-${map}`} value={map}>{map}</option>
                       ))}
                     </select>
-                    {/* 分數選擇 */}
+                    {/* 分數選擇（最高 2） */}
                     <div className="grid grid-cols-2 gap-2">
                       <select
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                         value={m.scoreA || 'n/a'}
                         onChange={(e) => updateCurrentMatchMap(i, 'scoreA', e.target.value)}
                       >
-                        {['n/a','1','2','3'].map(v => <option key={`scoreA-${v}`} value={v}>{v}</option>)}
+                        {['n/a','1','2'].map(v => <option key={`scoreA-${v}`} value={v}>{v}</option>)}
                       </select>
                       <select
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                         value={m.scoreB || 'n/a'}
                         onChange={(e) => updateCurrentMatchMap(i, 'scoreB', e.target.value)}
                       >
-                        {['n/a','1','2','3'].map(v => <option key={`scoreB-${v}`} value={v}>{v}</option>)}
+                        {['n/a','1','2'].map(v => <option key={`scoreB-${v}`} value={v}>{v}</option>)}
                       </select>
                     </div>
                   </div>

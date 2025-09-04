@@ -504,8 +504,32 @@ function OBSMapScoreDisplay({ data }) {
   const bracket = data?.bracket;
   const [teamsData, setTeamsData] = useState([]);
   const [mapsData, setMapsData] = useState([]);
-  const lastMapsRef = useRef([]); // 快取最近一次有效的 5 盤資料
-  
+  const lastMapsCacheRef = useRef({}); // rename for clarity
+  const [overrideMaps, setOverrideMaps] = useState(null);
+
+  // 當切換對戰或重整時，主動拉取一次最新 /api/state，以確保即時資料
+  useEffect(() => {
+    const fetchLatest = async () => {
+      try {
+        const res = await fetch('/api/state', { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = await res.json().catch(() => null);
+        const all = json?.data?.mapScores || {};
+        const { stage, index } = currentBroadcast || {};
+        if (!stage && stage !== 0) return;
+        if (typeof index !== 'number') return;
+        const key = `${stage}:${index}`;
+        const entry = all?.[key];
+        if (Array.isArray(entry) && entry.length > 0) {
+          const padded = [...entry];
+          while (padded.length < 5) padded.push({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' });
+          setOverrideMaps(padded.slice(0, 5));
+        }
+      } catch {}
+    };
+    fetchLatest();
+  }, [currentBroadcast]);
+
   // 載入隊伍資料
   useEffect(() => {
     const loadTeams = async () => {
@@ -686,19 +710,29 @@ function OBSMapScoreDisplay({ data }) {
   // 取得目前播報對戰的地圖資料
   const getCurrentMatchMaps = () => {
     const { stage, index } = currentBroadcast || {};
-    if (!stage && stage !== 0) return lastMapsRef.current || [];
-    if (typeof index !== 'number') return lastMapsRef.current || [];
+    if (!stage && stage !== 0) return [];
+    if (typeof index !== 'number') return [];
     
     const key = `${stage}:${index}`;
     const entry = mapScores?.[key];
     console.log('[OBS] getCurrentMatchMaps:', { stage, index, key, entry, mapScores });
     
-    // 僅在後端確實提供 5 筆資料時才回傳；否則回傳最近一次有效資料
-    if (Array.isArray(entry) && entry.length === 5) {
-      lastMapsRef.current = entry;
-      return entry;
+    // 1) 優先使用 overrideMaps（剛抓回的最新值）
+    if (Array.isArray(overrideMaps) && overrideMaps.length === 5) {
+      return overrideMaps;
     }
-    return lastMapsRef.current || [];
+
+    // 若有陣列資料，補齊為 5 筆並快取
+    if (Array.isArray(entry) && entry.length > 0) {
+      const padded = [...entry];
+      while (padded.length < 5) {
+        padded.push({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' });
+      }
+      lastMapsCacheRef.current[key] = padded.slice(0, 5);
+      return lastMapsCacheRef.current[key];
+    }
+    // 無新資料 → 回傳該對戰鍵值的快取，避免切換或重整顯示上一場
+    return lastMapsCacheRef.current[key] || [];
   };
 
   const teams = getCurrentBroadcastTeams();
@@ -708,7 +742,7 @@ function OBSMapScoreDisplay({ data }) {
   const mapsReady = Array.isArray(maps) && maps.length === 5;
   const iconsReady = mapsReady && Array.isArray(mapsData) && mapsData.length > 0;
 
-  // 計算隊伍總分（'n/a'、空字串、undefined 視為 0）
+  // 計算隊伍贏的地圖數（得分==2 算贏 1 盤，封頂 5）
   const getTeamMapsWon = (list, team) => {
     if (!Array.isArray(list)) return 0;
     const key = team === 'A' ? 'scoreA' : 'scoreB';
@@ -716,9 +750,18 @@ function OBSMapScoreDisplay({ data }) {
       const v = m?.[key];
       if (v === undefined || v === null) return acc;
       const n = Number(v);
-      return acc + (n === 3 ? 1 : 0);
+      return acc + (n === 2 ? 1 : 0);
     }, 0);
     return Math.min(5, won);
+  };
+
+  // 顯示用：將分數限制在 0~2，無效值顯示 '-'
+  const formatScoreDisplay = (v) => {
+    if (v === undefined || v === null || v === '' || v === 'n/a') return '-';
+    const n = Number(v);
+    if (!Number.isFinite(n)) return '-';
+    const clamped = Math.max(0, Math.min(2, n));
+    return String(clamped);
   };
 
   return (
@@ -812,8 +855,8 @@ function OBSMapScoreDisplay({ data }) {
                         <>
                           {/* 隊伍 A 分數 */}
                           <div className="h-24 flex flex-col justify-center items-center">
-                            <div className="text-2xl font-bold text-white">
-                              {map?.scoreA === 'n/a' || map?.scoreA === undefined || map?.scoreA === '' ? '-' : map?.scoreA}
+                            <div className="text-4xl font-extrabold text-white">
+                              {formatScoreDisplay(map?.scoreA)}
                             </div>
                           </div>
                           
@@ -822,8 +865,8 @@ function OBSMapScoreDisplay({ data }) {
                           
                           {/* 隊伍 B 分數 */}
                           <div className="h-24 flex flex-col justify-center items-center">
-                            <div className="text-2xl font-bold text-white">
-                              {map?.scoreB === 'n/a' || map?.scoreB === undefined || map?.scoreB === '' ? '-' : map?.scoreB}
+                            <div className="text-4xl font-extrabold text-white">
+                              {formatScoreDisplay(map?.scoreB)}
                             </div>
                           </div>
                         </>
@@ -854,7 +897,7 @@ function OBSMapScoreDisplay({ data }) {
                 {/* 最右邊的總分欄位：上（A 總分）、中線、下（B 總分） */}
                 <div className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center">
                   <div className="h-24 flex flex-col justify-center items-center">
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-4xl font-black text-pink-500">
                       {mapsReady ? getTeamMapsWon(maps, 'A') : ''}
                     </div>
                   </div>
@@ -862,7 +905,7 @@ function OBSMapScoreDisplay({ data }) {
                   <div className="w-full h-px bg-gray-600"></div>
                   
                   <div className="h-24 flex flex-col justify-center items-center">
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-4xl font-black text-pink-500">
                       {mapsReady ? getTeamMapsWon(maps, 'B') : ''}
                     </div>
                   </div>
