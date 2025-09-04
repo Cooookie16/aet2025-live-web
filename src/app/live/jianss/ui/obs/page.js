@@ -504,6 +504,7 @@ function OBSMapScoreDisplay({ data }) {
   const bracket = data?.bracket;
   const [teamsData, setTeamsData] = useState([]);
   const [mapsData, setMapsData] = useState([]);
+  const lastMapsRef = useRef([]); // 快取最近一次有效的 5 盤資料
   
   // 載入隊伍資料
   useEffect(() => {
@@ -685,16 +686,19 @@ function OBSMapScoreDisplay({ data }) {
   // 取得目前播報對戰的地圖資料
   const getCurrentMatchMaps = () => {
     const { stage, index } = currentBroadcast || {};
-    if (!stage && stage !== 0) return [];
-    if (typeof index !== 'number') return [];
+    if (!stage && stage !== 0) return lastMapsRef.current || [];
+    if (typeof index !== 'number') return lastMapsRef.current || [];
     
     const key = `${stage}:${index}`;
     const entry = mapScores?.[key];
     console.log('[OBS] getCurrentMatchMaps:', { stage, index, key, entry, mapScores });
     
-    // 僅在後端確實提供 5 筆資料時才回傳；否則回傳 [] 表示資料尚未就緒
-    if (Array.isArray(entry) && entry.length === 5) return entry;
-    return [];
+    // 僅在後端確實提供 5 筆資料時才回傳；否則回傳最近一次有效資料
+    if (Array.isArray(entry) && entry.length === 5) {
+      lastMapsRef.current = entry;
+      return entry;
+    }
+    return lastMapsRef.current || [];
   };
 
   const teams = getCurrentBroadcastTeams();
@@ -703,6 +707,19 @@ function OBSMapScoreDisplay({ data }) {
   // 資料就緒判斷
   const mapsReady = Array.isArray(maps) && maps.length === 5;
   const iconsReady = mapsReady && Array.isArray(mapsData) && mapsData.length > 0;
+
+  // 計算隊伍總分（'n/a'、空字串、undefined 視為 0）
+  const getTeamMapsWon = (list, team) => {
+    if (!Array.isArray(list)) return 0;
+    const key = team === 'A' ? 'scoreA' : 'scoreB';
+    const won = list.reduce((acc, m) => {
+      const v = m?.[key];
+      if (v === undefined || v === null) return acc;
+      const n = Number(v);
+      return acc + (n === 3 ? 1 : 0);
+    }, 0);
+    return Math.min(5, won);
+  };
 
   return (
     <div className="w-full h-full flex items-center justify-center p-2">
@@ -834,16 +851,20 @@ function OBSMapScoreDisplay({ data }) {
                   );
                 })}
                 
-                {/* 最右邊的額外方塊 */}
+                {/* 最右邊的總分欄位：上（A 總分）、中線、下（B 總分） */}
                 <div className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center">
                   <div className="h-24 flex flex-col justify-center items-center">
-                    <div className="text-2xl font-bold text-white">-</div>
+                    <div className="text-2xl font-bold text-white">
+                      {mapsReady ? getTeamMapsWon(maps, 'A') : ''}
+                    </div>
                   </div>
                   
                   <div className="w-full h-px bg-gray-600"></div>
                   
                   <div className="h-24 flex flex-col justify-center items-center">
-                    <div className="text-2xl font-bold text-white">-</div>
+                    <div className="text-2xl font-bold text-white">
+                      {mapsReady ? getTeamMapsWon(maps, 'B') : ''}
+                    </div>
                   </div>
                 </div>
               </div>

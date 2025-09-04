@@ -307,22 +307,22 @@
         "scoreB": "2"
       },
       {
-        "mode": "極限淘汰賽",
-        "map": "空礦地帶 Out in the Open",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "mode": "據點搶奪戰",
+        "map": "開門大吉 Open Business",
+        "scoreA": "3",
+        "scoreB": "1"
       },
       {
-        "mode": "金庫攻防戰",
-        "map": "轟隆峽谷 Kaboom Canyon",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "mode": "亂鬥足球",
+        "map": "三重威脅 Triple Dribble",
+        "scoreA": "1",
+        "scoreB": "3"
       },
       {
         "mode": "寶石爭奪戰",
         "map": "堅石礦井 Hard Rock Mine",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "scoreA": "3",
+        "scoreB": "2"
       },
       {
         "mode": "亂鬥足球",
