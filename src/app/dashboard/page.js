@@ -13,11 +13,11 @@ export default function Dashboard() {
   const [mapScores, setMapScores] = useState({});
   // 8 強到決賽（配對制）對戰樹狀態：每場比賽上下兩方與各自分數
   const [bracket, setBracket] = useState({
-    qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
-    sf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
-    lf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })), // 遺材賽
-    f:  Array.from({ length: 1 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
-    champ: { team: '', score: 'n/a' }
+    qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+    sf: Array.from({ length: 2 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+    lf: Array.from({ length: 2 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })), // 遺材賽
+    f:  Array.from({ length: 1 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+    champ: { team: '', score: '0' }
   });
   // 目前播報中的對戰（以階段與索引識別）
   const [currentBroadcast, setCurrentBroadcast] = useState({ stage: null, index: null });
@@ -348,11 +348,11 @@ export default function Dashboard() {
 
   // 重置整個賽程表為初始狀態
   const buildInitialBracket = () => ({
-    qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
-    sf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
-    lf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })), // 遺材賽
-    f:  Array.from({ length: 1 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
-    champ: { team: '', score: 'n/a' }
+    qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+    sf: Array.from({ length: 2 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+    lf: Array.from({ length: 2 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })), // 遺材賽
+    f:  Array.from({ length: 1 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+    champ: { team: '', score: '0' }
   });
 
   const handleResetBrackets = () => {
@@ -376,7 +376,7 @@ export default function Dashboard() {
     if (!currentMatchKey) return;
     const entry = mapScores[currentMatchKey];
     if (Array.isArray(entry) && entry.length === 5) return;
-    const init = Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' }));
+    const init = Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: '0', scoreB: '0' }));
     setMapScores(prev => ({ ...prev, [currentMatchKey]: init }));
   }, [currentMatchKey]);
 
@@ -392,15 +392,15 @@ export default function Dashboard() {
           for (let i = 0; i < list.length; i++) {
             const key = `${stage}:${i}`;
             const maps = mapScores?.[key];
-            let aSum = 'n/a';
-            let bSum = 'n/a';
+            let aSum = '0';
+            let bSum = '0';
             if (Array.isArray(maps) && maps.length > 0) {
               const aWins = maps.reduce((acc, m) => acc + (Number(m?.scoreA) === 2 ? 1 : 0), 0);
               const bWins = maps.reduce((acc, m) => acc + (Number(m?.scoreB) === 2 ? 1 : 0), 0);
               aSum = String(Math.min(5, aWins));
               bSum = String(Math.min(5, bWins));
             }
-            const match = list[i] || { a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } };
+            const match = list[i] || { a: { team: '', score: '0' }, b: { team: '', score: '0' } };
             const newA = { ...match.a, score: aSum };
             const newB = { ...match.b, score: bSum };
             if (match.a.score !== newA.score || match.b.score !== newB.score) {
@@ -421,7 +421,7 @@ export default function Dashboard() {
     if (!currentMatchKey) return [];
     const entry = mapScores[currentMatchKey];
     if (Array.isArray(entry) && entry.length === 5) return entry;
-    return Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' }));
+    return Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: '0', scoreB: '0' }));
   }, [mapScores, currentMatchKey]);
 
   const updateCurrentMatchMap = (idx, field, value) => {
@@ -738,20 +738,20 @@ export default function Dashboard() {
                         <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">上方隊伍</div>
                         <select
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                          value={m.scoreA || 'n/a'}
+                          value={m.scoreA || '0'}
                           onChange={(e) => updateCurrentMatchMap(i, 'scoreA', e.target.value)}
                         >
-                          {['n/a','1','2'].map(v => <option key={`scoreA-${v}`} value={v}>{v}</option>)}
+                                                      {['0','1','2'].map(v => <option key={`scoreA-${v}`} value={v}>{v}</option>)}
                         </select>
                       </div>
                       <div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">下方隊伍</div>
                         <select
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                          value={m.scoreB || 'n/a'}
+                          value={m.scoreB || '0'}
                           onChange={(e) => updateCurrentMatchMap(i, 'scoreB', e.target.value)}
                         >
-                          {['n/a','1','2'].map(v => <option key={`scoreB-${v}`} value={v}>{v}</option>)}
+                                                      {['0','1','2'].map(v => <option key={`scoreB-${v}`} value={v}>{v}</option>)}
                         </select>
                       </div>
                     </div>

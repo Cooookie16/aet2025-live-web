@@ -335,11 +335,11 @@ function OBSBracketDisplay({ data }) {
     return team ? team.members.join(', ') : '';
   };
 
-  const qf = bracket?.qf || Array.from({ length: 4 }).map(() => ({ a: { team: '隊伍 A', score: 'n/a' }, b: { team: '隊伍 B', score: 'n/a' } }));
-  const sf = bracket?.sf || Array.from({ length: 2 }).map(() => ({ a: { team: '勝者', score: 'n/a' }, b: { team: '勝者', score: 'n/a' } }));
-  const lf = bracket?.lf || Array.from({ length: 2 }).map(() => ({ a: { team: '敗者', score: 'n/a' }, b: { team: '敗者', score: 'n/a' } }));
-  const f = bracket?.f || [{ a: { team: '勝者', score: 'n/a' }, b: { team: '勝者', score: 'n/a' } }];
-  const champ = bracket?.champ || { team: '最終勝者', score: 'n/a' };
+  const qf = bracket?.qf || Array.from({ length: 4 }).map(() => ({ a: { team: '隊伍 A', score: '0' }, b: { team: '隊伍 B', score: '0' } }));
+  const sf = bracket?.sf || Array.from({ length: 2 }).map(() => ({ a: { team: '勝者', score: '0' }, b: { team: '勝者', score: '0' } }));
+  const lf = bracket?.lf || Array.from({ length: 2 }).map(() => ({ a: { team: '敗者', score: '0' }, b: { team: '敗者', score: '0' } }));
+  const f = bracket?.f || [{ a: { team: '勝者', score: '0' }, b: { team: '勝者', score: '0' } }];
+  const champ = bracket?.champ || { team: '最終勝者', score: '0' };
   const isLive = (stage, idx) => currentBroadcast && currentBroadcast.stage === stage && currentBroadcast.index === idx;
 
   return (
@@ -367,7 +367,7 @@ function OBSBracketDisplay({ data }) {
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
                           ) : null}
                         </div>
-                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== '0') ? m.a.score : '0'}</span>
                       </div>
                       <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                         <div className="flex flex-col">
@@ -376,7 +376,7 @@ function OBSBracketDisplay({ data }) {
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
                           ) : null}
                         </div>
-                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== '0') ? m.b.score : '0'}</span>
                       </div>
                     </div>
                   </div>
@@ -427,22 +427,22 @@ function OBSBracketDisplay({ data }) {
                         <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
                       ) : null}
                       <div className="text-[10px] leading-none text-black mb-1 text-left">四強 {i + 1}</div>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
-                          <div className="flex flex-col">
-                            <span className="text-black text-xs truncate">{m?.a?.team || '勝者'}</span>
-                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
-                          </div>
-                        </div>
-                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
-                      </div>
-                      <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
-                        <div className="flex flex-col">
-                          <span className="text-black text-xs truncate">{m?.b?.team || '勝者'}</span>
-                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
-                        </div>
-                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
-                      </div>
+                                             <div className="flex flex-col gap-1">
+                         <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                           <div className="flex flex-col">
+                             <span className="text-black text-xs truncate">{m?.a?.team || '勝者'}</span>
+                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                           </div>
+                           <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== '0') ? m.a.score : '0'}</span>
+                         </div>
+                         <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                           <div className="flex flex-col">
+                             <span className="text-black text-xs truncate">{m?.b?.team || '勝者'}</span>
+                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                           </div>
+                           <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== '0') ? m.b.score : '0'}</span>
+                         </div>
+                       </div>
                     </div>
                   </div>
                 ))}
@@ -497,7 +497,7 @@ function OBSBracketDisplay({ data }) {
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
                           ) : null}
                         </div>
-                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== '0') ? m.a.score : '0'}</span>
                       </div>
                       <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                         <div className="flex flex-col">
@@ -506,7 +506,7 @@ function OBSBracketDisplay({ data }) {
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
                           ) : null}
                         </div>
-                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== '0') ? m.b.score : '0'}</span>
                       </div>
                     </div>
                   </div>
@@ -587,7 +587,7 @@ function OBSMapScoreDisplay({ data }) {
         const entry = all?.[key];
         if (Array.isArray(entry) && entry.length > 0) {
           const padded = [...entry];
-          while (padded.length < 5) padded.push({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' });
+          while (padded.length < 5) padded.push({ mode: '', map: '', scoreA: '0', scoreB: '0' });
           setOverrideMaps(padded.slice(0, 5));
         }
       } catch {}
@@ -610,7 +610,7 @@ function OBSMapScoreDisplay({ data }) {
     const entry = mapScores?.[key];
     if (Array.isArray(entry) && entry.length > 0) {
       const padded = [...entry];
-      while (padded.length < 5) padded.push({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' });
+      while (padded.length < 5) padded.push({ mode: '', map: '', scoreA: '0', scoreB: '0' });
       setOverrideMaps(padded.slice(0, 5));
     } else {
       setOverrideMaps(null);
@@ -701,11 +701,11 @@ function OBSMapScoreDisplay({ data }) {
     return imagePath || null;
   };
 
-  // 檢查該盤是否已開始（有分數）
+  // 檢查該盤是否已開始（有分數且不為0）
   const isRoundStarted = (map) => {
-    // 分數需為已填寫值：不可為 undefined/null/'n/a'/空字串
-    const hasScoreA = map.scoreA !== undefined && map.scoreA !== null && map.scoreA !== 'n/a' && map.scoreA !== '';
-    const hasScoreB = map.scoreB !== undefined && map.scoreB !== null && map.scoreB !== 'n/a' && map.scoreB !== '';
+    // 分數需為已填寫值且不為0：不可為 undefined/null/'0'/空字串
+    const hasScoreA = map.scoreA !== undefined && map.scoreA !== null && map.scoreA !== '0' && map.scoreA !== '';
+    const hasScoreB = map.scoreB !== undefined && map.scoreB !== null && map.scoreB !== '0' && map.scoreB !== '';
     const result = hasScoreA || hasScoreB;
     if (OBS_DEBUG) console.log('[OBS] isRoundStarted:', { 
       mapName: map.map, 
@@ -814,7 +814,7 @@ function OBSMapScoreDisplay({ data }) {
     if (Array.isArray(entry) && entry.length > 0) {
       const padded = [...entry];
       while (padded.length < 5) {
-        padded.push({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' });
+        padded.push({ mode: '', map: '', scoreA: '0', scoreB: '0' });
       }
       lastMapsCacheRef.current[key] = padded.slice(0, 5);
       return lastMapsCacheRef.current[key];
@@ -843,11 +843,11 @@ function OBSMapScoreDisplay({ data }) {
     return Math.min(5, won);
   };
 
-  // 顯示用：將分數限制在 0~2，無效值顯示 '-'
+  // 顯示用：將分數限制在 0~2，無效值顯示 '0'
   const formatScoreDisplay = (v) => {
-    if (v === undefined || v === null || v === '' || v === 'n/a') return '-';
+    if (v === undefined || v === null || v === '' || v === '0') return '0';
     const n = Number(v);
-    if (!Number.isFinite(n)) return '-';
+    if (!Number.isFinite(n)) return '0';
     const clamped = Math.max(0, Math.min(2, n));
     return String(clamped);
   };
@@ -937,6 +937,7 @@ function OBSMapScoreDisplay({ data }) {
             {(mapsReady ? maps : Array.from({ length: 5 }).map(() => null)).map((map, index) => {
               const roundStarted = map ? isRoundStarted(map) : false;
               const mapImagePath = map && !roundStarted ? getMapImagePath(map.map) : null;
+              const hasMap = map && map.map && map.map.trim() !== '';
               
               return (
                 <div 
@@ -964,10 +965,10 @@ function OBSMapScoreDisplay({ data }) {
                       </div>
                     </>
                   ) : (
-                    // 未開始的盤：顯示地圖圖片或問號（資料未就緒則留空）
+                    // 未開始的盤：顯示地圖圖片或問號
                     <div className="w-full h-full flex items-center justify-center">
                       {map ? (
-                        mapImagePath ? (
+                        hasMap && mapImagePath ? (
                           <div className="w-full h-full flex flex-col">
                             <div className="flex-1 flex items-center justify-center">
                               <img 
@@ -983,7 +984,7 @@ function OBSMapScoreDisplay({ data }) {
                             </div>
                           </div>
                         ) : (
-                          // 只有在資料就緒且確定未選地圖時顯示問號
+                          // 沒有地圖時顯示置中的問號
                           <div className="text-4xl font-bold text-gray-500">?</div>
                         )
                       ) : (

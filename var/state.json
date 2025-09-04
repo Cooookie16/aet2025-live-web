@@ -3,42 +3,42 @@
     "qf": [
       {
         "a": {
-          "team": "Angelic But Bullied Megu",
+          "team": "",
           "score": "0"
         },
         "b": {
-          "team": "秦始皇騎熊貓",
-          "score": "2"
-        }
-      },
-      {
-        "a": {
-          "team": "Team BIG MOM",
-          "score": "0"
-        },
-        "b": {
-          "team": "123 (1)",
+          "team": "",
           "score": "0"
         }
       },
       {
         "a": {
-          "team": "boogiebandit",
-          "score": "n/a"
+          "team": "",
+          "score": "0"
         },
         "b": {
-          "team": "bp不重要",
-          "score": "n/a"
+          "team": "",
+          "score": "0"
         }
       },
       {
         "a": {
-          "team": "Tom and Jerry",
-          "score": "n/a"
+          "team": "",
+          "score": "0"
         },
         "b": {
-          "team": "HuyaTang",
-          "score": "n/a"
+          "team": "",
+          "score": "0"
+        }
+      },
+      {
+        "a": {
+          "team": "",
+          "score": "0"
+        },
+        "b": {
+          "team": "",
+          "score": "0"
         }
       }
     ],
@@ -55,181 +55,123 @@
       },
       {
         "a": {
-          "team": "Angelic But Bullied Megu",
-          "score": "n/a"
+          "team": "",
+          "score": "0"
         },
         "b": {
-          "team": "123 (1)",
-          "score": "n/a"
+          "team": "",
+          "score": "0"
         }
       }
     ],
     "lf": [
       {
         "a": {
-          "team": "Angelic But Bullied Megu",
+          "team": "",
           "score": "0"
         },
         "b": {
-          "team": "123 (1)",
+          "team": "",
           "score": "0"
         }
       },
       {
         "a": {
           "team": "",
-          "score": "n/a"
+          "score": "0"
         },
         "b": {
           "team": "",
-          "score": "n/a"
+          "score": "0"
         }
       }
     ],
     "f": [
       {
         "a": {
-          "team": "秦始皇騎熊貓",
-          "score": "n/a"
+          "team": "",
+          "score": "0"
         },
         "b": {
-          "team": "bp不重要",
-          "score": "n/a"
+          "team": "",
+          "score": "0"
         }
       }
     ],
     "champ": {
       "team": "",
-      "score": "n/a"
+      "score": "0"
     }
   },
   "dashboard:currentBroadcast": {
     "stage": "qf",
     "index": 0
   },
-  "dashboard:currentDisplay": "map-score",
   "dashboard:mapScores": {
     "qf:0": [
       {
         "mode": "據點搶奪戰",
         "map": "灼熱火圈 Ring of Fire",
         "scoreA": "1",
-        "scoreB": "2"
+        "scoreB": "0"
       },
       {
-        "mode": "據點搶奪戰",
-        "map": "開門大吉 Open Business",
-        "scoreA": "1",
-        "scoreB": "2"
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
       },
       {
-        "mode": "寶石爭奪戰",
-        "map": "堅石礦井 Hard Rock Mine"
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
       },
       {
-        "mode": "亂鬥足球",
-        "map": "三重威脅 Triple Dribble"
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
       },
       {
-        "mode": "搶星大作戰",
-        "map": "夾心蛋糕 Layer Cake"
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
       }
     ],
     "qf:1": [
       {
         "mode": "",
         "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "scoreA": "0",
+        "scoreB": "0"
       },
       {
         "mode": "",
         "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "scoreA": "0",
+        "scoreB": "0"
       },
       {
         "mode": "",
         "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "scoreA": "0",
+        "scoreB": "0"
       },
       {
         "mode": "",
         "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "scoreA": "0",
+        "scoreB": "0"
       },
       {
         "mode": "",
         "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      }
-    ],
-    "sf:0": [
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      }
-    ],
-    "lf:0": [
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "scoreA": "0",
+        "scoreB": "0"
       }
     ]
-  }
+  },
+  "dashboard:currentDisplay": "map-score"
 }
