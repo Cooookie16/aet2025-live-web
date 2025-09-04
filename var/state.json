@@ -82,9 +82,32 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": null,
-    "index": null
+    "stage": "sf",
+    "index": 1
   },
-  "dashboard:currentDisplay": "welcome",
-  "dashboard:mapScores": {}
+  "dashboard:currentDisplay": "banpick",
+  "dashboard:mapScores": {
+    "sf:1": [
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      }
+    ]
+  }
 }

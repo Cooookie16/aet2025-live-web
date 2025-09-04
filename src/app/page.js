@@ -1,5 +1,10 @@
 import Link from 'next/link';
 
+// 自訂本頁頁籤標題
+export const metadata = {
+  title: '首頁｜AET2025直播控制系統',
+};
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">

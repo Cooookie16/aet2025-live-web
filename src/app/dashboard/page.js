@@ -7,6 +7,8 @@ export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false);
   // 從檔案載入隊伍清單
   const [teamOptions, setTeamOptions] = useState([]);
+  // 從檔案載入地圖資料庫
+  const [mapsData, setMapsData] = useState([]);
   // 每場對戰（依 stage-index）對應 5 張地圖（含模式與地圖名）
   const [mapScores, setMapScores] = useState({});
   // 8 強到決賽（配對制）對戰樹狀態：每場比賽上下兩方與各自分數
@@ -223,6 +225,26 @@ export default function Dashboard() {
     loadTeams();
   }, []);
 
+  // 載入地圖資料庫
+  useEffect(() => {
+    const loadMaps = async () => {
+      try {
+        const res = await fetch('/maps.json', { cache: 'no-store' });
+        if (!res.ok) {
+          throw new Error('maps.json 載入失敗');
+        }
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setMapsData(data);
+        }
+      } catch (e) {
+        console.warn('載入地圖資料庫失敗:', e);
+        setMapsData([]);
+      }
+    };
+    loadMaps();
+  }, []);
+
   // 發送控制指令
   const sendCommand = async (command) => {
     try {
@@ -367,6 +389,17 @@ export default function Dashboard() {
     });
   };
 
+  // 取得可用的模式選項
+  const modeOptions = useMemo(() => {
+    return mapsData.map(item => item.mode);
+  }, [mapsData]);
+
+  // 根據選擇的模式取得對應的地圖選項
+  const getMapOptionsForMode = (mode) => {
+    const modeData = mapsData.find(item => item.mode === mode);
+    return modeData ? modeData.maps : [];
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* 標題列 */}
@@ -393,56 +426,17 @@ export default function Dashboard() {
                  }`}></div>
                  <span>{isConnected ? '已連線' : '未連線'}</span>
                </div>
+               
+               {/* 前往 OBS 直播畫面按鈕 */}
+               <a
+                 href="/live/jianss/ui/obs"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+               >
+                 前往直播畫面
+               </a>
              </div>
-          </div>
-        </div>
-
-        {/* 地圖與比數 區域 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">地圖與比數</h2>
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            目前播報對戰：
-            <span className="ml-1 font-medium text-gray-900 dark:text-gray-200">
-              {getStageLabel(currentBroadcast.stage) || '未選擇'}
-              {typeof currentBroadcast.index === 'number' ? ` 第 ${currentBroadcast.index + 1} 場` : ''}
-            </span>
-            <span className="ml-3">{getCurrentBroadcastTeams().a || '—'} vs {getCurrentBroadcastTeams().b || '—'}</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {currentMatchMaps.map((m, i) => (
-              <div
-                key={`map-${i}`}
-                className={
-                  `p-4 rounded-lg border-2 text-left transition-all ` +
-                  `border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600`
-                }
-              >
-                <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">地圖 {i + 1}</div>
-                <div className="space-y-2">
-                  {/* 模式選擇 */}
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                    value={m.mode}
-                    onChange={(e) => updateCurrentMatchMap(i, 'mode', e.target.value)}
-                  >
-                    <option value="">選擇模式</option>
-                    <option value="控制 Control">控制 Control</option>
-                    <option value="佔領 Assault">佔領 Assault</option>
-                    <option value="推車 Payload">推車 Payload</option>
-                    <option value="混合 Hybrid">混合 Hybrid</option>
-                    <option value="其他 Other">其他 Other</option>
-                  </select>
-                  {/* 地圖名稱 */}
-                  <input
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                    type="text"
-                    placeholder="輸入地圖名稱"
-                    value={m.map}
-                    onChange={(e) => updateCurrentMatchMap(i, 'map', e.target.value)}
-                  />
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -581,6 +575,64 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* 地圖與比數 區域 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">地圖與比數</h2>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              目前播報對戰：
+              <span className="ml-1 font-medium text-gray-900 dark:text-gray-200">
+                {getStageLabel(currentBroadcast.stage) || '未選擇'}
+                {typeof currentBroadcast.index === 'number' ? ` 第 ${currentBroadcast.index + 1} 場` : ''}
+              </span>
+              <span className="ml-3">{getCurrentBroadcastTeams().a || '—'} vs {getCurrentBroadcastTeams().b || '—'}</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              {currentMatchMaps.map((m, i) => (
+                <div
+                  key={`map-${i}`}
+                  className={
+                    `p-4 rounded-lg border-2 text-left transition-all ` +
+                    `border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600`
+                  }
+                >
+                  <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">地圖 {i + 1}</div>
+                  <div className="space-y-2">
+                    {/* 模式選擇 */}
+                    <select
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                      value={m.mode}
+                      onChange={(e) => {
+                        const newMode = e.target.value;
+                        updateCurrentMatchMap(i, 'mode', newMode);
+                        // 當模式改變時，清空地圖選擇
+                        if (newMode !== m.mode) {
+                          updateCurrentMatchMap(i, 'map', '');
+                        }
+                      }}
+                    >
+                      <option value="">選擇模式</option>
+                      {modeOptions.map(mode => (
+                        <option key={`mode-${mode}`} value={mode}>{mode}</option>
+                      ))}
+                    </select>
+                    {/* 地圖名稱選擇 */}
+                    <select
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                      value={m.map}
+                      onChange={(e) => updateCurrentMatchMap(i, 'map', e.target.value)}
+                      disabled={!m.mode}
+                    >
+                      <option value="">{m.mode ? '選擇地圖' : '請先選擇模式'}</option>
+                      {m.mode && getMapOptionsForMode(m.mode).map(map => (
+                        <option key={`map-${map}`} value={map}>{map}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

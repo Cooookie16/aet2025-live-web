@@ -1,0 +1,53 @@
+[
+  {
+    "mode": "控制 Control",
+    "maps": [
+      "伊利歐斯 Ilios",
+      "灕江塔 Lijiang Tower",
+      "尼泊爾 Nepal",
+      "綠洲城 Oasis",
+      "釜山 Busan"
+    ]
+  },
+  {
+    "mode": "佔領 Assault",
+    "maps": [
+      "花村 Hanamura",
+      "地平線月球基地 Horizon Lunar Colony",
+      "巴黎 Paris",
+      "神殿 Temple of Anubis",
+      "沃爾斯卡亞工業區 Volskaya Industries"
+    ]
+  },
+  {
+    "mode": "推車 Payload",
+    "maps": [
+      "多拉多 Dorado",
+      "垃圾鎮 Junkertown",
+      "里亞爾托 Rialto",
+      "好萊塢 Hollywood",
+      "國王大道 King's Row",
+      "努巴尼 Numbani",
+      "直布羅陀 Gibraltar",
+      "66號公路 Route 66"
+    ]
+  },
+  {
+    "mode": "混合 Hybrid",
+    "maps": [
+      "暴雪世界 Blizzard World",
+      "艾興瓦爾德 Eichenwalde",
+      "努巴尼 Numbani",
+      "國王大道 King's Row",
+      "好萊塢 Hollywood"
+    ]
+  },
+  {
+    "mode": "其他 Other",
+    "maps": [
+      "自訂地圖 Custom Map",
+      "訓練場 Training Ground",
+      "競技場 Arena"
+    ]
+  }
+]
