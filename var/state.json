@@ -104,261 +104,39 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": "qf",
+    "stage": "sf",
     "index": 0
   },
   "dashboard:currentDisplay": "map-score",
   "dashboard:mapScores": {
-    "qf:3": [
+    "sf:0": [
       {
-        "mode": "",
-        "map": ""
+        "mode": "極限淘汰賽",
+        "map": "空礦地帶 Out in the Open",
+        "scoreA": "2",
+        "scoreB": "1"
       },
       {
-        "mode": "",
-        "map": ""
+        "mode": "據點搶奪戰",
+        "map": "灼熱火圈 Ring of Fire",
+        "scoreA": "1",
+        "scoreB": "2"
       },
       {
-        "mode": "",
-        "map": ""
+        "mode": "極限淘汰賽",
+        "map": "金臂峽谷 Goldarm Gulch",
+        "scoreA": "2",
+        "scoreB": "1"
       },
       {
-        "mode": "",
-        "map": ""
+        "mode": "據點搶奪戰",
+        "map": "灼熱火圈 Ring of Fire",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
       },
-      {
-        "mode": "",
-        "map": ""
-      }
-    ],
-    "qf:0": [
       {
         "mode": "寶石爭奪戰",
         "map": "咻咻作響 Double Swoosh",
-        "scoreA": "2",
-        "scoreB": "1"
-      },
-      {
-        "mode": "金庫攻防戰",
-        "map": "安全區域 Safe Zone",
-        "scoreA": "2",
-        "scoreB": "1"
-      },
-      {
-        "mode": "極限淘汰賽",
-        "map": "空礦地帶 Out in the Open"
-      },
-      {
-        "mode": "搶星大作戰",
-        "map": "夾心蛋糕 Layer Cake"
-      },
-      {
-        "mode": "極限淘汰賽",
-        "map": "金臂峽谷 Goldarm Gulch"
-      }
-    ],
-    "lf:0": [
-      {
-        "mode": "",
-        "map": ""
-      },
-      {
-        "mode": "",
-        "map": ""
-      },
-      {
-        "mode": "",
-        "map": ""
-      },
-      {
-        "mode": "",
-        "map": ""
-      },
-      {
-        "mode": "",
-        "map": ""
-      }
-    ],
-    "f:0": [
-      {
-        "mode": "搶星大作戰",
-        "map": "",
-        "scoreA": "3",
-        "scoreB": "2"
-      },
-      {
-        "mode": "亂鬥足球",
-        "map": "三重威脅 Triple Dribble"
-      },
-      {
-        "mode": "據點搶奪戰",
-        "map": "灼熱火圈 Ring of Fire"
-      },
-      {
-        "mode": "",
-        "map": ""
-      },
-      {
-        "mode": "",
-        "map": ""
-      }
-    ],
-    "sf:0": [
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      }
-    ],
-    "lf:1": [
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      }
-    ],
-    "qf:1": [
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      }
-    ],
-    "sf:1": [
-      {
-        "mode": "據點搶奪戰",
-        "map": "開門大吉 Open Business",
-        "scoreA": "2",
-        "scoreB": "2"
-      },
-      {
-        "mode": "據點搶奪戰",
-        "map": "開門大吉 Open Business",
-        "scoreA": "1",
-        "scoreB": "1"
-      },
-      {
-        "mode": "亂鬥足球",
-        "map": "三重威脅 Triple Dribble",
-        "scoreA": "1",
-        "scoreB": "3"
-      },
-      {
-        "mode": "寶石爭奪戰",
-        "map": "堅石礦井 Hard Rock Mine",
-        "scoreA": "3",
-        "scoreB": "2"
-      },
-      {
-        "mode": "亂鬥足球",
-        "map": "綠蔭球場 Sneaky Fields",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      }
-    ],
-    "qf:2": [
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
         "scoreA": "n/a",
         "scoreB": "n/a"
       }

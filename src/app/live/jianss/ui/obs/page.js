@@ -530,6 +530,28 @@ function OBSMapScoreDisplay({ data }) {
     fetchLatest();
   }, [currentBroadcast]);
 
+  // 同步 overrideMaps：SSE 推來的新 mapScores 或目前對戰變動時立即套用
+  useEffect(() => {
+    const { stage, index } = currentBroadcast || {};
+    if (!stage && stage !== 0) {
+      setOverrideMaps(null);
+      return;
+    }
+    if (typeof index !== 'number') {
+      setOverrideMaps(null);
+      return;
+    }
+    const key = `${stage}:${index}`;
+    const entry = mapScores?.[key];
+    if (Array.isArray(entry) && entry.length > 0) {
+      const padded = [...entry];
+      while (padded.length < 5) padded.push({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' });
+      setOverrideMaps(padded.slice(0, 5));
+    } else {
+      setOverrideMaps(null);
+    }
+  }, [mapScores, currentBroadcast]);
+
   // 載入隊伍資料
   useEffect(() => {
     const loadTeams = async () => {
@@ -875,11 +897,20 @@ function OBSMapScoreDisplay({ data }) {
                         <div className="w-full h-full flex items-center justify-center">
                           {map ? (
                             mapImagePath ? (
-                              <img 
-                                src={mapImagePath} 
-                                alt={map.map || `第${index + 1}盤`}
-                                className="w-full h-full object-contain"
-                              />
+                              <div className="w-full h-full flex flex-col">
+                                <div className="flex-1 flex items-center justify-center">
+                                  <img 
+                                    src={mapImagePath} 
+                                    alt={map.map || `第${index + 1}盤`}
+                                    className="max-w-full max-h-full object-contain"
+                                  />
+                                </div>
+                                <div className="h-8 flex items-center justify-center px-1">
+                                  <div className="w-full text-[10px] leading-tight text-gray-300 text-center whitespace-normal break-words overflow-hidden">
+                                    {map.map || `第${index + 1}盤`}
+                                  </div>
+                                </div>
+                              </div>
                             ) : (
                               // 只有在資料就緒且確定未選地圖時顯示問號
                               <div className="text-4xl font-bold text-gray-500">?</div>
