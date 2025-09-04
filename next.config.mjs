@@ -28,28 +28,17 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
-  // 安全標頭
+  // 安全標頭（排除 Next 開發資源與 HMR 路徑，避免影響 WebSocket）
   async headers() {
     return [
       {
-        source: '/(.*)',
+        // 只對非 _next 資源套用
+        source: '/:path((?!_next/).*)',
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
-          },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
         ],
       },
     ];
@@ -74,8 +63,8 @@ const nextConfig = {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
 
-  // 輸出配置 - 針對部署優化
-  output: 'standalone', // 生成獨立部署包
+  // 輸出配置 - 僅在正式環境使用 standalone，避免干擾開發 HMR
+  ...(process.env.NODE_ENV === 'production' && { output: 'standalone' }),
   trailingSlash: false, // 統一 URL 格式
   
   // 開發環境優化

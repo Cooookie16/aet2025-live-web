@@ -273,12 +273,16 @@ export default function Dashboard() {
   // 切換顯示介面
   const switchDisplay = (displayId) => {
     setCurrentDisplay(displayId);
-    // 改由 /api/state 的 POST 觸發 SSE 廣播，避免重複與競態
-    // sendCommand({
-    //   action: 'switch-display',
-    //   displayId: displayId,
-    //   displayName: displayOptions.find(opt => opt.id === displayId)?.name
-    // });
+    // 立即同步到後端，觸發 SSE，確保 OBS 立刻更新畫面
+    (async () => {
+      try {
+        await fetch('/api/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentDisplay: displayId })
+        });
+      } catch {}
+    })();
   };
 
   // 目前僅負責切換顯示介面（依需求可擴充資料載入與設定）
@@ -375,6 +379,43 @@ export default function Dashboard() {
     const init = Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' }));
     setMapScores(prev => ({ ...prev, [currentMatchKey]: init }));
   }, [currentMatchKey]);
+
+  // 依據地圖比分自動計算每場對戰的總和分數，並更新 bracket 顯示
+  useEffect(() => {
+    try {
+      const stages = ['qf', 'sf', 'lf', 'f'];
+      setBracket(prev => {
+        let changed = false;
+        const next = { ...prev };
+        for (const stage of stages) {
+          const list = Array.isArray(prev[stage]) ? [...prev[stage]] : [];
+          for (let i = 0; i < list.length; i++) {
+            const key = `${stage}:${i}`;
+            const maps = mapScores?.[key];
+            let aSum = 'n/a';
+            let bSum = 'n/a';
+            if (Array.isArray(maps) && maps.length > 0) {
+              const aWins = maps.reduce((acc, m) => acc + (Number(m?.scoreA) === 2 ? 1 : 0), 0);
+              const bWins = maps.reduce((acc, m) => acc + (Number(m?.scoreB) === 2 ? 1 : 0), 0);
+              aSum = String(Math.min(5, aWins));
+              bSum = String(Math.min(5, bWins));
+            }
+            const match = list[i] || { a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } };
+            const newA = { ...match.a, score: aSum };
+            const newB = { ...match.b, score: bSum };
+            if (match.a.score !== newA.score || match.b.score !== newB.score) {
+              list[i] = { ...match, a: newA, b: newB };
+              changed = true;
+            }
+          }
+          if (changed) {
+            next[stage] = list;
+          }
+        }
+        return changed ? next : prev;
+      });
+    } catch {}
+  }, [mapScores]);
 
   const currentMatchMaps = useMemo(() => {
     if (!currentMatchKey) return [];
@@ -613,13 +654,9 @@ export default function Dashboard() {
                           <option value="">選擇隊伍</option>
                           {teamOptions.map(t => <option key={`champ-${t}`} value={t}>{t}</option>)}
                         </select>
-                        <select
-                          className="shrink-0 w-20 sm:w-28 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                          value={bracket.champ.score}
-                          onChange={(e) => handleMatchChange('champ', 0, 'team', 'score', e.target.value)}
-                        >
-                          {['n/a','1','2','3'].map(v => <option key={`champ-s-${v}`} value={v}>{v}</option>)}
-                        </select>
+                        <div className="shrink-0 w-20 sm:w-28 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 dark:text-white text-center">
+                          {bracket.champ.score}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -764,13 +801,9 @@ function MatchEditor({ stage, index, match, teams, onChange, label, isCurrent, o
           <option value="">選擇隊伍</option>
           {teams.map(t => <option key={`${stage}-${index}-a-${t}`} value={t}>{t}</option>)}
         </select>
-        <select
-          className="shrink-0 w-20 sm:w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-          value={match.a.score}
-          onChange={(e) => onChange(stage, index, 'a', 'score', e.target.value)}
-        >
-          {['n/a','1','2','3'].map(v => <option key={`${stage}-${index}-a-s-${v}`} value={v}>{v}</option>)}
-        </select>
+        <div className="shrink-0 w-20 sm:w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 dark:text-white text-center">
+          {match.a.score}
+        </div>
       </div>
       {/* B 方 */}
       <div className="flex items-center gap-2 min-w-0">
@@ -782,13 +815,9 @@ function MatchEditor({ stage, index, match, teams, onChange, label, isCurrent, o
           <option value="">選擇隊伍</option>
           {teams.map(t => <option key={`${stage}-${index}-b-${t}`} value={t}>{t}</option>)}
         </select>
-        <select
-          className="shrink-0 w-20 sm:w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-          value={match.b.score}
-          onChange={(e) => onChange(stage, index, 'b', 'score', e.target.value)}
-        >
-          {['n/a','1','2','3'].map(v => <option key={`${stage}-${index}-b-s-${v}`} value={v}>{v}</option>)}
-        </select>
+        <div className="shrink-0 w-20 sm:w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 dark:text-white text-center">
+          {match.b.score}
+        </div>
       </div>
     </div>
   );
