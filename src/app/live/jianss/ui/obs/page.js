@@ -67,7 +67,10 @@ export default function OBSLiveUI() {
 
     // 後備：每 3 秒輪詢一次狀態以矯正畫面（當 SSE 未連線時才輪詢）
     const poll = setInterval(async () => {
-      if (esRef.current) return; // SSE 正常時暫停輪詢
+      // 若 SSE 連線存在但長時間未更新，也主動校正一次狀態
+      const now = Date.now();
+      const tooStale = (now - (lastUpdateRef.current || 0)) > 15000; // 15s 無事件視為過舊
+      if (esRef.current && !tooStale) return; // SSE 正常且不過舊時暫停輪詢
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (!res.ok) return;
@@ -120,7 +123,10 @@ export default function OBSLiveUI() {
         };
         es.onmessage = (evt) => {
           try {
-            const latestMessage = JSON.parse(evt.data);
+            // 忽略空白或無效資料框，避免 JSON.parse 例外
+            const raw = (evt && typeof evt.data === 'string') ? evt.data.trim() : '';
+            if (!raw || raw[0] !== '{') return;
+            const latestMessage = JSON.parse(raw);
             console.log('[OBS] SSE message:', latestMessage);
             if (!latestMessage) return;
             if (latestMessage.timestamp && latestMessage.timestamp <= (lastUpdateRef.current || 0)) return;
@@ -181,6 +187,18 @@ export default function OBSLiveUI() {
         setIsConnected(false);
       }
     };
+    // 看門狗：若 25s 沒有任何事件，主動關閉 SSE 並觸發重連
+    const watchdog = setInterval(() => {
+      const now = Date.now();
+      const staleMs = now - (lastUpdateRef.current || 0);
+      if (esRef.current && staleMs > 25000) {
+        try { esRef.current.close(); } catch {}
+        esRef.current = null;
+        // 立即嘗試重連（不等待退避）
+        connect();
+      }
+    }, 5000);
+
 
     // 初次建立連線
     connect();
@@ -204,6 +222,7 @@ export default function OBSLiveUI() {
       try { document.removeEventListener('visibilitychange', onVisible); } catch {}
       try { window.removeEventListener('online', onOnline); } catch {}
       try { clearInterval(poll); } catch {}
+      try { clearInterval(watchdog); } catch {}
       if (retryTimerRef.current) {
         try { clearTimeout(retryTimerRef.current); } catch {}
       }

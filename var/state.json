@@ -8,7 +8,7 @@
         },
         "b": {
           "team": "秦始皇騎熊貓",
-          "score": "0"
+          "score": "2"
         }
       },
       {
@@ -68,11 +68,11 @@
       {
         "a": {
           "team": "Angelic But Bullied Megu",
-          "score": "n/a"
+          "score": "0"
         },
         "b": {
           "team": "123 (1)",
-          "score": "n/a"
+          "score": "0"
         }
       },
       {
@@ -104,31 +104,35 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": "sf",
+    "stage": "qf",
     "index": 0
   },
-  "dashboard:currentDisplay": "bracket",
+  "dashboard:currentDisplay": "map-score",
   "dashboard:mapScores": {
     "qf:0": [
       {
         "mode": "據點搶奪戰",
-        "map": "灼熱火圈 Ring of Fire"
+        "map": "灼熱火圈 Ring of Fire",
+        "scoreA": "1",
+        "scoreB": "2"
       },
       {
-        "mode": "",
-        "map": ""
+        "mode": "據點搶奪戰",
+        "map": "開門大吉 Open Business",
+        "scoreA": "1",
+        "scoreB": "2"
       },
       {
-        "mode": "",
-        "map": ""
+        "mode": "寶石爭奪戰",
+        "map": "堅石礦井 Hard Rock Mine"
       },
       {
-        "mode": "",
-        "map": ""
+        "mode": "亂鬥足球",
+        "map": "三重威脅 Triple Dribble"
       },
       {
-        "mode": "",
-        "map": ""
+        "mode": "搶星大作戰",
+        "map": "夾心蛋糕 Layer Cake"
       }
     ],
     "qf:1": [
@@ -164,6 +168,38 @@
       }
     ],
     "sf:0": [
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      }
+    ],
+    "lf:0": [
       {
         "mode": "",
         "map": "",
