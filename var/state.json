@@ -107,102 +107,30 @@
     "stage": "qf",
     "index": 0
   },
-  "dashboard:currentDisplay": "map-score",
+  "dashboard:currentDisplay": "banpick",
   "dashboard:mapScores": {
     "qf:0": [
       {
-        "mode": "寶石爭奪戰",
-        "map": "堅石礦井 Hard Rock Mine",
-        "scoreA": "2",
-        "scoreB": "1"
-      },
-      {
-        "mode": "亂鬥足球",
-        "map": "綠蔭球場 Sneaky Fields",
-        "scoreA": "1",
-        "scoreB": "2"
-      },
-      {
-        "mode": "金庫攻防戰",
-        "map": "遙遠的橋 Bridge Too Far",
-        "scoreA": "1",
-        "scoreB": "2"
-      },
-      {
-        "mode": "搶星大作戰",
-        "map": "神秘流星 Shooting Star",
-        "scoreA": "2",
-        "scoreB": "1"
-      },
-      {
         "mode": "據點搶奪戰",
         "map": "開門大吉 Open Business",
-        "scoreA": "2",
-        "scoreB": "1"
-      }
-    ],
-    "qf:1": [
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "scoreA": "1",
+        "scoreB": "2"
       },
       {
         "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "map": ""
       },
       {
         "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "map": ""
       },
       {
         "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "map": ""
       },
       {
         "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      }
-    ],
-    "qf:2": [
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "",
-        "map": "",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
+        "map": ""
       }
     ]
   }

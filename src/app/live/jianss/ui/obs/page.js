@@ -32,19 +32,19 @@ export default function OBSLiveUI() {
   useEffect(() => { currentDisplayRef.current = currentDisplay; }, [currentDisplay]);
 
   useEffect(() => {
-    if (OBS_DEBUG) console.log('[OBS] init: start load /api/state');
+    console.log('[OBS] init: start load /api/state');
     // 啟動時從後端讀取當前狀態，避免在沒有收到即時事件前畫面無法同步
     (async () => {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
-        if (OBS_DEBUG) console.log('[OBS] /api/state status:', res.status);
+        console.log('[OBS] /api/state status:', res.status);
         if (res.ok) {
           let json = null;
           try { json = await res.json(); } catch { json = null; }
           const d = json?.data || {};
-          if (OBS_DEBUG) console.log('[OBS] /api/state data:', d);
+          console.log('[OBS] /api/state data:', d);
           if (typeof d?.currentDisplay === 'string' && d.currentDisplay) {
-            if (OBS_DEBUG) console.log('[OBS] set currentDisplay from state:', d.currentDisplay);
+            console.log('[OBS] set currentDisplay from state:', d.currentDisplay);
             setCurrentDisplay(d.currentDisplay);
           }
           if (d?.bracket) {
@@ -76,7 +76,7 @@ export default function OBSLiveUI() {
         const d = json?.data || {};
         const srv = typeof d?.currentDisplay === 'string' ? d.currentDisplay : null;
         if (srv && srv !== currentDisplayRef.current) {
-          if (OBS_DEBUG) console.log('[OBS] POLL sync display ->', srv, '(was:', currentDisplayRef.current, ')');
+          console.log('[OBS] POLL sync display ->', srv, '(was:', currentDisplayRef.current, ')');
           setCurrentDisplay(srv);
         }
         if (d?.bracket) {
@@ -84,6 +84,9 @@ export default function OBSLiveUI() {
         }
         if (d?.currentBroadcast) {
           setCurrentBroadcast(d.currentBroadcast);
+        }
+        if (d?.mapScores) {
+          setDisplayData(prev => ({ ...prev, mapScores: d.mapScores }));
         }
       } catch {}
     }, 3000);
@@ -94,12 +97,12 @@ export default function OBSLiveUI() {
           try { esRef.current.close(); } catch {}
           esRef.current = null;
         }
-        if (OBS_DEBUG) console.log('[OBS] SSE connect -> /api/events');
+        console.log('[OBS] SSE connect -> /api/events');
         const es = new EventSource('/api/events');
         esRef.current = es;
 
         es.onopen = () => {
-          if (OBS_DEBUG) console.log('[OBS] SSE onopen');
+          console.log('[OBS] SSE onopen');
           setIsConnected(true);
           retryAttemptRef.current = 0; // 重置退避
         };
@@ -110,7 +113,7 @@ export default function OBSLiveUI() {
           esRef.current = null;
           // 指數退避（上限 30s）
           const nextDelay = Math.min(30000, 1000 * Math.pow(2, retryAttemptRef.current || 0));
-          if (OBS_DEBUG) console.log('[OBS] retry in', nextDelay, 'ms, attempt', retryAttemptRef.current);
+          console.log('[OBS] retry in', nextDelay, 'ms, attempt', retryAttemptRef.current);
           retryAttemptRef.current = (retryAttemptRef.current || 0) + 1;
           if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
           retryTimerRef.current = setTimeout(() => connect(), nextDelay);
@@ -118,21 +121,23 @@ export default function OBSLiveUI() {
         es.onmessage = (evt) => {
           try {
             const latestMessage = JSON.parse(evt.data);
-            if (OBS_DEBUG) console.log('[OBS] SSE message:', latestMessage);
+            console.log('[OBS] SSE message:', latestMessage);
             if (!latestMessage) return;
             if (latestMessage.timestamp && latestMessage.timestamp <= (lastUpdateRef.current || 0)) return;
 
             if (latestMessage.type === 'display-change') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              if (OBS_DEBUG) console.log('[OBS] display-change ->', latestMessage.data?.displayId, 'ts:', lastUpdateRef.current);
+              console.log('[OBS] display-change ->', latestMessage.data?.displayId, 'ts:', lastUpdateRef.current);
               setCurrentDisplay(latestMessage.data.displayId);
-              setDisplayData({
+              // 重要：合併，不要覆蓋既有 mapScores
+              setDisplayData(prev => ({
+                ...prev,
                 ...latestMessage.data,
                 lastUpdate: lastUpdateRef.current
-              });
+              }));
             } else if (latestMessage.type === 'bracket-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              if (OBS_DEBUG) console.log('[OBS] bracket-update');
+              console.log('[OBS] bracket-update');
               if (latestMessage?.data?.bracket) {
                 setBracket(latestMessage.data.bracket);
               }
@@ -143,7 +148,7 @@ export default function OBSLiveUI() {
               }
             } else if (latestMessage.type === 'map-score-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              if (OBS_DEBUG) console.log('[OBS] map-score-update');
+              console.log('[OBS] map-score-update');
               if (latestMessage?.data?.mapScores) {
                 setDisplayData(prev => ({
                   ...prev,
@@ -152,7 +157,7 @@ export default function OBSLiveUI() {
               }
             } else if (latestMessage.type === 'custom-message') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              if (OBS_DEBUG) console.log('[OBS] custom-message ->', latestMessage.data);
+              console.log('[OBS] custom-message ->', latestMessage.data);
               setDisplayData(prev => ({
                 ...prev,
                 customMessage: latestMessage.data.message,
@@ -175,20 +180,20 @@ export default function OBSLiveUI() {
 
     // 當頁面由隱藏轉為顯示、或網路回復時，嘗試重連
     const onVisible = () => {
-      if (OBS_DEBUG) console.log('[OBS] visibilitychange:', document.visibilityState);
+      console.log('[OBS] visibilitychange:', document.visibilityState);
       if (document.visibilityState === 'visible' && !esRef.current) {
         connect();
       }
     };
     const onOnline = () => {
-      if (OBS_DEBUG) console.log('[OBS] online');
+      console.log('[OBS] online');
       if (!esRef.current) connect();
     };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('online', onOnline);
 
     return () => {
-      if (OBS_DEBUG) console.log('[OBS] cleanup');
+      console.log('[OBS] cleanup');
       try { document.removeEventListener('visibilitychange', onVisible); } catch {}
       try { window.removeEventListener('online', onOnline); } catch {}
       try { clearInterval(poll); } catch {}
@@ -199,6 +204,25 @@ export default function OBSLiveUI() {
       esRef.current = null;
     };
   }, []);
+
+  // 新增：當切換顯示至 map-score 或切換目前對戰時，立即拉取最新 state 並更新 mapScores
+  useEffect(() => {
+    const fetchForSwitch = async () => {
+      const isMapScore = currentDisplay === 'map-score';
+      const { stage, index } = currentBroadcast || {};
+      if (!isMapScore || (!stage && stage !== 0) || typeof index !== 'number') return;
+      try {
+        const res = await fetch('/api/state', { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = await res.json().catch(() => null);
+        const d = json?.data || {};
+        if (d?.mapScores) {
+          setDisplayData(prev => ({ ...prev, mapScores: d.mapScores }));
+        }
+      } catch {}
+    };
+    fetchForSwitch();
+  }, [currentDisplay, currentBroadcast]);
 
   // 顯示介面變更偵錯
   useEffect(() => {
@@ -278,10 +302,11 @@ function OBSBracketDisplay({ data }) {
     loadTeams();
   }, []);
 
-  // 根據隊伍名稱取得選手陣列
+  // 根據隊伍名稱取得選手陣列（未選隊伍時不顯示）
   const getTeamMembers = (teamName) => {
+    if (!teamName) return '';
     const team = teamsData.find(t => t.name === teamName);
-    return team ? team.members.join(', ') : '選手A1, 選手A2';
+    return team ? team.members.join(', ') : '';
   };
 
   const qf = bracket?.qf || Array.from({ length: 4 }).map(() => ({ a: { team: '隊伍 A', score: 'n/a' }, b: { team: '隊伍 B', score: 'n/a' } }));
@@ -312,14 +337,18 @@ function OBSBracketDisplay({ data }) {
                       <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                         <div className="flex flex-col">
                           <span className="text-black text-xs truncate">{m?.a?.team || '隊伍 A'}</span>
-                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                          {getTeamMembers(m?.a?.team) ? (
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                          ) : null}
                         </div>
                         <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
                       </div>
                       <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                         <div className="flex flex-col">
                           <span className="text-black text-xs truncate">{m?.b?.team || '隊伍 B'}</span>
-                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                          {getTeamMembers(m?.b?.team) ? (
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                          ) : null}
                         </div>
                         <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
                       </div>
@@ -348,14 +377,12 @@ function OBSBracketDisplay({ data }) {
                             <span className="text-black text-xs truncate">{m?.a?.team || '敗者'}</span>
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
                           </div>
-                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
                         </div>
                         <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                           <div className="flex flex-col">
                             <span className="text-black text-xs truncate">{m?.b?.team || '敗者'}</span>
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
                           </div>
-                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
                         </div>
                       </div>
                     </div>
@@ -380,15 +407,15 @@ function OBSBracketDisplay({ data }) {
                             <span className="text-black text-xs truncate">{m?.a?.team || '勝者'}</span>
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
                           </div>
-                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
                         </div>
-                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
-                          <div className="flex flex-col">
-                            <span className="text-black text-xs truncate">{m?.b?.team || '勝者'}</span>
-                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
-                          </div>
-                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                        <div className="flex flex-col">
+                          <span className="text-black text-xs truncate">{m?.b?.team || '勝者'}</span>
+                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
                         </div>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
                       </div>
                     </div>
                   </div>
@@ -412,14 +439,12 @@ function OBSBracketDisplay({ data }) {
                             <span className="text-black text-xs truncate">{m?.a?.team || '敗者'}</span>
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
                           </div>
-                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
                         </div>
                         <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                           <div className="flex flex-col">
                             <span className="text-black text-xs truncate">{m?.b?.team || '敗者'}</span>
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
                           </div>
-                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
                         </div>
                       </div>
                     </div>
@@ -442,14 +467,18 @@ function OBSBracketDisplay({ data }) {
                       <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                         <div className="flex flex-col">
                           <span className="text-black text-xs truncate">{m?.a?.team || '勝者'}</span>
-                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                          {getTeamMembers(m?.a?.team) ? (
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                          ) : null}
                         </div>
                         <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
                       </div>
                       <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                         <div className="flex flex-col">
                           <span className="text-black text-xs truncate">{m?.b?.team || '勝者'}</span>
-                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                          {getTeamMembers(m?.b?.team) ? (
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                          ) : null}
                         </div>
                         <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
                       </div>
@@ -594,10 +623,11 @@ function OBSMapScoreDisplay({ data }) {
     loadMaps();
   }, []);
 
-  // 根據隊伍名稱取得選手陣列
+  // 根據隊伍名稱取得選手陣列（未選隊伍時不顯示）
   const getTeamMembers = (teamName) => {
+    if (!teamName) return '';
     const team = teamsData.find(t => t.name === teamName);
-    return team ? team.members.join(', ') : '選手A1, 選手A2';
+    return team ? team.members.join(', ') : '';
   };
 
   // 根據地圖名稱取得地圖圖片路徑
@@ -849,112 +879,117 @@ function OBSMapScoreDisplay({ data }) {
               {/* 隊伍 A */}
               <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
                 <div className="text-sm font-bold text-white text-center leading-tight">{teams.a || '隊伍 A'}</div>
+                {getTeamMembers(teams.a) ? (
                 <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.a)}</div>
-              </div>
-              
-              {/* 隊伍 A 和 B 之間的分隔線 */}
-              <div className="w-24 h-px bg-gray-600"></div>
-              
-              {/* 隊伍 B */}
-              <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
-                <div className="text-sm font-bold text-white text-center leading-tight">{teams.b || '隊伍 B'}</div>
-                <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
-              </div>
+              ) : null}
             </div>
             
-            {/* 中間垂直分隔線 */}
-            <div className="flex flex-col gap-0">
-              <div className="w-px h-24 bg-gray-600"></div>
-              <div className="w-px h-px bg-gray-600"></div>
-              <div className="w-px h-24 bg-gray-600"></div>
-            </div>
+            {/* 隊伍 A 和 B 之間的分隔線 */}
+            <div className="w-24 h-px bg-gray-600"></div>
             
-            {/* 右側：地圖比分 */}
-            <div className="flex flex-col gap-0">
-              {/* 地圖圖片區域 - 跨越上下兩個位置 */}
-              <div className="flex gap-0">
-                {(mapsReady ? maps : Array.from({ length: 5 }).map(() => null)).map((map, index) => {
-                  const roundStarted = map ? isRoundStarted(map) : false;
-                  const mapImagePath = map && !roundStarted ? getMapImagePath(map.map) : null;
-                  
-                  return (
-                    <div 
-                      key={`map-${index}`}
-                      className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center"
-                    >
-                      {roundStarted ? (
-                        // 已開始的盤：顯示分數佈局（移除模式名稱）
-                        <>
-                          {/* 隊伍 A 分數 */}
-                          <div className="h-24 flex flex-col justify-center items-center">
-                            <div className="text-4xl font-extrabold text-white">
-                              {formatScoreDisplay(map?.scoreA)}
-                            </div>
-                          </div>
-                          
-                          {/* 分隔線 */}
-                          <div className="w-full h-px bg-gray-600"></div>
-                          
-                          {/* 隊伍 B 分數 */}
-                          <div className="h-24 flex flex-col justify-center items-center">
-                            <div className="text-4xl font-extrabold text-white">
-                              {formatScoreDisplay(map?.scoreB)}
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        // 未開始的盤：顯示地圖圖片或問號（資料未就緒則留空）
-                        <div className="w-full h-full flex items-center justify-center">
-                          {map ? (
-                            mapImagePath ? (
-                              <div className="w-full h-full flex flex-col">
-                                <div className="flex-1 flex items-center justify-center">
-                                  <img 
-                                    src={mapImagePath} 
-                                    alt={map.map || `第${index + 1}盤`}
-                                    className="max-w-full max-h-full object-contain"
-                                  />
-                                </div>
-                                <div className="h-8 flex items-center justify-center px-1">
-                                  <div className="w-full text-[10px] leading-tight text-gray-300 text-center whitespace-normal break-words overflow-hidden">
-                                    {map.map || `第${index + 1}盤`}
-                                  </div>
-                                </div>
-                              </div>
-                            ) : (
-                              // 只有在資料就緒且確定未選地圖時顯示問號
-                              <div className="text-4xl font-bold text-gray-500">?</div>
-                            )
-                          ) : (
-                            // maps 尚未就緒：顯示空白
-                            <div className="w-full h-full" />
-                          )}
+            {/* 隊伍 B */}
+            <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
+              <div className="text-sm font-bold text-white text-center leading-tight">{teams.b || '隊伍 B'}</div>
+              {getTeamMembers(teams.b) ? (
+              <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
+            ) : null}
+          </div>
+        </div>
+        
+        {/* 中間垂直分隔線 */}
+        <div className="flex flex-col gap-0">
+          <div className="w-px h-24 bg-gray-600"></div>
+          <div className="w-px h-px bg-gray-600"></div>
+          <div className="w-px h-24 bg-gray-600"></div>
+        </div>
+        {/* 中間垂直分隔線結束 */}
+ 
+        {/* 右側：地圖比分 */}
+        <div className="flex flex-col gap-0">
+          {/* 地圖圖片區域 - 跨越上下兩個位置 */}
+          <div className="flex gap-0">
+            {(mapsReady ? maps : Array.from({ length: 5 }).map(() => null)).map((map, index) => {
+              const roundStarted = map ? isRoundStarted(map) : false;
+              const mapImagePath = map && !roundStarted ? getMapImagePath(map.map) : null;
+              
+              return (
+                <div 
+                  key={`map-${index}`}
+                  className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center"
+                >
+                  {roundStarted ? (
+                    // 已開始的盤：顯示分數佈局（移除模式名稱）
+                    <>
+                      {/* 隊伍 A 分數 */}
+                      <div className="h-24 flex flex-col justify-center items-center">
+                        <div className="text-4xl font-extrabold text-white">
+                          {formatScoreDisplay(map?.scoreA)}
                         </div>
+                      </div>
+                      
+                      {/* 分隔線 */}
+                      <div className="w-full h-px bg-gray-600"></div>
+                      
+                      {/* 隊伍 B 分數 */}
+                      <div className="h-24 flex flex-col justify-center items-center">
+                        <div className="text-4xl font-extrabold text-white">
+                          {formatScoreDisplay(map?.scoreB)}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    // 未開始的盤：顯示地圖圖片或問號（資料未就緒則留空）
+                    <div className="w-full h-full flex items-center justify-center">
+                      {map ? (
+                        mapImagePath ? (
+                          <div className="w-full h-full flex flex-col">
+                            <div className="flex-1 flex items-center justify-center">
+                              <img 
+                                src={mapImagePath} 
+                                alt={map.map || `第${index + 1}盤`}
+                                className="max-w-full max-h-full object-contain"
+                              />
+                            </div>
+                            <div className="h-8 flex items-center justify-center px-1">
+                              <div className="w-full text-[10px] leading-tight text-gray-300 text-center whitespace-normal break-words overflow-hidden">
+                                {map.map || `第${index + 1}盤`}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          // 只有在資料就緒且確定未選地圖時顯示問號
+                          <div className="text-4xl font-bold text-gray-500">?</div>
+                        )
+                      ) : (
+                        // maps 尚未就緒：顯示空白
+                        <div className="w-full h-full" />
                       )}
                     </div>
-                  );
-                })}
-                
-                {/* 最右邊的總分欄位：上（A 總分）、中線、下（B 總分） */}
-                <div className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center">
-                  <div className="h-24 flex flex-col justify-center items-center">
-                    <div className="text-4xl font-black text-pink-500">
-                      {mapsReady ? getTeamMapsWon(maps, 'A') : ''}
-                    </div>
-                  </div>
-                  
-                  <div className="w-full h-px bg-gray-600"></div>
-                  
-                  <div className="h-24 flex flex-col justify-center items-center">
-                    <div className="text-4xl font-black text-pink-500">
-                      {mapsReady ? getTeamMapsWon(maps, 'B') : ''}
-                    </div>
-                  </div>
+                  )}
+                </div>
+              );
+            })}
+            
+            {/* 最右邊的總分欄位：上（A 總分）、中線、下（B 總分） */}
+            <div className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center">
+              <div className="h-24 flex flex-col justify-center items-center">
+                <div className="text-4xl font-black text-pink-500">
+                  {mapsReady ? getTeamMapsWon(maps, 'A') : ''}
+                </div>
+              </div>
+              
+              <div className="w-full h-px bg-gray-600"></div>
+              
+              <div className="h-24 flex flex-col justify-center items-center">
+                <div className="text-4xl font-black text-pink-500">
+                  {mapsReady ? getTeamMapsWon(maps, 'B') : ''}
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
       </div>
     </div>
   );
