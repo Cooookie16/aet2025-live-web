@@ -503,6 +503,7 @@ function OBSMapScoreDisplay({ data }) {
   const mapScores = data?.mapScores;
   const bracket = data?.bracket;
   const [teamsData, setTeamsData] = useState([]);
+  const [mapsData, setMapsData] = useState([]);
   
   // 載入隊伍資料
   useEffect(() => {
@@ -520,10 +521,88 @@ function OBSMapScoreDisplay({ data }) {
     loadTeams();
   }, []);
 
+  // 載入地圖資料
+  useEffect(() => {
+    const loadMaps = async () => {
+      try {
+        const res = await fetch('/maps.json', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setMapsData(data);
+        }
+      } catch (e) {
+        console.warn('載入地圖資料失敗:', e);
+      }
+    };
+    loadMaps();
+  }, []);
+
   // 根據隊伍名稱取得選手陣列
   const getTeamMembers = (teamName) => {
     const team = teamsData.find(t => t.name === teamName);
     return team ? team.members.join(', ') : '選手A1, 選手A2';
+  };
+
+  // 根據地圖名稱取得地圖圖片路徑
+  const getMapImagePath = (mapName) => {
+    if (!mapName) {
+      console.log('[OBS] getMapImagePath: mapName is null/empty');
+      return null;
+    }
+    
+    // 地圖名稱對應圖片檔名的映射（根據 maps.json 和實際圖片檔案名稱）
+    const mapImageMap = {
+      // 寶石爭奪戰
+      '戈壁陷阱 Deathcap Trap': '/maps/deathcap_trap.png',
+      '咻咻作響 Double Swoosh': '/maps/double_swoosh.png',
+      '堅石礦井 Hard Rock Mine': '/maps/hard_rock_mine.png',
+      
+      // 亂鬥足球
+      '精準射門 Pinhole Punt': '/maps/pinhole_punt.png',
+      '綠蔭球場 Sneaky Fields': '/maps/sneaky_fields.png',
+      '三重威脅 Triple Dribble': '/maps/triple_dribble.png',
+      
+      // 金庫攻防戰
+      '遙遠的橋 Bridge Too Far': '/maps/bridge_too_far.png',
+      '轟隆峽谷 Kaboom Canyon': '/maps/kaboom_canyon.png',
+      '安全區域 Safe Zone': '/maps/safe_zone.png',
+      
+      // 搶星大作戰
+      '草叢迷蹤 Hideout': '/maps/hideout.png',
+      '夾心蛋糕 Layer Cake': '/maps/layer_cake.png',
+      '神秘流星 Shooting Star': '/maps/shooting_star.png',
+      
+      // 據點搶奪戰
+      '甲蟲決鬥 Dueling Beetles': '/maps/dueling_beetles.png',
+      '開門大吉 Open Business': '/maps/open_business.png',
+      '灼熱火圈 Ring of Fire': '/maps/ring_of_fire.png',
+      
+      // 極限淘汰賽
+      '搖滾蓓爾 Belle\'s Rock': '/maps/belles_rock.png',
+      '金臂峽谷 Goldarm Gulch': '/maps/goldarm_gulch.png',
+      '空礦地帶 Out in the Open': '/maps/out_in_the_open.png'
+    };
+    
+    const imagePath = mapImageMap[mapName];
+    console.log('[OBS] getMapImagePath:', { mapName, imagePath, found: !!imagePath });
+    return imagePath || null;
+  };
+
+  // 檢查該盤是否已開始（有分數）
+  const isRoundStarted = (map) => {
+    // 檢查是否有實際的分數（不是 'n/a' 且不是 undefined）
+    const hasScoreA = map.scoreA && map.scoreA !== 'n/a' && map.scoreA !== undefined;
+    const hasScoreB = map.scoreB && map.scoreB !== 'n/a' && map.scoreB !== undefined;
+    const result = hasScoreA || hasScoreB;
+    console.log('[OBS] isRoundStarted:', { 
+      mapName: map.map, 
+      scoreA: map.scoreA, 
+      scoreB: map.scoreB, 
+      hasScoreA, 
+      hasScoreB, 
+      result 
+    });
+    return result;
   };
 
   // 取得目前播報對戰的隊伍名稱
@@ -549,6 +628,8 @@ function OBSMapScoreDisplay({ data }) {
     
     const key = `${stage}:${index}`;
     const entry = mapScores?.[key];
+    console.log('[OBS] getCurrentMatchMaps:', { stage, index, key, entry, mapScores });
+    
     if (Array.isArray(entry) && entry.length === 5) return entry;
     return Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' }));
   };
@@ -556,52 +637,131 @@ function OBSMapScoreDisplay({ data }) {
   const teams = getCurrentBroadcastTeams();
   const maps = getCurrentMatchMaps();
 
+  // 使用真實 maps；未設定地圖時不要回退到測試資料
+  console.log('[OBS] Final maps data:', { maps });
+
   return (
     <div className="w-full h-full flex items-center justify-center p-2">
-      <div className="bg-white rounded-lg shadow-lg p-4">
-        {/* 7x2 方塊陣列 - 左邊隊伍名稱，右邊是該隊伍在各張地圖的比分 */}
-        <div className="grid grid-cols-7 grid-rows-2 gap-2">
-          {/* A1 - 隊伍 A 名稱 */}
-          <div className="w-20 h-20 border border-gray-300 p-2 flex flex-col justify-center items-center bg-blue-50 rounded">
-            <div className="text-xs font-bold text-blue-800 text-center leading-tight">{teams.a || '隊伍 A'}</div>
-            <div className="text-[10px] text-blue-600 text-center mt-1 leading-tight">{getTeamMembers(teams.a)}</div>
+      <div className="bg-black rounded-lg shadow-lg p-4">
+        {/* 重新設計的佈局：隊伍名稱在左側上下排列，地圖比分在右側 */}
+        <div className="flex gap-0">
+          {/* 左側：隊伍名稱上下排列 */}
+          <div className="flex flex-col gap-0">
+            {/* 隊伍 A */}
+            <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
+              <div className="text-sm font-bold text-white text-center leading-tight">{teams.a || '隊伍 A'}</div>
+              <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.a)}</div>
+            </div>
+            
+            {/* 隊伍 A 和 B 之間的分隔線 */}
+            <div className="w-24 h-px bg-gray-600"></div>
+            
+            {/* 隊伍 B */}
+            <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
+              <div className="text-sm font-bold text-white text-center leading-tight">{teams.b || '隊伍 B'}</div>
+              <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
+            </div>
           </div>
           
-          {/* A2 - 隊伍 B 名稱 */}
-          <div className="w-20 h-20 border border-gray-300 p-2 flex flex-col justify-center items-center bg-red-50 rounded">
-            <div className="text-xs font-bold text-red-800 text-center leading-tight">{teams.b || '隊伍 B'}</div>
-            <div className="text-[10px] text-red-600 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
+          {/* 中間垂直分隔線 */}
+          <div className="flex flex-col gap-0">
+            <div className="w-px h-24 bg-gray-600"></div>
+            <div className="w-px h-px bg-gray-600"></div>
+            <div className="w-px h-24 bg-gray-600"></div>
           </div>
           
-          {/* B1~F1 - 第一橫排：A1 隊伍在各張地圖的比分 */}
-          {maps.map((map, index) => (
-            <div 
-              key={`map-a-${index}`}
-              className="w-20 h-20 border border-gray-300 p-2 flex flex-col justify-center items-center bg-blue-50 rounded"
-            >
-              <div className="text-[10px] font-semibold text-blue-700 text-center mb-1 leading-tight">
-                {map.mode || '未選擇'}
-              </div>
-              <div className="text-2xl font-bold text-blue-800">
-                {map.scoreA === 'n/a' ? '-' : map.scoreA}
-              </div>
-            </div>
-          ))}
-          
-          {/* B2~F2 - 第二橫排：A2 隊伍在各張地圖的比分 */}
-          {maps.map((map, index) => (
-            <div 
-              key={`map-b-${index}`}
-              className="w-20 h-20 border border-gray-300 p-2 flex flex-col justify-center items-center bg-red-50 rounded"
-            >
-              <div className="text-[10px] font-semibold text-red-700 text-center mb-1 leading-tight">
-                {map.mode || '未選擇'}
-              </div>
-              <div className="text-2xl font-bold text-red-800">
-                {map.scoreB === 'n/a' ? '-' : map.scoreB}
-              </div>
-            </div>
-          ))}
+                     {/* 右側：地圖比分 */}
+           <div className="flex flex-col gap-0">
+             {/* 地圖圖片區域 - 跨越上下兩個位置 */}
+             <div className="flex gap-0">
+               {maps.map((map, index) => {
+                 const roundStarted = isRoundStarted(map);
+                 const mapImagePath = getMapImagePath(map.map);
+                 
+                 console.log('[OBS] Map rendering:', { 
+                   index, 
+                   mapName: map.map, 
+                   roundStarted, 
+                   mapImagePath,
+                   scoreA: map.scoreA,
+                   scoreB: map.scoreB
+                 });
+                 
+                 return (
+                   <div 
+                     key={`map-${index}`}
+                     className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center"
+                   >
+                     {roundStarted ? (
+                       // 已開始的盤：顯示分數佈局
+                       <>
+                         {/* 隊伍 A 分數 */}
+                         <div className="h-24 flex flex-col justify-center items-center">
+                           <div className="text-[10px] font-semibold text-gray-300 text-center mb-1 leading-tight">
+                             {map.mode || `第${index + 1}盤`}
+                           </div>
+                           <div className="text-2xl font-bold text-white">
+                             {map.scoreA === 'n/a' ? '-' : map.scoreA}
+                           </div>
+                         </div>
+                         
+                         {/* 分隔線 */}
+                         <div className="w-full h-px bg-gray-600"></div>
+                         
+                         {/* 隊伍 B 分數 */}
+                         <div className="h-24 flex flex-col justify-center items-center">
+                           <div className="text-[10px] font-semibold text-gray-300 text-center mb-1 leading-tight">
+                             {map.mode || `第${index + 1}盤`}
+                           </div>
+                           <div className="text-2xl font-bold text-white">
+                             {map.scoreB === 'n/a' ? '-' : map.scoreB}
+                           </div>
+                         </div>
+                       </>
+                     ) : (
+                       // 未開始的盤：顯示地圖圖片或問號
+                       <div className="w-full h-full flex items-center justify-center">
+                         {mapImagePath ? (
+                           <img 
+                             src={mapImagePath} 
+                             alt={map.map || `第${index + 1}盤`}
+                             className="w-full h-full object-contain"
+                             onLoad={() => console.log('[OBS] Image loaded successfully:', mapImagePath)}
+                             onError={(e) => console.error('[OBS] Image failed to load:', mapImagePath, e)}
+                           />
+                         ) : (
+                           <div className="text-4xl font-bold text-gray-500">?</div>
+                         )}
+                       </div>
+                     )}
+                   </div>
+                 );
+               })}
+               
+               {/* 最右邊的額外方塊 */}
+               <div className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center">
+                 <div className="h-24 flex flex-col justify-center items-center">
+                   <div className="text-[10px] font-semibold text-gray-300 text-center mb-1 leading-tight">
+                     額外
+                   </div>
+                   <div className="text-2xl font-bold text-white">
+                     -
+                   </div>
+                 </div>
+                 
+                 <div className="w-full h-px bg-gray-600"></div>
+                 
+                 <div className="h-24 flex flex-col justify-center items-center">
+                   <div className="text-[10px] font-semibold text-gray-300 text-center mb-1 leading-tight">
+                     額外
+                   </div>
+                   <div className="text-2xl font-bold text-white">
+                     -
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
         </div>
       </div>
     </div>

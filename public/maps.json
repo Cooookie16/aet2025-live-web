@@ -1,53 +1,56 @@
 [
   {
-    "mode": "控制 Control",
+    "mode": "寶石爭奪戰",
+    "mode_en": "gem_grab",
     "maps": [
-      "伊利歐斯 Ilios",
-      "灕江塔 Lijiang Tower",
-      "尼泊爾 Nepal",
-      "綠洲城 Oasis",
-      "釜山 Busan"
+      "戈壁陷阱 Deathcap Trap",
+      "咻咻作響 Double Swoosh",
+      "堅石礦井 Hard Rock Mine"
     ]
   },
   {
-    "mode": "佔領 Assault",
+    "mode": "亂鬥足球",
+    "mode_en": "brawl_ball",
     "maps": [
-      "花村 Hanamura",
-      "地平線月球基地 Horizon Lunar Colony",
-      "巴黎 Paris",
-      "神殿 Temple of Anubis",
-      "沃爾斯卡亞工業區 Volskaya Industries"
+      "精準射門 Pinhole Punt",
+      "綠蔭球場 Sneaky Fields",
+      "三重威脅 Triple Dribble"
     ]
   },
   {
-    "mode": "推車 Payload",
+    "mode": "金庫攻防戰",
+    "mode_en": "heist",
     "maps": [
-      "多拉多 Dorado",
-      "垃圾鎮 Junkertown",
-      "里亞爾托 Rialto",
-      "好萊塢 Hollywood",
-      "國王大道 King's Row",
-      "努巴尼 Numbani",
-      "直布羅陀 Gibraltar",
-      "66號公路 Route 66"
+      "遙遠的橋 Bridge Too Far",
+      "轟隆峽谷 Kaboom Canyon",
+      "安全區域 Safe Zone"
     ]
   },
   {
-    "mode": "混合 Hybrid",
+    "mode": "搶星大作戰",
+    "mode_en": "bounty",
     "maps": [
-      "暴雪世界 Blizzard World",
-      "艾興瓦爾德 Eichenwalde",
-      "努巴尼 Numbani",
-      "國王大道 King's Row",
-      "好萊塢 Hollywood"
+      "草叢迷蹤 Hideout",
+      "夾心蛋糕 Layer Cake",
+      "神秘流星 Shooting Star"
     ]
   },
   {
-    "mode": "其他 Other",
+    "mode": "據點搶奪戰",
+    "mode_en": "hot_zone",
     "maps": [
-      "自訂地圖 Custom Map",
-      "訓練場 Training Ground",
-      "競技場 Arena"
+      "甲蟲決鬥 Dueling Beetles",
+      "開門大吉 Open Business",
+      "灼熱火圈 Ring of Fire"
+    ]
+  },
+  {
+    "mode": "極限淘汰賽",
+    "mode_en": "knock_out",
+    "maps": [
+      "搖滾蓓爾 Belle's Rock",
+      "金臂峽谷 Goldarm Gulch",
+      "空礦地帶 Out in the Open"
     ]
   }
 ]

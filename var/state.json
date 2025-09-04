@@ -3,11 +3,11 @@
     "qf": [
       {
         "a": {
-          "team": "",
+          "team": "Angelic But Bullied Megu",
           "score": "n/a"
         },
         "b": {
-          "team": "",
+          "team": "秦始皇騎熊貓",
           "score": "n/a"
         }
       },
@@ -89,11 +89,11 @@
     "f": [
       {
         "a": {
-          "team": "Angelic But Bullied Megu",
+          "team": "秦始皇騎熊貓",
           "score": "n/a"
         },
         "b": {
-          "team": "Team BIG MOM",
+          "team": "bp不重要",
           "score": "n/a"
         }
       }
@@ -104,7 +104,7 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": "f",
+    "stage": "qf",
     "index": 0
   },
   "dashboard:currentDisplay": "map-score",
@@ -133,12 +133,16 @@
     ],
     "qf:0": [
       {
-        "mode": "",
-        "map": ""
+        "mode": "金庫攻防戰",
+        "map": "轟隆峽谷 Kaboom Canyon",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
       },
       {
-        "mode": "",
-        "map": ""
+        "mode": "金庫攻防戰",
+        "map": "安全區域 Safe Zone",
+        "scoreA": "3",
+        "scoreB": "2"
       },
       {
         "mode": "",
@@ -177,8 +181,18 @@
     ],
     "f:0": [
       {
-        "mode": "",
-        "map": ""
+        "mode": "搶星大作戰",
+        "map": "",
+        "scoreA": "3",
+        "scoreB": "2"
+      },
+      {
+        "mode": "亂鬥足球",
+        "map": "三重威脅 Triple Dribble"
+      },
+      {
+        "mode": "據點搶奪戰",
+        "map": "灼熱火圈 Ring of Fire"
       },
       {
         "mode": "",
@@ -187,14 +201,70 @@
       {
         "mode": "",
         "map": ""
+      }
+    ],
+    "sf:0": [
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
       },
       {
         "mode": "",
-        "map": ""
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
       },
       {
         "mode": "",
-        "map": ""
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      }
+    ],
+    "lf:1": [
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
       }
     ]
   }
