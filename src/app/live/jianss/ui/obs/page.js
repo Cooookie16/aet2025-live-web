@@ -590,9 +590,9 @@ function OBSMapScoreDisplay({ data }) {
 
   // 檢查該盤是否已開始（有分數）
   const isRoundStarted = (map) => {
-    // 檢查是否有實際的分數（不是 'n/a' 且不是 undefined）
-    const hasScoreA = map.scoreA && map.scoreA !== 'n/a' && map.scoreA !== undefined;
-    const hasScoreB = map.scoreB && map.scoreB !== 'n/a' && map.scoreB !== undefined;
+    // 分數需為已填寫值：不可為 undefined/null/'n/a'/空字串
+    const hasScoreA = map.scoreA !== undefined && map.scoreA !== null && map.scoreA !== 'n/a' && map.scoreA !== '';
+    const hasScoreB = map.scoreB !== undefined && map.scoreB !== null && map.scoreB !== 'n/a' && map.scoreB !== '';
     const result = hasScoreA || hasScoreB;
     console.log('[OBS] isRoundStarted:', { 
       mapName: map.map, 
@@ -603,6 +603,68 @@ function OBSMapScoreDisplay({ data }) {
       result 
     });
     return result;
+  };
+
+  // 從 mapsData 依地圖中文+英文名稱尋找所屬模式
+  const findModeByMapName = (mapName) => {
+    if (!mapName || !Array.isArray(mapsData) || mapsData.length === 0) return { modeZh: null, modeEn: null };
+    for (const entry of mapsData) {
+      if (Array.isArray(entry.maps) && entry.maps.includes(mapName)) {
+        return { modeZh: entry.mode || null, modeEn: entry.mode_en || null };
+      }
+    }
+    return { modeZh: null, modeEn: null };
+  };
+
+  // 由 map 物件推導目前模式（若 map.mode 或 map.mode_en 缺失，改以地圖名稱反推）
+  const getModeInfo = (map) => {
+    const modeZh = map?.mode || null;
+    const modeEn = map?.mode_en || null;
+    if (modeZh && modeEn) return { modeZh, modeEn };
+
+    // 先用地圖名稱反推
+    const byMap = findModeByMapName(map?.map);
+    if (byMap.modeZh || byMap.modeEn) return byMap;
+
+    // 再以 mapsData 的中文模式對照英文
+    if (modeZh && Array.isArray(mapsData)) {
+      const hit = mapsData.find(e => e.mode === modeZh);
+      if (hit) return { modeZh: hit.mode || modeZh, modeEn: hit.mode_en || null };
+    }
+    return { modeZh: modeZh || null, modeEn: modeEn || null };
+  };
+
+  // 依 mode_en 取得 icon 路徑
+  const getModeIconPathByEn = (modeEn) => {
+    if (!modeEn) return null;
+    return `/icons/${modeEn}.png`;
+  };
+
+  // 根據目前階段取得標籤（八強/四強/遺材賽/冠亞賽）
+  const getStageLabel = () => {
+    const stage = currentBroadcast?.stage;
+    if (!stage) return '';
+    const mapStageToLabel = {
+      qf: '八強',
+      sf: '四強',
+      lf: '遺材賽',
+      f: '冠亞賽',
+    };
+    return mapStageToLabel[stage] || '';
+  };
+
+  // 取得模式 icon 路徑（/public/icons）
+  const getModeIconPath = (modeZh) => {
+    if (!modeZh) return null;
+    const modeMap = {
+      '寶石爭奪戰': '/icons/gem_grab.png',
+      '亂鬥足球': '/icons/brawl_ball.png',
+      '金庫攻防戰': '/icons/heist.png',
+      '搶星大作戰': '/icons/bounty.png',
+      '據點搶奪戰': '/icons/hot_zone.png',
+      '極限淘汰賽': '/icons/knock_out.png',
+    };
+    return modeMap[modeZh] || null;
   };
 
   // 取得目前播報對戰的隊伍名稱
@@ -630,138 +692,163 @@ function OBSMapScoreDisplay({ data }) {
     const entry = mapScores?.[key];
     console.log('[OBS] getCurrentMatchMaps:', { stage, index, key, entry, mapScores });
     
+    // 僅在後端確實提供 5 筆資料時才回傳；否則回傳 [] 表示資料尚未就緒
     if (Array.isArray(entry) && entry.length === 5) return entry;
-    return Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' }));
+    return [];
   };
 
   const teams = getCurrentBroadcastTeams();
   const maps = getCurrentMatchMaps();
 
-  // 使用真實 maps；未設定地圖時不要回退到測試資料
-  console.log('[OBS] Final maps data:', { maps });
+  // 資料就緒判斷
+  const mapsReady = Array.isArray(maps) && maps.length === 5;
+  const iconsReady = mapsReady && Array.isArray(mapsData) && mapsData.length > 0;
 
   return (
     <div className="w-full h-full flex items-center justify-center p-2">
       <div className="bg-black rounded-lg shadow-lg p-4">
         {/* 重新設計的佈局：隊伍名稱在左側上下排列，地圖比分在右側 */}
-        <div className="flex gap-0">
-          {/* 左側：隊伍名稱上下排列 */}
-          <div className="flex flex-col gap-0">
-            {/* 隊伍 A */}
-            <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
-              <div className="text-sm font-bold text-white text-center leading-tight">{teams.a || '隊伍 A'}</div>
-              <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.a)}</div>
+        <div className="flex flex-col gap-0">
+          {/* 上方模式列：左側顯示階段標籤；右側顯示每盤模式 icon */}
+          <div className="flex gap-0">
+            {/* 左側階段標籤（同寬 24） */}
+            <div className="w-24 h-12 bg-black p-2 flex items-center justify-center">
+              <div className="text-sm font-bold text-white text-center leading-tight">
+                {getStageLabel() || ''}
+              </div>
             </div>
-            
-            {/* 隊伍 A 和 B 之間的分隔線 */}
-            <div className="w-24 h-px bg-gray-600"></div>
-            
-            {/* 隊伍 B */}
-            <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
-              <div className="text-sm font-bold text-white text-center leading-tight">{teams.b || '隊伍 B'}</div>
-              <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
+            {/* 中間垂直分隔線（與主表對齊） */}
+            <div className="w-px h-12 bg-gray-600"></div>
+            {/* 右側每盤模式 icon（5 欄 + 額外 1 欄） */}
+            <div className="flex gap-0">
+              {(mapsReady ? maps : Array.from({ length: 5 }).map(() => null)).map((map, index) => {
+                const { modeEn } = map ? getModeInfo(map) : { modeEn: null };
+                const iconPath = iconsReady && modeEn ? getModeIconPathByEn(modeEn) : null;
+                const showIcon = !!iconPath;
+                return (
+                  <div key={`mode-${index}`} className="w-24 h-12 bg-black p-2 flex items-center justify-center">
+                    {showIcon ? (
+                      <img src={iconPath} alt={modeEn || `第${index + 1}盤`} className="max-w-full max-h-full object-contain" />
+                    ) : (
+                      // 資料未就緒顯示空白；資料就緒但無 icon 顯示問號
+                      iconsReady && mapsReady ? (
+                        <div className="text-xl font-bold text-gray-500">?</div>
+                      ) : (
+                        <div className="w-full h-full" />
+                      )
+                    )}
+                  </div>
+                );
+              })}
+              {/* 額外欄位 */}
+              <div className="w-24 h-12 bg-black p-2 flex items-center justify-center">
+                <div className="text-sm font-bold text-white">-</div>
+              </div>
             </div>
           </div>
-          
-          {/* 中間垂直分隔線 */}
-          <div className="flex flex-col gap-0">
-            <div className="w-px h-24 bg-gray-600"></div>
-            <div className="w-px h-px bg-gray-600"></div>
-            <div className="w-px h-24 bg-gray-600"></div>
+
+          {/* 頂部列與主體之間的水平分隔線 */}
+          <div className="w-full h-px bg-gray-600"></div>
+
+          {/* 主體列（原本的左/中/右三區） */}
+          <div className="flex gap-0">
+            {/* 左側：隊伍名稱上下排列 */}
+            <div className="flex flex-col gap-0">
+              {/* 隊伍 A */}
+              <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
+                <div className="text-sm font-bold text-white text-center leading-tight">{teams.a || '隊伍 A'}</div>
+                <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.a)}</div>
+              </div>
+              
+              {/* 隊伍 A 和 B 之間的分隔線 */}
+              <div className="w-24 h-px bg-gray-600"></div>
+              
+              {/* 隊伍 B */}
+              <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
+                <div className="text-sm font-bold text-white text-center leading-tight">{teams.b || '隊伍 B'}</div>
+                <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
+              </div>
+            </div>
+            
+            {/* 中間垂直分隔線 */}
+            <div className="flex flex-col gap-0">
+              <div className="w-px h-24 bg-gray-600"></div>
+              <div className="w-px h-px bg-gray-600"></div>
+              <div className="w-px h-24 bg-gray-600"></div>
+            </div>
+            
+            {/* 右側：地圖比分 */}
+            <div className="flex flex-col gap-0">
+              {/* 地圖圖片區域 - 跨越上下兩個位置 */}
+              <div className="flex gap-0">
+                {(mapsReady ? maps : Array.from({ length: 5 }).map(() => null)).map((map, index) => {
+                  const roundStarted = map ? isRoundStarted(map) : false;
+                  const mapImagePath = map && !roundStarted ? getMapImagePath(map.map) : null;
+                  
+                  return (
+                    <div 
+                      key={`map-${index}`}
+                      className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center"
+                    >
+                      {roundStarted ? (
+                        // 已開始的盤：顯示分數佈局（移除模式名稱）
+                        <>
+                          {/* 隊伍 A 分數 */}
+                          <div className="h-24 flex flex-col justify-center items-center">
+                            <div className="text-2xl font-bold text-white">
+                              {map?.scoreA === 'n/a' || map?.scoreA === undefined || map?.scoreA === '' ? '-' : map?.scoreA}
+                            </div>
+                          </div>
+                          
+                          {/* 分隔線 */}
+                          <div className="w-full h-px bg-gray-600"></div>
+                          
+                          {/* 隊伍 B 分數 */}
+                          <div className="h-24 flex flex-col justify-center items-center">
+                            <div className="text-2xl font-bold text-white">
+                              {map?.scoreB === 'n/a' || map?.scoreB === undefined || map?.scoreB === '' ? '-' : map?.scoreB}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        // 未開始的盤：顯示地圖圖片或問號（資料未就緒則留空）
+                        <div className="w-full h-full flex items-center justify-center">
+                          {map ? (
+                            mapImagePath ? (
+                              <img 
+                                src={mapImagePath} 
+                                alt={map.map || `第${index + 1}盤`}
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              // 只有在資料就緒且確定未選地圖時顯示問號
+                              <div className="text-4xl font-bold text-gray-500">?</div>
+                            )
+                          ) : (
+                            // maps 尚未就緒：顯示空白
+                            <div className="w-full h-full" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                
+                {/* 最右邊的額外方塊 */}
+                <div className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center">
+                  <div className="h-24 flex flex-col justify-center items-center">
+                    <div className="text-2xl font-bold text-white">-</div>
+                  </div>
+                  
+                  <div className="w-full h-px bg-gray-600"></div>
+                  
+                  <div className="h-24 flex flex-col justify-center items-center">
+                    <div className="text-2xl font-bold text-white">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          
-                     {/* 右側：地圖比分 */}
-           <div className="flex flex-col gap-0">
-             {/* 地圖圖片區域 - 跨越上下兩個位置 */}
-             <div className="flex gap-0">
-               {maps.map((map, index) => {
-                 const roundStarted = isRoundStarted(map);
-                 const mapImagePath = getMapImagePath(map.map);
-                 
-                 console.log('[OBS] Map rendering:', { 
-                   index, 
-                   mapName: map.map, 
-                   roundStarted, 
-                   mapImagePath,
-                   scoreA: map.scoreA,
-                   scoreB: map.scoreB
-                 });
-                 
-                 return (
-                   <div 
-                     key={`map-${index}`}
-                     className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center"
-                   >
-                     {roundStarted ? (
-                       // 已開始的盤：顯示分數佈局
-                       <>
-                         {/* 隊伍 A 分數 */}
-                         <div className="h-24 flex flex-col justify-center items-center">
-                           <div className="text-[10px] font-semibold text-gray-300 text-center mb-1 leading-tight">
-                             {map.mode || `第${index + 1}盤`}
-                           </div>
-                           <div className="text-2xl font-bold text-white">
-                             {map.scoreA === 'n/a' ? '-' : map.scoreA}
-                           </div>
-                         </div>
-                         
-                         {/* 分隔線 */}
-                         <div className="w-full h-px bg-gray-600"></div>
-                         
-                         {/* 隊伍 B 分數 */}
-                         <div className="h-24 flex flex-col justify-center items-center">
-                           <div className="text-[10px] font-semibold text-gray-300 text-center mb-1 leading-tight">
-                             {map.mode || `第${index + 1}盤`}
-                           </div>
-                           <div className="text-2xl font-bold text-white">
-                             {map.scoreB === 'n/a' ? '-' : map.scoreB}
-                           </div>
-                         </div>
-                       </>
-                     ) : (
-                       // 未開始的盤：顯示地圖圖片或問號
-                       <div className="w-full h-full flex items-center justify-center">
-                         {mapImagePath ? (
-                           <img 
-                             src={mapImagePath} 
-                             alt={map.map || `第${index + 1}盤`}
-                             className="w-full h-full object-contain"
-                             onLoad={() => console.log('[OBS] Image loaded successfully:', mapImagePath)}
-                             onError={(e) => console.error('[OBS] Image failed to load:', mapImagePath, e)}
-                           />
-                         ) : (
-                           <div className="text-4xl font-bold text-gray-500">?</div>
-                         )}
-                       </div>
-                     )}
-                   </div>
-                 );
-               })}
-               
-               {/* 最右邊的額外方塊 */}
-               <div className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center">
-                 <div className="h-24 flex flex-col justify-center items-center">
-                   <div className="text-[10px] font-semibold text-gray-300 text-center mb-1 leading-tight">
-                     額外
-                   </div>
-                   <div className="text-2xl font-bold text-white">
-                     -
-                   </div>
-                 </div>
-                 
-                 <div className="w-full h-px bg-gray-600"></div>
-                 
-                 <div className="h-24 flex flex-col justify-center items-center">
-                   <div className="text-[10px] font-semibold text-gray-300 text-center mb-1 leading-tight">
-                     額外
-                   </div>
-                   <div className="text-2xl font-bold text-white">
-                     -
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
         </div>
       </div>
     </div>
