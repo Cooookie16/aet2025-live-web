@@ -8,36 +8,36 @@
         },
         "b": {
           "team": "秦始皇騎熊貓",
-          "score": "2"
-        }
-      },
-      {
-        "a": {
-          "team": "",
-          "score": "0"
-        },
-        "b": {
-          "team": "",
           "score": "0"
         }
       },
       {
         "a": {
-          "team": "",
+          "team": "Team BIG MOM",
+          "score": "0"
+        },
+        "b": {
+          "team": "123 (1)",
+          "score": "0"
+        }
+      },
+      {
+        "a": {
+          "team": "boogiebandit",
           "score": "n/a"
         },
         "b": {
-          "team": "",
+          "team": "bp不重要",
           "score": "n/a"
         }
       },
       {
         "a": {
-          "team": "",
+          "team": "Tom and Jerry",
           "score": "n/a"
         },
         "b": {
-          "team": "",
+          "team": "HuyaTang",
           "score": "n/a"
         }
       }
@@ -46,11 +46,11 @@
       {
         "a": {
           "team": "",
-          "score": "n/a"
+          "score": "0"
         },
         "b": {
           "team": "",
-          "score": "n/a"
+          "score": "0"
         }
       },
       {
@@ -78,11 +78,11 @@
       {
         "a": {
           "team": "",
-          "score": "0"
+          "score": "n/a"
         },
         "b": {
           "team": "",
-          "score": "0"
+          "score": "n/a"
         }
       }
     ],
@@ -104,11 +104,33 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": "qf",
+    "stage": "sf",
     "index": 0
   },
-  "dashboard:currentDisplay": "map-score",
+  "dashboard:currentDisplay": "bracket",
   "dashboard:mapScores": {
+    "qf:0": [
+      {
+        "mode": "據點搶奪戰",
+        "map": "灼熱火圈 Ring of Fire"
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      }
+    ],
     "qf:1": [
       {
         "mode": "",
@@ -141,39 +163,7 @@
         "scoreB": "n/a"
       }
     ],
-    "qf:0": [
-      {
-        "mode": "寶石爭奪戰",
-        "map": "堅石礦井 Hard Rock Mine",
-        "scoreA": "1",
-        "scoreB": "2"
-      },
-      {
-        "mode": "亂鬥足球",
-        "map": "三重威脅 Triple Dribble",
-        "scoreA": "1",
-        "scoreB": "2"
-      },
-      {
-        "mode": "金庫攻防戰",
-        "map": "轟隆峽谷 Kaboom Canyon",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "據點搶奪戰",
-        "map": "灼熱火圈 Ring of Fire",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      },
-      {
-        "mode": "極限淘汰賽",
-        "map": "搖滾蓓爾 Belle's Rock",
-        "scoreA": "n/a",
-        "scoreB": "n/a"
-      }
-    ],
-    "lf:1": [
+    "sf:0": [
       {
         "mode": "",
         "map": "",

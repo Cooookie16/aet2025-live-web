@@ -154,6 +154,13 @@ export default function OBSLiveUI() {
                   ...prev,
                   mapScores: latestMessage.data.mapScores
                 }));
+                // 如果整體 mapScores 被重置為空物件，清空本地快取，避免殘留顯示
+                try {
+                  const isEmpty = latestMessage && latestMessage.data && latestMessage.data.mapScores && Object.keys(latestMessage.data.mapScores).length === 0;
+                  if (isEmpty) {
+                    lastMapsCacheRef.current = {};
+                  }
+                } catch {}
               }
             } else if (latestMessage.type === 'custom-message') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
@@ -793,8 +800,8 @@ function OBSMapScoreDisplay({ data }) {
       lastMapsCacheRef.current[key] = padded.slice(0, 5);
       return lastMapsCacheRef.current[key];
     }
-    // 無新資料 → 回傳該對戰鍵值的快取，避免切換或重整顯示上一場
-    return lastMapsCacheRef.current[key] || [];
+    // 無新資料 → 不再回傳快取，確保 RESET ALL 後能立即清空顯示
+    return [];
   };
 
   const teams = getCurrentBroadcastTeams();
