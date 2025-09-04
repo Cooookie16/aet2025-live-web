@@ -4,11 +4,11 @@
       {
         "a": {
           "team": "Angelic But Bullied Megu",
-          "score": "n/a"
+          "score": "2"
         },
         "b": {
           "team": "秦始皇騎熊貓",
-          "score": "n/a"
+          "score": "3"
         }
       },
       {
@@ -104,39 +104,103 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": "sf",
+    "stage": "qf",
     "index": 0
   },
   "dashboard:currentDisplay": "map-score",
   "dashboard:mapScores": {
-    "sf:0": [
+    "qf:0": [
       {
-        "mode": "極限淘汰賽",
-        "map": "空礦地帶 Out in the Open",
+        "mode": "寶石爭奪戰",
+        "map": "堅石礦井 Hard Rock Mine",
         "scoreA": "2",
         "scoreB": "1"
       },
       {
-        "mode": "據點搶奪戰",
-        "map": "灼熱火圈 Ring of Fire",
+        "mode": "亂鬥足球",
+        "map": "綠蔭球場 Sneaky Fields",
         "scoreA": "1",
         "scoreB": "2"
       },
       {
-        "mode": "極限淘汰賽",
-        "map": "金臂峽谷 Goldarm Gulch",
+        "mode": "金庫攻防戰",
+        "map": "遙遠的橋 Bridge Too Far",
+        "scoreA": "1",
+        "scoreB": "2"
+      },
+      {
+        "mode": "搶星大作戰",
+        "map": "神秘流星 Shooting Star",
         "scoreA": "2",
         "scoreB": "1"
       },
       {
         "mode": "據點搶奪戰",
-        "map": "灼熱火圈 Ring of Fire",
+        "map": "開門大吉 Open Business",
+        "scoreA": "2",
+        "scoreB": "1"
+      }
+    ],
+    "qf:1": [
+      {
+        "mode": "",
+        "map": "",
         "scoreA": "n/a",
         "scoreB": "n/a"
       },
       {
-        "mode": "寶石爭奪戰",
-        "map": "咻咻作響 Double Swoosh",
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      }
+    ],
+    "qf:2": [
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "n/a",
+        "scoreB": "n/a"
+      },
+      {
+        "mode": "",
+        "map": "",
         "scoreA": "n/a",
         "scoreB": "n/a"
       }

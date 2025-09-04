@@ -5,6 +5,16 @@ import React from 'react';
 import Image from 'next/image';
 import './obs.css';
 
+const OBS_DEBUG = false; // 關閉 OBS 端除錯輸出
+if (typeof window !== 'undefined' && !OBS_DEBUG) {
+  try {
+    const noop = () => {};
+    console.log = noop;
+    console.warn = noop;
+    console.error = noop;
+  } catch {}
+}
+
 export default function OBSLiveUI() {
   const [currentDisplay, setCurrentDisplay] = useState(null);
   const [displayData, setDisplayData] = useState({});
@@ -22,19 +32,19 @@ export default function OBSLiveUI() {
   useEffect(() => { currentDisplayRef.current = currentDisplay; }, [currentDisplay]);
 
   useEffect(() => {
-    console.log('[OBS] init: start load /api/state');
+    if (OBS_DEBUG) console.log('[OBS] init: start load /api/state');
     // 啟動時從後端讀取當前狀態，避免在沒有收到即時事件前畫面無法同步
     (async () => {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
-        console.log('[OBS] /api/state status:', res.status);
+        if (OBS_DEBUG) console.log('[OBS] /api/state status:', res.status);
         if (res.ok) {
           let json = null;
           try { json = await res.json(); } catch { json = null; }
           const d = json?.data || {};
-          console.log('[OBS] /api/state data:', d);
+          if (OBS_DEBUG) console.log('[OBS] /api/state data:', d);
           if (typeof d?.currentDisplay === 'string' && d.currentDisplay) {
-            console.log('[OBS] set currentDisplay from state:', d.currentDisplay);
+            if (OBS_DEBUG) console.log('[OBS] set currentDisplay from state:', d.currentDisplay);
             setCurrentDisplay(d.currentDisplay);
           }
           if (d?.bracket) {
@@ -66,7 +76,7 @@ export default function OBSLiveUI() {
         const d = json?.data || {};
         const srv = typeof d?.currentDisplay === 'string' ? d.currentDisplay : null;
         if (srv && srv !== currentDisplayRef.current) {
-          console.log('[OBS] POLL sync display ->', srv, '(was:', currentDisplayRef.current, ')');
+          if (OBS_DEBUG) console.log('[OBS] POLL sync display ->', srv, '(was:', currentDisplayRef.current, ')');
           setCurrentDisplay(srv);
         }
         if (d?.bracket) {
@@ -84,12 +94,12 @@ export default function OBSLiveUI() {
           try { esRef.current.close(); } catch {}
           esRef.current = null;
         }
-        console.log('[OBS] SSE connect -> /api/events');
+        if (OBS_DEBUG) console.log('[OBS] SSE connect -> /api/events');
         const es = new EventSource('/api/events');
         esRef.current = es;
 
         es.onopen = () => {
-          console.log('[OBS] SSE onopen');
+          if (OBS_DEBUG) console.log('[OBS] SSE onopen');
           setIsConnected(true);
           retryAttemptRef.current = 0; // 重置退避
         };
@@ -100,7 +110,7 @@ export default function OBSLiveUI() {
           esRef.current = null;
           // 指數退避（上限 30s）
           const nextDelay = Math.min(30000, 1000 * Math.pow(2, retryAttemptRef.current || 0));
-          console.log('[OBS] retry in', nextDelay, 'ms, attempt', retryAttemptRef.current);
+          if (OBS_DEBUG) console.log('[OBS] retry in', nextDelay, 'ms, attempt', retryAttemptRef.current);
           retryAttemptRef.current = (retryAttemptRef.current || 0) + 1;
           if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
           retryTimerRef.current = setTimeout(() => connect(), nextDelay);
@@ -108,13 +118,13 @@ export default function OBSLiveUI() {
         es.onmessage = (evt) => {
           try {
             const latestMessage = JSON.parse(evt.data);
-            console.log('[OBS] SSE message:', latestMessage);
+            if (OBS_DEBUG) console.log('[OBS] SSE message:', latestMessage);
             if (!latestMessage) return;
             if (latestMessage.timestamp && latestMessage.timestamp <= (lastUpdateRef.current || 0)) return;
 
             if (latestMessage.type === 'display-change') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] display-change ->', latestMessage.data?.displayId, 'ts:', lastUpdateRef.current);
+              if (OBS_DEBUG) console.log('[OBS] display-change ->', latestMessage.data?.displayId, 'ts:', lastUpdateRef.current);
               setCurrentDisplay(latestMessage.data.displayId);
               setDisplayData({
                 ...latestMessage.data,
@@ -122,7 +132,7 @@ export default function OBSLiveUI() {
               });
             } else if (latestMessage.type === 'bracket-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] bracket-update');
+              if (OBS_DEBUG) console.log('[OBS] bracket-update');
               if (latestMessage?.data?.bracket) {
                 setBracket(latestMessage.data.bracket);
               }
@@ -133,7 +143,7 @@ export default function OBSLiveUI() {
               }
             } else if (latestMessage.type === 'map-score-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] map-score-update');
+              if (OBS_DEBUG) console.log('[OBS] map-score-update');
               if (latestMessage?.data?.mapScores) {
                 setDisplayData(prev => ({
                   ...prev,
@@ -142,7 +152,7 @@ export default function OBSLiveUI() {
               }
             } else if (latestMessage.type === 'custom-message') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] custom-message ->', latestMessage.data);
+              if (OBS_DEBUG) console.log('[OBS] custom-message ->', latestMessage.data);
               setDisplayData(prev => ({
                 ...prev,
                 customMessage: latestMessage.data.message,
@@ -165,20 +175,20 @@ export default function OBSLiveUI() {
 
     // 當頁面由隱藏轉為顯示、或網路回復時，嘗試重連
     const onVisible = () => {
-      console.log('[OBS] visibilitychange:', document.visibilityState);
+      if (OBS_DEBUG) console.log('[OBS] visibilitychange:', document.visibilityState);
       if (document.visibilityState === 'visible' && !esRef.current) {
         connect();
       }
     };
     const onOnline = () => {
-      console.log('[OBS] online');
+      if (OBS_DEBUG) console.log('[OBS] online');
       if (!esRef.current) connect();
     };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('online', onOnline);
 
     return () => {
-      console.log('[OBS] cleanup');
+      if (OBS_DEBUG) console.log('[OBS] cleanup');
       try { document.removeEventListener('visibilitychange', onVisible); } catch {}
       try { window.removeEventListener('online', onOnline); } catch {}
       try { clearInterval(poll); } catch {}
@@ -192,12 +202,12 @@ export default function OBSLiveUI() {
 
   // 顯示介面變更偵錯
   useEffect(() => {
-    console.log('[OBS] render display ->', currentDisplay);
+    if (OBS_DEBUG) console.log('[OBS] render display ->', currentDisplay);
   }, [currentDisplay]);
 
   // 顯示資料變更偵錯
   useEffect(() => {
-    console.log('[OBS] displayData updated ->', displayData);
+    if (OBS_DEBUG) console.log('[OBS] displayData updated ->', displayData);
   }, [displayData]);
 
   // 渲染不同的顯示介面
@@ -593,7 +603,7 @@ function OBSMapScoreDisplay({ data }) {
   // 根據地圖名稱取得地圖圖片路徑
   const getMapImagePath = (mapName) => {
     if (!mapName) {
-      console.log('[OBS] getMapImagePath: mapName is null/empty');
+      if (OBS_DEBUG) console.log('[OBS] getMapImagePath: mapName is null/empty');
       return null;
     }
     
@@ -631,7 +641,7 @@ function OBSMapScoreDisplay({ data }) {
     };
     
     const imagePath = mapImageMap[mapName];
-    console.log('[OBS] getMapImagePath:', { mapName, imagePath, found: !!imagePath });
+    if (OBS_DEBUG) console.log('[OBS] getMapImagePath:', { mapName, imagePath, found: !!imagePath });
     return imagePath || null;
   };
 
@@ -641,7 +651,7 @@ function OBSMapScoreDisplay({ data }) {
     const hasScoreA = map.scoreA !== undefined && map.scoreA !== null && map.scoreA !== 'n/a' && map.scoreA !== '';
     const hasScoreB = map.scoreB !== undefined && map.scoreB !== null && map.scoreB !== 'n/a' && map.scoreB !== '';
     const result = hasScoreA || hasScoreB;
-    console.log('[OBS] isRoundStarted:', { 
+    if (OBS_DEBUG) console.log('[OBS] isRoundStarted:', { 
       mapName: map.map, 
       scoreA: map.scoreA, 
       scoreB: map.scoreB, 
@@ -737,7 +747,7 @@ function OBSMapScoreDisplay({ data }) {
     
     const key = `${stage}:${index}`;
     const entry = mapScores?.[key];
-    console.log('[OBS] getCurrentMatchMaps:', { stage, index, key, entry, mapScores });
+    if (OBS_DEBUG) console.log('[OBS] getCurrentMatchMaps:', { stage, index, key, entry, mapScores });
     
     // 1) 優先使用 overrideMaps（剛抓回的最新值）
     if (Array.isArray(overrideMaps) && overrideMaps.length === 5) {
