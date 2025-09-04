@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import './obs.css';
 
@@ -41,6 +42,12 @@ export default function OBSLiveUI() {
           }
           if (d?.currentBroadcast) {
             setCurrentBroadcast(d.currentBroadcast);
+          }
+          if (d?.mapScores) {
+            setDisplayData(prev => ({
+              ...prev,
+              mapScores: d.mapScores
+            }));
           }
         }
       } catch (e) {
@@ -124,6 +131,15 @@ export default function OBSLiveUI() {
               if (latestMessage?.data?.currentBroadcast) {
                 setCurrentBroadcast(latestMessage.data.currentBroadcast);
               }
+            } else if (latestMessage.type === 'map-score-update') {
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              console.log('[OBS] map-score-update');
+              if (latestMessage?.data?.mapScores) {
+                setDisplayData(prev => ({
+                  ...prev,
+                  mapScores: latestMessage.data.mapScores
+                }));
+              }
             } else if (latestMessage.type === 'custom-message') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
               console.log('[OBS] custom-message ->', latestMessage.data);
@@ -195,7 +211,7 @@ export default function OBSLiveUI() {
       case 'banpick':
         return <OBSBanpickDisplay data={displayData} />;
       case 'map-score':
-        return <OBSMapScoreDisplay data={displayData} />;
+        return <OBSMapScoreDisplay data={{ currentBroadcast, mapScores: displayData.mapScores, bracket }} />;
       default:
         return null;
     }
@@ -234,37 +250,68 @@ function OBSWelcomeDisplay({ data }) {
 function OBSBracketDisplay({ data }) {
   const bracket = data?.bracket;
   const currentBroadcast = data?.currentBroadcast;
+  const [teamsData, setTeamsData] = useState([]);
+  
+  // 載入隊伍資料
+  useEffect(() => {
+    const loadTeams = async () => {
+      try {
+        const res = await fetch('/teams.json', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setTeamsData(data);
+        }
+      } catch (e) {
+        console.warn('載入隊伍資料失敗:', e);
+      }
+    };
+    loadTeams();
+  }, []);
+
+  // 根據隊伍名稱取得選手陣列
+  const getTeamMembers = (teamName) => {
+    const team = teamsData.find(t => t.name === teamName);
+    return team ? team.members.join(', ') : '選手A1, 選手A2';
+  };
+
   const qf = bracket?.qf || Array.from({ length: 4 }).map(() => ({ a: { team: '隊伍 A', score: 'n/a' }, b: { team: '隊伍 B', score: 'n/a' } }));
   const sf = bracket?.sf || Array.from({ length: 2 }).map(() => ({ a: { team: '勝者', score: 'n/a' }, b: { team: '勝者', score: 'n/a' } }));
+  const lf = bracket?.lf || Array.from({ length: 2 }).map(() => ({ a: { team: '敗者', score: 'n/a' }, b: { team: '敗者', score: 'n/a' } }));
   const f = bracket?.f || [{ a: { team: '勝者', score: 'n/a' }, b: { team: '勝者', score: 'n/a' } }];
   const champ = bracket?.champ || { team: '最終勝者', score: 'n/a' };
   const isLive = (stage, idx) => currentBroadcast && currentBroadcast.stage === stage && currentBroadcast.index === idx;
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-3">
-      <div className="w-full max-w-[760px]">
-        <h2 className="text-2xl font-bold mb-4 text-white">目前賽程 Bracket</h2>
+    <div className="w-full h-full flex items-center justify-center p-2">
+      <div className="w-full max-w-[780px]">
+        <h2 className="text-xl font-bold mb-2 text-pink-300">目前賽程 Bracket</h2>
         <div className="relative w-full overflow-hidden">
-          <div className="w-full grid grid-cols-4 gap-3">
+          <div className="w-full grid grid-cols-4 gap-2">
             {/* 八強（4 場） */}
-            <div className="space-y-6 flex flex-col justify-center">
+            <div className="space-y-3 flex flex-col justify-center">
               {qf.map((m, i) => (
                 <div key={`qf-${i}`} className="relative">
                   {/* 往四強的水平連接線 */}
-                  <div className="hidden md:block absolute right-[-8px] top-1/2 w-2 border-t border-white"></div>
-                  <div className={`relative rounded-xl bg-white p-2 min-w-0 ${isLive('qf', i) ? 'border-2 border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.3)]' : 'border border-white'}`}>
+                  <div className="hidden md:block absolute right-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
+                  <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('qf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
                     {isLive('qf', i) ? (
-                      <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">LIVE</div>
+                      <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
                     ) : null}
-                    <div className="text-[10px] leading-none text-black mb-2 text-left">八強 {i + 1}</div>
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-emerald-50">
-                        <span className="text-black text-sm truncate">{m?.a?.team || '隊伍 A'}</span>
-                        <span className="text-emerald-700 font-extrabold text-lg ml-2">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                    <div className="text-[10px] leading-none text-black mb-1 text-left">八強 {i + 1}</div>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                        <div className="flex flex-col">
+                          <span className="text-black text-xs truncate">{m?.a?.team || '隊伍 A'}</span>
+                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                        </div>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
                       </div>
-                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-sky-50">
-                        <span className="text-black text-sm truncate">{m?.b?.team || '隊伍 B'}</span>
-                        <span className="text-sky-700 font-extrabold text-lg ml-2">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                      <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                        <div className="flex flex-col">
+                          <span className="text-black text-xs truncate">{m?.b?.team || '隊伍 B'}</span>
+                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                        </div>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
                       </div>
                     </div>
                   </div>
@@ -272,51 +319,129 @@ function OBSBracketDisplay({ data }) {
               ))}
             </div>
 
-            {/* 四強（2 場） */}
-            <div className="space-y-6 flex flex-col justify-center">
-              {sf.map((m, i) => (
-                <div key={`sf-${i}`} className="relative">
-                  {/* 左右匯入/導向的水平連接線 */}
-                  <div className="hidden md:block absolute left-[-8px] top-1/2 w-2 border-t border-white"></div>
-                  <div className="hidden md:block absolute right-[-8px] top-1/2 w-2 border-t border-white"></div>
-                  <div className={`relative rounded-xl bg-white p-2 min-w-0 ${isLive('sf', i) ? 'border-2 border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.3)]' : 'border border-white'}`}>
-                    {isLive('sf', i) ? (
-                      <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">LIVE</div>
-                    ) : null}
-                    <div className="text-[10px] leading-none text-black mb-2 text-left">四強 {i + 1}</div>
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-emerald-50">
-                        <span className="text-black text-sm truncate">{m?.a?.team || '勝者'}</span>
-                        <span className="text-emerald-700 font-extrabold text-lg ml-2">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
-                      </div>
-                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-sky-50">
-                        <span className="text-black text-sm truncate">{m?.b?.team || '勝者'}</span>
-                        <span className="text-sky-700 font-extrabold text-lg ml-2">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+            {/* 四強與遺材賽（同欄位，四強往右推） */}
+            <div className="space-y-3 flex flex-col justify-center">
+              {/* 上方遺材賽 */}
+              <div className="space-y-3">
+                {lf.slice(0, 1).map((m, i) => (
+                  <div key={`lf-top-${i}`} className="relative">
+                    <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
+                    <div className="hidden md:block absolute bottom-[-6px] left-1/2 w-0.5 h-1.5 bg-pink-300"></div>
+                    <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('lf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
+                      {isLive('lf', i) ? (
+                        <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
+                      ) : null}
+                      <div className="text-[10px] leading-none text-black mb-1 text-left">遺材賽 {i + 1}</div>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                          <div className="flex flex-col">
+                            <span className="text-black text-xs truncate">{m?.a?.team || '敗者'}</span>
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                          </div>
+                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                          <div className="flex flex-col">
+                            <span className="text-black text-xs truncate">{m?.b?.team || '敗者'}</span>
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                          </div>
+                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              {/* 四強（往右推） */}
+              <div className="space-y-3 ml-4">
+                {sf.map((m, i) => (
+                  <div key={`sf-${i}`} className="relative">
+                    <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
+                    <div className="hidden md:block absolute right-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
+                    <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('sf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
+                      {isLive('sf', i) ? (
+                        <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
+                      ) : null}
+                      <div className="text-[10px] leading-none text-black mb-1 text-left">四強 {i + 1}</div>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                          <div className="flex flex-col">
+                            <span className="text-black text-xs truncate">{m?.a?.team || '勝者'}</span>
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                          </div>
+                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                          <div className="flex flex-col">
+                            <span className="text-black text-xs truncate">{m?.b?.team || '勝者'}</span>
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                          </div>
+                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 下方遺材賽 */}
+              <div className="space-y-3">
+                {lf.slice(1, 2).map((m, i) => (
+                  <div key={`lf-bottom-${i}`} className="relative">
+                    <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
+                    <div className="hidden md:block absolute top-[-6px] left-1/2 w-0.5 h-1.5 bg-pink-300"></div>
+                    <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('lf', i + 1) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
+                      {isLive('lf', i + 1) ? (
+                        <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
+                      ) : null}
+                      <div className="text-[10px] leading-none text-black mb-1 text-left">遺材賽 {i + 2}</div>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                          <div className="flex flex-col">
+                            <span className="text-black text-xs truncate">{m?.a?.team || '敗者'}</span>
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                          </div>
+                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                          <div className="flex flex-col">
+                            <span className="text-black text-xs truncate">{m?.b?.team || '敗者'}</span>
+                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                          </div>
+                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* 冠亞（1 場） */}
             <div className="flex flex-col justify-center">
               {f.map((m, i) => (
                 <div key={`f-${i}`} className="relative">
-                  <div className="hidden md:block absolute left-[-8px] top-1/2 w-2 border-t border-white"></div>
-                  <div className={`relative rounded-xl bg-white p-2 min-w-0 ${isLive('f', i) ? 'border-2 border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.3)]' : 'border border-white'}`}>
+                  <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
+                  <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('f', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
                     {isLive('f', i) ? (
-                      <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">LIVE</div>
+                      <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
                     ) : null}
-                    <div className="text-[10px] leading-none text-black mb-2 text-left">冠亞賽</div>
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-emerald-50">
-                        <span className="text-black text-sm truncate">{m?.a?.team || '勝者'}</span>
-                        <span className="text-emerald-700 font-extrabold text-lg ml-2">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
+                    <div className="text-[10px] leading-none text-black mb-1 text-left">冠亞賽</div>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                        <div className="flex flex-col">
+                          <span className="text-black text-xs truncate">{m?.a?.team || '勝者'}</span>
+                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
+                        </div>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== 'n/a') ? m.a.score : '-'}</span>
                       </div>
-                      <div className="flex items-center justify-between rounded-md px-2 py-1 bg-sky-50">
-                        <span className="text-black text-sm truncate">{m?.b?.team || '勝者'}</span>
-                        <span className="text-sky-700 font-extrabold text-lg ml-2">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
+                      <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
+                        <div className="flex flex-col">
+                          <span className="text-black text-xs truncate">{m?.b?.team || '勝者'}</span>
+                          <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
+                        </div>
+                        <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== 'n/a') ? m.b.score : '-'}</span>
                       </div>
                     </div>
                   </div>
@@ -327,10 +452,13 @@ function OBSBracketDisplay({ data }) {
             {/* 冠軍（單一） */}
             <div className="flex flex-col justify-center">
               <div className="relative">
-                <div className="hidden md:block absolute left-[-18px] top-1/2 w-5 border-t border-amber-300"></div>
-                <div className="rounded-xl bg-amber-300 border border-amber-300 p-3 min-w-[160px]">
-                  <div className="text-xs font-semibold text-amber-900 mb-1">冠軍</div>
-                  <div className="rounded-md bg-amber-200 px-2 py-2 text-amber-900 text-sm">{champ?.team || '最終勝者'}{champ?.score && champ.score !== 'n/a' ? `（${champ.score}）` : ''}</div>
+                <div className="hidden md:block absolute left-[-12px] top-1/2 w-3 border-t border-pink-400"></div>
+                <div className="rounded-lg bg-pink-400 border border-pink-400 p-2 min-w-[140px]">
+                  <div className="text-xs font-semibold text-pink-900 mb-1">冠軍</div>
+                  <div className="rounded bg-pink-300 px-1.5 py-1 text-pink-900 text-xs">
+                    <div>{champ?.team || '最終勝者'}</div>
+                    <div className="text-[10px]">{getTeamMembers(champ?.team)}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -371,28 +499,110 @@ function OBSBanpickDisplay({ data }) {
 
 // OBS 地圖與比數顯示
 function OBSMapScoreDisplay({ data }) {
-  const mapName = data?.map?.name || 'Map 1';
-  const scoreA = data?.score?.a ?? 0;
-  const scoreB = data?.score?.b ?? 0;
-  const teamA = data?.teams?.a || 'Team A';
-  const teamB = data?.teams?.b || 'Team B';
-  // 以 7 寬 x 2 高的方塊格狀呈現（800x600 優化）
-  return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-[760px] grid grid-cols-7 grid-rows-2 gap-2">
-        {/* 第一列：依序放入隊伍 A、分數 A、地圖、分隔、地圖、分數 B、隊伍 B */}
-        <div className="rounded-lg border border-white bg-white flex items-center justify-center px-2 text-base text-black truncate h-12">{teamA}</div>
-        <div className="rounded-lg border border-emerald-500 bg-white flex items-center justify-center text-2xl font-extrabold text-emerald-600 h-12">{scoreA}</div>
-        <div className="rounded-lg border border-white bg-white flex items-center justify-center text-sm text-black truncate h-12">{mapName}</div>
-        <div className="rounded-lg border border-white bg-white flex items-center justify-center text-xl text-black h-12">VS</div>
-        <div className="rounded-lg border border-white bg-white flex items-center justify-center text-sm text-black truncate h-12">{mapName}</div>
-        <div className="rounded-lg border border-sky-500 bg-white flex items-center justify-center text-2xl font-extrabold text-sky-600 h-12">{scoreB}</div>
-        <div className="rounded-lg border border-white bg-white flex items-center justify-center px-2 text-base text-black truncate h-12">{teamB}</div>
+  const currentBroadcast = data?.currentBroadcast;
+  const mapScores = data?.mapScores;
+  const bracket = data?.bracket;
+  const [teamsData, setTeamsData] = useState([]);
+  
+  // 載入隊伍資料
+  useEffect(() => {
+    const loadTeams = async () => {
+      try {
+        const res = await fetch('/teams.json', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setTeamsData(data);
+        }
+      } catch (e) {
+        console.warn('載入隊伍資料失敗:', e);
+      }
+    };
+    loadTeams();
+  }, []);
 
-        {/* 第二列：保留為資訊輔助或未來擴充（目前僅顯示空白框以符合 7x2） */}
-        {Array.from({ length: 7 }).map((_, idx) => (
-          <div key={`f2-${idx}`} className="rounded-lg border border-white bg-white h-8" />
-        ))}
+  // 根據隊伍名稱取得選手陣列
+  const getTeamMembers = (teamName) => {
+    const team = teamsData.find(t => t.name === teamName);
+    return team ? team.members.join(', ') : '選手A1, 選手A2';
+  };
+
+  // 取得目前播報對戰的隊伍名稱
+  const getCurrentBroadcastTeams = () => {
+    const { stage, index } = currentBroadcast || {};
+    if (!stage && stage !== 0) {
+      return { a: '', b: '' };
+    }
+    const list = bracket?.[stage];
+    if (!list || typeof index !== 'number' || !list[index]) {
+      return { a: '', b: '' };
+    }
+    const a = list[index]?.a?.team || '';
+    const b = list[index]?.b?.team || '';
+    return { a, b };
+  };
+
+  // 取得目前播報對戰的地圖資料
+  const getCurrentMatchMaps = () => {
+    const { stage, index } = currentBroadcast || {};
+    if (!stage && stage !== 0) return [];
+    if (typeof index !== 'number') return [];
+    
+    const key = `${stage}:${index}`;
+    const entry = mapScores?.[key];
+    if (Array.isArray(entry) && entry.length === 5) return entry;
+    return Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' }));
+  };
+
+  const teams = getCurrentBroadcastTeams();
+  const maps = getCurrentMatchMaps();
+
+  return (
+    <div className="w-full h-full flex items-center justify-center p-2">
+      <div className="bg-white rounded-lg shadow-lg p-4">
+        {/* 7x2 方塊陣列 - 左邊隊伍名稱，右邊是該隊伍在各張地圖的比分 */}
+        <div className="grid grid-cols-7 grid-rows-2 gap-2">
+          {/* A1 - 隊伍 A 名稱 */}
+          <div className="w-20 h-20 border border-gray-300 p-2 flex flex-col justify-center items-center bg-blue-50 rounded">
+            <div className="text-xs font-bold text-blue-800 text-center leading-tight">{teams.a || '隊伍 A'}</div>
+            <div className="text-[10px] text-blue-600 text-center mt-1 leading-tight">{getTeamMembers(teams.a)}</div>
+          </div>
+          
+          {/* A2 - 隊伍 B 名稱 */}
+          <div className="w-20 h-20 border border-gray-300 p-2 flex flex-col justify-center items-center bg-red-50 rounded">
+            <div className="text-xs font-bold text-red-800 text-center leading-tight">{teams.b || '隊伍 B'}</div>
+            <div className="text-[10px] text-red-600 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
+          </div>
+          
+          {/* B1~F1 - 第一橫排：A1 隊伍在各張地圖的比分 */}
+          {maps.map((map, index) => (
+            <div 
+              key={`map-a-${index}`}
+              className="w-20 h-20 border border-gray-300 p-2 flex flex-col justify-center items-center bg-blue-50 rounded"
+            >
+              <div className="text-[10px] font-semibold text-blue-700 text-center mb-1 leading-tight">
+                {map.mode || '未選擇'}
+              </div>
+              <div className="text-2xl font-bold text-blue-800">
+                {map.scoreA === 'n/a' ? '-' : map.scoreA}
+              </div>
+            </div>
+          ))}
+          
+          {/* B2~F2 - 第二橫排：A2 隊伍在各張地圖的比分 */}
+          {maps.map((map, index) => (
+            <div 
+              key={`map-b-${index}`}
+              className="w-20 h-20 border border-gray-300 p-2 flex flex-col justify-center items-center bg-red-50 rounded"
+            >
+              <div className="text-[10px] font-semibold text-red-700 text-center mb-1 leading-tight">
+                {map.mode || '未選擇'}
+              </div>
+              <div className="text-2xl font-bold text-red-800">
+                {map.scoreB === 'n/a' ? '-' : map.scoreB}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

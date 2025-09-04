@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [bracket, setBracket] = useState({
     qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
     sf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
+    lf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })), // 遺材賽
     f:  Array.from({ length: 1 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
     champ: { team: '', score: 'n/a' }
   });
@@ -317,6 +318,9 @@ export default function Dashboard() {
     if (stage === 'sf') {
       return '四強';
     }
+    if (stage === 'lf') {
+      return '遺材賽';
+    }
     if (stage === 'f') {
       return '冠亞賽';
     }
@@ -342,6 +346,7 @@ export default function Dashboard() {
   const buildInitialBracket = () => ({
     qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
     sf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
+    lf: Array.from({ length: 2 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })), // 遺材賽
     f:  Array.from({ length: 1 }, () => ({ a: { team: '', score: 'n/a' }, b: { team: '', score: 'n/a' } })),
     champ: { team: '', score: 'n/a' }
   });
@@ -367,7 +372,7 @@ export default function Dashboard() {
     if (!currentMatchKey) return;
     const entry = mapScores[currentMatchKey];
     if (Array.isArray(entry) && entry.length === 5) return;
-    const init = Array.from({ length: 5 }, () => ({ mode: '', map: '' }));
+    const init = Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' }));
     setMapScores(prev => ({ ...prev, [currentMatchKey]: init }));
   }, [currentMatchKey]);
 
@@ -375,7 +380,7 @@ export default function Dashboard() {
     if (!currentMatchKey) return [];
     const entry = mapScores[currentMatchKey];
     if (Array.isArray(entry) && entry.length === 5) return entry;
-    return Array.from({ length: 5 }, () => ({ mode: '', map: '' }));
+    return Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: 'n/a', scoreB: 'n/a' }));
   }, [mapScores, currentMatchKey]);
 
   const updateCurrentMatchMap = (idx, field, value) => {
@@ -483,7 +488,7 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* 對戰樹佈局：四欄（八強/四強/冠亞/冠軍） */}
+            {/* 對戰樹佈局：四欄（八強/四強+遺材賽/冠亞/冠軍） */}
             <div className="w-full overflow-x-auto">
               <div className="min-w-[900px] grid grid-cols-4 gap-8">
                 {/* 八強（4 場） */}
@@ -506,25 +511,70 @@ export default function Dashboard() {
                   ))}
                 </div>
 
-                {/* 四強（2 場） */}
+                {/* 四強與遺材賽（同欄位，遺材賽在上方和下方） */}
                 <div className="space-y-28 flex flex-col justify-center">
-                  {bracket.sf.map((m, i) => (
-                    <div key={`sf-m-${i}`} className="relative">
-                      {/* 連接線（左方彙入 & 往決賽） */}
-                      <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                      <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                      <MatchEditor
-                        stage="sf"
-                        index={i}
-                        match={m}
-                        teams={teamOptions}
-                        onChange={handleMatchChange}
-                        label={`四強 ${i + 1}`}
-                        isCurrent={isCurrentMatch('sf', i)}
-                        onSetCurrent={setBroadcastMatch}
-                      />
-                    </div>
-                  ))}
+                  {/* 上方遺材賽 */}
+                  <div className="space-y-10">
+                    {bracket.lf.slice(0, 1).map((m, i) => (
+                      <div key={`lf-top-${i}`} className="relative">
+                        {/* 連接線（左方彙入 & 往下） */}
+                        <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                        <div className="hidden md:block absolute bottom-[-16px] left-1/2 w-0.5 h-4 bg-gray-300 dark:bg-gray-600"></div>
+                        <MatchEditor
+                          stage="lf"
+                          index={i}
+                          match={m}
+                          teams={teamOptions}
+                          onChange={handleMatchChange}
+                          label={`遺材賽 ${i + 1}`}
+                          isCurrent={isCurrentMatch('lf', i)}
+                          onSetCurrent={setBroadcastMatch}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 四強 */}
+                  <div className="space-y-10">
+                    {bracket.sf.map((m, i) => (
+                      <div key={`sf-m-${i}`} className="relative">
+                        {/* 連接線（左方彙入 & 往決賽） */}
+                        <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                        <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                        <MatchEditor
+                          stage="sf"
+                          index={i}
+                          match={m}
+                          teams={teamOptions}
+                          onChange={handleMatchChange}
+                          label={`四強 ${i + 1}`}
+                          isCurrent={isCurrentMatch('sf', i)}
+                          onSetCurrent={setBroadcastMatch}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 下方遺材賽 */}
+                  <div className="space-y-10">
+                    {bracket.lf.slice(1, 2).map((m, i) => (
+                      <div key={`lf-bottom-${i}`} className="relative">
+                        {/* 連接線（左方彙入 & 往上） */}
+                        <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                        <div className="hidden md:block absolute top-[-16px] left-1/2 w-0.5 h-4 bg-gray-300 dark:bg-gray-600"></div>
+                        <MatchEditor
+                          stage="lf"
+                          index={i + 1}
+                          match={m}
+                          teams={teamOptions}
+                          onChange={handleMatchChange}
+                          label={`遺材賽 ${i + 2}`}
+                          isCurrent={isCurrentMatch('lf', i + 1)}
+                          onSetCurrent={setBroadcastMatch}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* 冠亞賽（1 場） */}
@@ -630,6 +680,23 @@ export default function Dashboard() {
                         <option key={`map-${map}`} value={map}>{map}</option>
                       ))}
                     </select>
+                    {/* 分數選擇 */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                        value={m.scoreA || 'n/a'}
+                        onChange={(e) => updateCurrentMatchMap(i, 'scoreA', e.target.value)}
+                      >
+                        {['n/a','1','2','3'].map(v => <option key={`scoreA-${v}`} value={v}>{v}</option>)}
+                      </select>
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                        value={m.scoreB || 'n/a'}
+                        onChange={(e) => updateCurrentMatchMap(i, 'scoreB', e.target.value)}
+                      >
+                        {['n/a','1','2','3'].map(v => <option key={`scoreB-${v}`} value={v}>{v}</option>)}
+                      </select>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -652,7 +719,11 @@ export default function Dashboard() {
 // 對戰編輯元件：上下兩列（A/B），每列含隊伍與分數下拉 + 播報按鈕
 function MatchEditor({ stage, index, match, teams, onChange, label, isCurrent, onSetCurrent }) {
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900/50 min-w-[260px] overflow-hidden">
+    <div className={`rounded-lg border p-4 min-w-[260px] overflow-hidden ${
+      isCurrent 
+        ? 'border-emerald-400 bg-emerald-50/60 dark:bg-emerald-500/10 dark:border-emerald-500' 
+        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50'
+    }`}>
       {/* 標籤與播報按鈕 */}
       <div className="flex items-center justify-between mb-2">
         <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{label}</div>

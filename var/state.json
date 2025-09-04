@@ -64,7 +64,17 @@
         }
       }
     ],
-    "f": [
+    "lf": [
+      {
+        "a": {
+          "team": "",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "",
+          "score": "n/a"
+        }
+      },
       {
         "a": {
           "team": "",
@@ -76,18 +86,96 @@
         }
       }
     ],
+    "f": [
+      {
+        "a": {
+          "team": "Angelic But Bullied Megu",
+          "score": "n/a"
+        },
+        "b": {
+          "team": "Team BIG MOM",
+          "score": "n/a"
+        }
+      }
+    ],
     "champ": {
       "team": "",
       "score": "n/a"
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": "sf",
-    "index": 1
+    "stage": "f",
+    "index": 0
   },
-  "dashboard:currentDisplay": "banpick",
+  "dashboard:currentDisplay": "map-score",
   "dashboard:mapScores": {
-    "sf:1": [
+    "qf:3": [
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      }
+    ],
+    "qf:0": [
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      }
+    ],
+    "lf:0": [
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      },
+      {
+        "mode": "",
+        "map": ""
+      }
+    ],
+    "f:0": [
       {
         "mode": "",
         "map": ""
