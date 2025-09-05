@@ -158,7 +158,7 @@ export function useBracketState() {
             });
           }
         }
-      } catch (error) {
+      } catch {
         // 靜默處理錯誤
       }
     };

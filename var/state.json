@@ -122,8 +122,8 @@
         "scoreB": "0"
       },
       {
-        "mode": "",
-        "map": "",
+        "mode": "極限淘汰賽",
+        "map": "空礦地帶 Out in the Open",
         "scoreA": "0",
         "scoreB": "0"
       },
@@ -141,23 +141,6 @@
       }
     ]
   },
-  "dashboard:currentDisplay": "map-score",
-  "dashboard:banpickData": {
-    "qf:0": {
-      "teamA": {
-        "bans": [
-          "alli",
-          "colette",
-          "janet"
-        ]
-      },
-      "teamB": {
-        "bans": [
-          "jae-Yong",
-          "rt",
-          "byron"
-        ]
-      }
-    }
-  }
+  "dashboard:currentDisplay": "bracket",
+  "dashboard:banpickData": {}
 }

@@ -189,7 +189,7 @@ export function useMapScores() {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // 靜默處理錯誤
     }
   };

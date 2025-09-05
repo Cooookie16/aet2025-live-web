@@ -8,6 +8,15 @@ export default function OBSBracketDisplay({ data }) {
   const currentBroadcast = data?.currentBroadcast;
   const [teamsData, setTeamsData] = useState([]);
   
+  // 生成穩定的 key，不使用陣列索引
+  const generateMatchKey = (stage, match, index) => {
+    const teamA = match.a.team || `team-a-${index}`;
+    const teamB = match.b.team || `team-b-${index}`;
+    const scoreA = match.a.score || '0';
+    const scoreB = match.b.score || '0';
+    return `${stage}-${teamA}-${teamB}-${scoreA}-${scoreB}`;
+  };
+  
   // 載入隊伍資料
   useEffect(() => {
     const loadTeams = async () => {
@@ -47,7 +56,7 @@ export default function OBSBracketDisplay({ data }) {
             {/* 八強（4 場） */}
             <div className="space-y-3 flex flex-col justify-center">
               {qf.map((m, i) => (
-                <div key={`qf-${i}`} className="relative">
+                <div key={generateMatchKey('qf', m, i)} className="relative">
                   {/* 往四強的水平連接線 */}
                   <div className="hidden md:block absolute right-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                   <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('qf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
@@ -85,7 +94,7 @@ export default function OBSBracketDisplay({ data }) {
               {/* 上方遺材賽 */}
               <div className="space-y-3">
                 {lf.slice(0, 1).map((m, i) => (
-                  <div key={`lf-top-${i}`} className="relative">
+                  <div key={generateMatchKey('lf-top', m, i)} className="relative">
                     <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                     <div className="hidden md:block absolute bottom-[-6px] left-1/2 w-0.5 h-1.5 bg-pink-300"></div>
                     <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('lf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
@@ -115,7 +124,7 @@ export default function OBSBracketDisplay({ data }) {
               {/* 四強（往右推） */}
               <div className="space-y-3 ml-4">
                 {sf.map((m, i) => (
-                  <div key={`sf-${i}`} className="relative">
+                  <div key={generateMatchKey('sf', m, i)} className="relative">
                     <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                     <div className="hidden md:block absolute right-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                     <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('sf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
@@ -147,7 +156,7 @@ export default function OBSBracketDisplay({ data }) {
               {/* 下方遺材賽 */}
               <div className="space-y-3">
                 {lf.slice(1, 2).map((m, i) => (
-                  <div key={`lf-bottom-${i}`} className="relative">
+                  <div key={generateMatchKey('lf-bottom', m, i)} className="relative">
                     <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                     <div className="hidden md:block absolute top-[-6px] left-1/2 w-0.5 h-1.5 bg-pink-300"></div>
                     <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('lf', i + 1) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
@@ -178,7 +187,7 @@ export default function OBSBracketDisplay({ data }) {
             {/* 冠亞（1 場） */}
             <div className="flex flex-col justify-center">
               {f.map((m, i) => (
-                <div key={`f-${i}`} className="relative">
+                <div key={generateMatchKey('f', m, i)} className="relative">
                   <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                   <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('f', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
                     {isLive('f', i) ? (
