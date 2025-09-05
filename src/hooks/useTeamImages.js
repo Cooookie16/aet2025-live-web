@@ -112,6 +112,41 @@ export function useTeamImages() {
     }
   };
 
+  // 刪除單一隊伍圖片
+  const handleDeleteTeamImage = async (teamName) => {
+    try {
+      const imageData = teamImages[teamName];
+      if (!imageData) {
+        return;
+      }
+
+      const response = await fetch('/api/delete-team-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          teamName,
+          imageUrl: imageData.url 
+        })
+      });
+      
+      if (response.ok) {
+        // 從本地狀態中移除該隊伍的圖片
+        setTeamImages(prev => {
+          const newImages = { ...prev };
+          delete newImages[teamName];
+          return newImages;
+        });
+        // console.log('隊伍圖片刪除成功:', teamName);
+      } else {
+        // console.error('刪除隊伍圖片失敗');
+      }
+    } catch {
+      // console.error('刪除隊伍圖片錯誤:', error);
+    }
+  };
+
   // 刪除全部隊伍圖片
   const handleDeleteAllImages = async () => {
     try {
@@ -141,6 +176,7 @@ export function useTeamImages() {
     selectedTeamForDisplay,
     setSelectedTeamForDisplay,
     handleTeamImageUpload,
+    handleDeleteTeamImage,
     handleDeleteAllImages
   };
 }

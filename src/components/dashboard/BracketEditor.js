@@ -59,9 +59,10 @@ export default function BracketEditor({
   onResetBrackets 
 }) {
   // 是否為目前播報對戰
-  const isCurrentMatch = (stage, index) => (
-    currentBroadcast.stage === stage && currentBroadcast.index === index
-  );
+  const isCurrentMatch = (stage, index) => {
+    if (!currentBroadcast) return false;
+    return currentBroadcast.stage === stage && currentBroadcast.index === index;
+  };
 
   // 轉換階段顯示標籤
   const getStageLabel = (stage) => {

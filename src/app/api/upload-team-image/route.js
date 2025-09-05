@@ -51,11 +51,15 @@ export async function POST(request) {
     // 回傳檔案資訊
     const imageUrl = `/team-images/${filename}`;
     
+    // 記錄檔名對照到日誌（每次修改都記錄）
+    console.log(`隊伍圖片更新記錄 - 隊伍: ${teamName}, 檔名: ${filename}, URL: ${imageUrl}, 時間: ${new Date().toISOString()}`);
+    
     return NextResponse.json({
       success: true,
       filename: filename,
       url: imageUrl,
-      teamName: teamName
+      teamName: teamName,
+      timestamp: timestamp
     });
 
   } catch (error) {

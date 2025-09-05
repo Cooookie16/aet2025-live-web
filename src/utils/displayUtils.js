@@ -12,7 +12,7 @@ export function getStageLabel(stage) {
 // 取得目前播報對戰的隊伍名稱
 export function getCurrentBroadcastTeams(currentBroadcast, bracket) {
   const { stage, index } = currentBroadcast || {};
-  if (!stage && stage !== 0) {
+  if (stage === null || stage === undefined) {
     return { a: '', b: '' };
   }
   const list = bracket?.[stage];

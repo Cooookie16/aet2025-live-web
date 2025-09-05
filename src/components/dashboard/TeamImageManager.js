@@ -7,6 +7,7 @@ export default function TeamImageManager({
   selectedTeamForDisplay, 
   onTeamImageUpload, 
   onSelectedTeamChange,
+  onDeleteTeamImage,
   onDeleteAllImages
 }) {
   return (
@@ -75,7 +76,7 @@ export default function TeamImageManager({
             )}
             
             {/* 上傳按鈕 */}
-            <div className="relative">
+            <div className="relative mb-2">
               <input
                 type="file"
                 accept="image/*"
@@ -91,6 +92,30 @@ export default function TeamImageManager({
                 {teamImages[team] ? '重新上傳' : '上傳圖片'}
               </button>
             </div>
+
+            {/* 刪除按鈕 */}
+            <button
+              onClick={() => {
+                if (!teamImages[team]) {
+                  return;
+                }
+                try {
+                  const ok = window.confirm(`確認要刪除 ${team} 的圖片嗎？`);
+                  if (ok) {
+                    onDeleteTeamImage(team);
+                  }
+                } catch {}
+              }}
+              disabled={!teamImages[team]}
+              className={`w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                teamImages[team]
+                  ? 'bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400'
+              }`}
+              title={teamImages[team] ? `刪除 ${team} 的圖片` : '該隊伍尚未上傳圖片'}
+            >
+              🗑️ 刪除圖片
+            </button>
           </div>
         ))}
       </div>

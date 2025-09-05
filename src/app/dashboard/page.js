@@ -6,6 +6,7 @@ import TeamImageManager from '@/components/dashboard/TeamImageManager';
 import BracketEditor from '@/components/dashboard/BracketEditor';
 import MapScoreEditor from '@/components/dashboard/MapScoreEditor';
 import StatusBar from '@/components/dashboard/StatusBar';
+import SideNavbar from '@/components/dashboard/SideNavbar';
 import { useDisplayState } from '@/hooks/useDisplayState';
 import { useTeamImages } from '@/hooks/useTeamImages';
 import { useBracketState } from '@/hooks/useBracketState';
@@ -17,7 +18,7 @@ import { getStageLabel } from '@/utils/displayUtils';
 export default function Dashboard() {
   // 使用自定義 hooks
   const { selectedDisplayId, displayOptions, switchDisplay } = useDisplayState();
-  const { teamImages, selectedTeamForDisplay, setSelectedTeamForDisplay, handleTeamImageUpload, handleDeleteAllImages } = useTeamImages();
+  const { teamImages, selectedTeamForDisplay, setSelectedTeamForDisplay, handleTeamImageUpload, handleDeleteTeamImage, handleDeleteAllImages } = useTeamImages();
   const { bracket, currentBroadcast, handleMatchChange, setBroadcastMatch, handleResetBrackets, getCurrentBroadcastTeams } = useBracketState();
   const { mapsData, modeOptions, getCurrentMatchMaps, updateCurrentMatchMap, handleResetMapScores } = useMapScores();
   const { isConnected } = useConnectionState();
@@ -39,12 +40,43 @@ export default function Dashboard() {
 
   // 取得目前播報對戰的地圖資料
   const currentMatchMaps = getCurrentMatchMaps(currentBroadcast);
-
-  // 取得目前播報對戰的隊伍名稱
   const currentBroadcastTeams = getCurrentBroadcastTeams();
+
+  // 側邊導航區域定義
+  const navSections = [
+    {
+      id: 'display-selector',
+      name: '顯示選擇',
+      description: '選擇OBS顯示內容',
+      icon: '📺'
+    },
+    {
+      id: 'team-images',
+      name: '隊伍圖片',
+      description: '管理隊伍形象圖',
+      icon: '🖼️'
+    },
+    {
+      id: 'bracket-editor',
+      name: '賽程表',
+      description: '編輯對戰組合',
+      icon: '🏆'
+    },
+    {
+      id: 'map-scores',
+      name: '地圖分數',
+      description: '設定地圖比分',
+      icon: '🗺️'
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* 側邊導航 */}
+      <SideNavbar sections={navSections} />
+      
+      {/* 主要內容區域 */}
+      <div>
       {/* 標題列 */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,51 +119,61 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 gap-8">
           {/* 顯示介面選擇 */}
-          <DisplaySelector 
-            displayOptions={displayOptions}
-            selectedDisplayId={selectedDisplayId}
-            onSwitchDisplay={switchDisplay}
-          />
+          <div id="display-selector">
+            <DisplaySelector 
+              displayOptions={displayOptions}
+              selectedDisplayId={selectedDisplayId}
+              onSwitchDisplay={switchDisplay}
+            />
+          </div>
 
           {/* 隊伍圖片管理區域 */}
-                          <TeamImageManager
-                  teamOptions={teamOptions}
-                  teamImages={teamImages}
-                  selectedTeamForDisplay={selectedTeamForDisplay}
-                  onTeamImageUpload={handleTeamImageUpload}
-                  onSelectedTeamChange={setSelectedTeamForDisplay}
-                  onDeleteAllImages={handleDeleteAllImages}
-                />
+          <div id="team-images">
+            <TeamImageManager
+              teamOptions={teamOptions}
+              teamImages={teamImages}
+              selectedTeamForDisplay={selectedTeamForDisplay}
+              onTeamImageUpload={handleTeamImageUpload}
+              onSelectedTeamChange={setSelectedTeamForDisplay}
+              onDeleteTeamImage={handleDeleteTeamImage}
+              onDeleteAllImages={handleDeleteAllImages}
+            />
+          </div>
 
           {/* 賽程表 Brackets 區域 */}
-          <BracketEditor 
-            bracket={bracket}
-            teamOptions={teamOptions}
-            currentBroadcast={currentBroadcast}
-            onMatchChange={handleMatchChange}
-            onSetBroadcastMatch={setBroadcastMatch}
-            onResetBrackets={handleResetBrackets}
-          />
+          <div id="bracket-editor">
+            <BracketEditor 
+              bracket={bracket}
+              teamOptions={teamOptions}
+              currentBroadcast={currentBroadcast}
+              onMatchChange={handleMatchChange}
+              onSetBroadcastMatch={setBroadcastMatch}
+              onResetBrackets={handleResetBrackets}
+            />
+          </div>
 
           {/* 地圖與比數 區域 */}
-          <MapScoreEditor 
-            currentBroadcast={currentBroadcast}
-            currentMatchMaps={currentMatchMaps}
-            modeOptions={modeOptions}
-            mapsData={mapsData}
-            onUpdateMap={(idx, field, value) => updateCurrentMatchMap(currentBroadcast, idx, field, value)}
-            onResetMapScores={handleResetMapScores}
-          />
+          <div id="map-scores">
+            <MapScoreEditor 
+              currentBroadcast={currentBroadcast}
+              currentMatchMaps={currentMatchMaps}
+              modeOptions={modeOptions}
+              mapsData={mapsData}
+              onUpdateMap={(idx, field, value) => updateCurrentMatchMap(currentBroadcast, idx, field, value)}
+              onResetMapScores={handleResetMapScores}
+            />
+          </div>
         </div>
       </div>
       
       <StatusBar 
-        stageLabel={getStageLabel(currentBroadcast.stage)} 
+        stageLabel={currentBroadcast?.stage ? getStageLabel(currentBroadcast.stage) : ''} 
         teamA={currentBroadcastTeams.a} 
         teamB={currentBroadcastTeams.b} 
         displayName={displayOptions.find(opt => opt.id === selectedDisplayId)?.name || '歡迎畫面'} 
         isConnected={isConnected} 
       />
+      </div>
     </div>
   );
 }

@@ -19,16 +19,18 @@ export async function GET() {
     const mapScores = kvGet(KEYS.mapScores);
     const teamImages = kvGet(KEYS.teamImages);
     const selectedTeamForDisplay = kvGet(KEYS.selectedTeamForDisplay);
+    
+    const responseData = {};
+    if (bracket) responseData.bracket = bracket;
+    if (broadcast && broadcast.stage !== null) responseData.currentBroadcast = broadcast;
+    if (display) responseData.currentDisplay = display;
+    if (mapScores) responseData.mapScores = mapScores;
+    if (teamImages) responseData.teamImages = teamImages;
+    if (selectedTeamForDisplay) responseData.selectedTeamForDisplay = selectedTeamForDisplay;
+    
     return NextResponse.json({
       ok: true,
-      data: {
-        bracket: bracket ?? null,
-        currentBroadcast: broadcast ?? null,
-        currentDisplay: display ?? null,
-        mapScores: mapScores ?? null,
-        teamImages: teamImages ?? null,
-        selectedTeamForDisplay: selectedTeamForDisplay ?? null,
-      },
+      data: responseData,
     }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ ok: false, error: 'READ_FAILED' }, { status: 500 });
@@ -41,7 +43,7 @@ export async function POST(request) {
     const { bracket, currentBroadcast, currentDisplay, mapScores, teamImages, selectedTeamForDisplay } = body || {};
 
     if (bracket !== undefined) {
-      kvSet(KEYS.bracket, JSON.stringify(bracket));
+      kvSet(KEYS.bracket, bracket);
       // 廣播 bracket 更新，讓 OBS 即時同步
       try {
         sseBroadcast({
@@ -53,7 +55,7 @@ export async function POST(request) {
       } catch {}
     }
     if (currentBroadcast !== undefined) {
-      kvSet(KEYS.broadcast, JSON.stringify(currentBroadcast));
+      kvSet(KEYS.broadcast, currentBroadcast);
       // 廣播目前播報對戰更新，供 OBS 高亮顯示
       try {
         sseBroadcast({
@@ -78,7 +80,7 @@ export async function POST(request) {
     }
 
     if (mapScores !== undefined) {
-      kvSet(KEYS.mapScores, JSON.stringify(mapScores));
+      kvSet(KEYS.mapScores, mapScores);
       // 廣播地圖與比數更新，提供 OBS 或其他客戶端同步
       try {
         sseBroadcast({
@@ -91,7 +93,7 @@ export async function POST(request) {
     }
 
     if (teamImages !== undefined) {
-      kvSet(KEYS.teamImages, JSON.stringify(teamImages));
+      kvSet(KEYS.teamImages, teamImages);
       // 廣播隊伍圖片更新
       try {
         sseBroadcast({
@@ -118,6 +120,7 @@ export async function POST(request) {
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e) {
-    return NextResponse.json({ ok: false, error: 'WRITE_FAILED' }, { status: 500 });
+    console.error('API狀態更新失敗:', e);
+    return NextResponse.json({ ok: false, error: 'WRITE_FAILED', details: e.message }, { status: 500 });
   }
 }

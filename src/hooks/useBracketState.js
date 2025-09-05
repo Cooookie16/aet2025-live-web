@@ -16,34 +16,51 @@ export function useBracketState() {
   // 載入狀態
   useEffect(() => {
     const loadState = async () => {
+      let apiData = {};
+      
+      // 先嘗試從API載入
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (res.ok) {
           let json = null;
           try { json = await res.json(); } catch { json = null; }
-          const d = json?.data || {};
-          if (d.bracket) {
-            setBracket(d.bracket);
-          }
-          if (d.currentBroadcast) {
-            setCurrentBroadcast(d.currentBroadcast);
-          }
+          apiData = json?.data || {};
         }
-      } catch {}
+      } catch (error) {
+        console.warn('載入API狀態失敗:', error);
+      }
       
-      // 後備：從 localStorage 載入
-      try {
-        const rawBracket = localStorage.getItem('dashboard:bracket');
-        if (rawBracket) {
-          setBracket(JSON.parse(rawBracket));
+      // 載入bracket：API優先，localStorage為後備
+      if (apiData.bracket) {
+        setBracket(apiData.bracket);
+      } else {
+        try {
+          const rawBracket = localStorage.getItem('dashboard:bracket');
+          if (rawBracket) {
+            setBracket(JSON.parse(rawBracket));
+          }
+        } catch (error) {
+          console.warn('載入localStorage bracket失敗:', error);
         }
-      } catch {}
-      try {
-        const rawBroadcast = localStorage.getItem('dashboard:currentBroadcast');
-        if (rawBroadcast) {
-          setCurrentBroadcast(JSON.parse(rawBroadcast));
+      }
+      
+      // 載入currentBroadcast：API優先，localStorage為後備
+      if (apiData.currentBroadcast && apiData.currentBroadcast.stage !== null) {
+        setCurrentBroadcast(apiData.currentBroadcast);
+      } else {
+        try {
+          const rawBroadcast = localStorage.getItem('dashboard:currentBroadcast');
+          if (rawBroadcast) {
+            const parsedBroadcast = JSON.parse(rawBroadcast);
+            // 只有當localStorage中的值不是null時才使用
+            if (parsedBroadcast && parsedBroadcast.stage !== null) {
+              setCurrentBroadcast(parsedBroadcast);
+            }
+          }
+        } catch (error) {
+          console.warn('載入localStorage currentBroadcast失敗:', error);
         }
-      } catch {}
+      }
     };
     loadState();
   }, []);
@@ -118,7 +135,7 @@ export function useBracketState() {
   // 取得目前播報對戰的隊伍名稱
   const getCurrentBroadcastTeams = () => {
     const { stage, index } = currentBroadcast || {};
-    if (!stage && stage !== 0) {
+    if (stage === null || stage === undefined) {
       return { a: '', b: '' };
     }
     const list = bracket[stage];
