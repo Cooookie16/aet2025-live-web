@@ -22,9 +22,16 @@ export function useBracketState() {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (res.ok) {
-          let json = null;
-          try { json = await res.json(); } catch { json = null; }
-          apiData = json?.data || {};
+          const text = await res.text();
+          if (text) {
+            try {
+              const json = JSON.parse(text);
+              apiData = json?.data || {};
+            } catch (parseError) {
+              console.warn('解析API回應JSON失敗:', parseError);
+              apiData = {};
+            }
+          }
         }
       } catch (error) {
         console.warn('載入API狀態失敗:', error);

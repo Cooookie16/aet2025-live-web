@@ -27,6 +27,7 @@ export default function OBSLiveUI() {
   const [isConnected, setIsConnected] = useState(false);
   const [teamImages, setTeamImages] = useState({});
   const [selectedTeamForDisplay, setSelectedTeamForDisplay] = useState('');
+  const [banpickData, setBanpickData] = useState({});
   
   // 以 SSE 取代輪詢（僅在掛載時建立一次連線）
   const lastUpdateRef = useRef(0);
@@ -71,6 +72,9 @@ export default function OBSLiveUI() {
           if (d?.selectedTeamForDisplay) {
             setSelectedTeamForDisplay(d.selectedTeamForDisplay);
           }
+          if (d?.banpickData) {
+            setBanpickData(d.banpickData);
+          }
         }
       } catch (e) {
         console.warn('[OBS] /api/state failed:', e);
@@ -108,6 +112,9 @@ export default function OBSLiveUI() {
         }
         if (d?.selectedTeamForDisplay) {
           setSelectedTeamForDisplay(d.selectedTeamForDisplay);
+        }
+        if (d?.banpickData) {
+          setBanpickData(d.banpickData);
         }
       } catch {}
     }, 3000);
@@ -207,6 +214,12 @@ export default function OBSLiveUI() {
               if (latestMessage?.data?.selectedTeamForDisplay) {
                 setSelectedTeamForDisplay(latestMessage.data.selectedTeamForDisplay);
               }
+            } else if (latestMessage.type === 'banpick-update') {
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              console.log('[OBS] banpick-update');
+              if (latestMessage?.data?.banpickData) {
+                setBanpickData(latestMessage.data.banpickData);
+              }
             }
           } catch (e) {
             console.warn('[OBS] onmessage parse error:', e, 'raw:', evt?.data);
@@ -299,7 +312,7 @@ export default function OBSLiveUI() {
       case 'bracket':
         return <OBSBracketDisplay data={{ bracket, currentBroadcast }} />;
       case 'banpick':
-        return <OBSBanpickDisplay data={displayData} />;
+        return <OBSBanpickDisplay data={{ currentBroadcast, banpickData, bracket }} />;
       case 'map-score':
         return <OBSMapScoreDisplay data={{ currentBroadcast, mapScores: displayData.mapScores, bracket }} />;
       case 'team-image':

@@ -13,11 +13,17 @@ export function useMapScores() {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (res.ok) {
-          let json = null;
-          try { json = await res.json(); } catch { json = null; }
-          const d = json?.data || {};
-          if (d.mapScores) {
-            setMapScores(d.mapScores || {});
+          const text = await res.text();
+          if (text) {
+            try {
+              const json = JSON.parse(text);
+              const d = json?.data || {};
+              if (d.mapScores) {
+                setMapScores(d.mapScores || {});
+              }
+            } catch (parseError) {
+              console.warn('解析API回應JSON失敗:', parseError);
+            }
           }
         }
       } catch {}

@@ -41,25 +41,31 @@ export function useDisplayState() {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (res.ok) {
-          let json = null;
-          try { json = await res.json(); } catch { json = null; }
-          const d = json?.data || {};
-          // 先嘗試使用後端值；若沒有再嘗試 localStorage
-          let nextDisplay = sanitizeDisplay(d.currentDisplay);
-          if (!nextDisplay) {
+          const text = await res.text();
+          if (text) {
             try {
-              const rawDisplay = localStorage.getItem('dashboard:currentDisplay');
-              const cleaned = sanitizeDisplay(rawDisplay);
-              if (cleaned) {
-                nextDisplay = cleaned;
+              const json = JSON.parse(text);
+              const d = json?.data || {};
+              // 先嘗試使用後端值；若沒有再嘗試 localStorage
+              let nextDisplay = sanitizeDisplay(d.currentDisplay);
+              if (!nextDisplay) {
+                try {
+                  const rawDisplay = localStorage.getItem('dashboard:currentDisplay');
+                  const cleaned = sanitizeDisplay(rawDisplay);
+                  if (cleaned) {
+                    nextDisplay = cleaned;
+                  }
+                } catch {}
               }
-            } catch {}
+              if (nextDisplay) {
+                setCurrentDisplay(nextDisplay);
+              }
+              setDisplayLoaded(true);
+              return;
+            } catch (parseError) {
+              console.warn('解析API回應JSON失敗:', parseError);
+            }
           }
-          if (nextDisplay) {
-            setCurrentDisplay(nextDisplay);
-          }
-          setDisplayLoaded(true);
-          return;
         }
       } catch {}
       

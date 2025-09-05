@@ -25,7 +25,7 @@ function MatchEditor({ stage, index, match, teams, onChange, label, isCurrent, o
           onChange={(e) => onChange(stage, index, 'a', 'team', e.target.value)}
         >
           <option value="">選擇隊伍</option>
-          {teams.map(t => <option key={`${stage}-${index}-a-${t}`} value={t}>{t}</option>)}
+          {teams.map(t => <option key={`${stage}-${index}-a-${t.name || t}`} value={t.name || t}>{t.name || t}</option>)}
         </select>
         <div className="shrink-0 w-20 sm:w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 dark:text-white text-center">
           {match.a.score}
@@ -39,7 +39,7 @@ function MatchEditor({ stage, index, match, teams, onChange, label, isCurrent, o
           onChange={(e) => onChange(stage, index, 'b', 'team', e.target.value)}
         >
           <option value="">選擇隊伍</option>
-          {teams.map(t => <option key={`${stage}-${index}-b-${t}`} value={t}>{t}</option>)}
+          {teams.map(t => <option key={`${stage}-${index}-b-${t.name || t}`} value={t.name || t}>{t.name || t}</option>)}
         </select>
         <div className="shrink-0 w-20 sm:w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 dark:text-white text-center">
           {match.b.score}
@@ -209,7 +209,7 @@ export default function BracketEditor({
                     onChange={(e) => onMatchChange('champ', 0, 'team', 'team', e.target.value)}
                   >
                     <option value="">選擇隊伍</option>
-                    {teamOptions.map(t => <option key={`champ-${t}`} value={t}>{t}</option>)}
+                    {teamOptions.map(t => <option key={`champ-${t.name || t}`} value={t.name || t}>{t.name || t}</option>)}
                   </select>
                   <div className="shrink-0 w-20 sm:w-28 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 dark:text-white text-center">
                     {bracket.champ.score}

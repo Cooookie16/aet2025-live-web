@@ -9,6 +9,7 @@ const KEYS = {
   mapScores: 'dashboard:mapScores',
   teamImages: 'dashboard:teamImages',
   selectedTeamForDisplay: 'dashboard:selectedTeamForDisplay',
+  banpickData: 'dashboard:banpickData',
 };
 
 export async function GET() {
@@ -19,6 +20,7 @@ export async function GET() {
     const mapScores = kvGet(KEYS.mapScores);
     const teamImages = kvGet(KEYS.teamImages);
     const selectedTeamForDisplay = kvGet(KEYS.selectedTeamForDisplay);
+    const banpickData = kvGet(KEYS.banpickData);
     
     const responseData = {};
     if (bracket) responseData.bracket = bracket;
@@ -27,6 +29,7 @@ export async function GET() {
     if (mapScores) responseData.mapScores = mapScores;
     if (teamImages) responseData.teamImages = teamImages;
     if (selectedTeamForDisplay) responseData.selectedTeamForDisplay = selectedTeamForDisplay;
+    if (banpickData) responseData.banpickData = banpickData;
     
     return NextResponse.json({
       ok: true,
@@ -39,8 +42,30 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { bracket, currentBroadcast, currentDisplay, mapScores, teamImages, selectedTeamForDisplay } = body || {};
+    const text = await request.text();
+    if (!text) {
+      return NextResponse.json({ ok: false, error: 'EMPTY_BODY' }, { status: 400 });
+    }
+    
+    let body;
+    try {
+      body = JSON.parse(text);
+    } catch (parseError) {
+      console.error('解析請求JSON失敗:', parseError);
+      return NextResponse.json({ ok: false, error: 'INVALID_JSON', details: parseError.message }, { status: 400 });
+    }
+    
+    const { bracket, currentBroadcast, currentDisplay, mapScores, teamImages, selectedTeamForDisplay, banpickData } = body || {};
+
+    console.log('API接收到的資料:', {
+      bracket: bracket ? '有資料' : '無資料',
+      currentBroadcast: currentBroadcast ? '有資料' : '無資料',
+      currentDisplay: currentDisplay ? '有資料' : '無資料',
+      mapScores: mapScores ? '有資料' : '無資料',
+      teamImages: teamImages ? '有資料' : '無資料',
+      selectedTeamForDisplay: selectedTeamForDisplay ? '有資料' : '無資料',
+      banpickData: banpickData ? '有資料' : '無資料'
+    });
 
     if (bracket !== undefined) {
       kvSet(KEYS.bracket, bracket);
@@ -67,7 +92,7 @@ export async function POST(request) {
       } catch {}
     }
     if (currentDisplay !== undefined) {
-      kvSet(KEYS.display, String(currentDisplay));
+      kvSet(KEYS.display, currentDisplay);
       // 同步透過 SSE 廣播顯示切換，確保 OBS 即時更新
       try {
         sseBroadcast({
@@ -106,7 +131,7 @@ export async function POST(request) {
     }
 
     if (selectedTeamForDisplay !== undefined) {
-      kvSet(KEYS.selectedTeamForDisplay, String(selectedTeamForDisplay));
+      kvSet(KEYS.selectedTeamForDisplay, selectedTeamForDisplay);
       // 廣播選定隊伍更新
       try {
         sseBroadcast({
@@ -118,9 +143,23 @@ export async function POST(request) {
       } catch {}
     }
 
+    if (banpickData !== undefined) {
+      kvSet(KEYS.banpickData, banpickData);
+      // 廣播banpick資料更新
+      try {
+        sseBroadcast({
+          action: 'broadcast',
+          type: 'banpick-update',
+          data: { banpickData },
+          timestamp: Date.now(),
+        });
+      } catch {}
+    }
+
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e) {
     console.error('API狀態更新失敗:', e);
+    console.error('錯誤堆疊:', e.stack);
     return NextResponse.json({ ok: false, error: 'WRITE_FAILED', details: e.message }, { status: 500 });
   }
 }

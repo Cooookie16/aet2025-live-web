@@ -34,18 +34,29 @@ export function kvGet(key) {
 }
 
 export function kvSet(key, value) {
-  const data = readAll();
   try {
-    // 如果 value 是字串，嘗試解析為 JSON
+    const data = readAll();
+    // 如果 value 是字串，檢查是否為JSON格式
     if (typeof value === 'string') {
-      data[key] = JSON.parse(value);
+      // 檢查是否為JSON格式（以{或[開頭）
+      if (value.trim().startsWith('{') || value.trim().startsWith('[')) {
+        try {
+          data[key] = JSON.parse(value);
+        } catch (parseError) {
+          console.warn(`解析JSON失敗，使用原始字串值:`, parseError);
+          data[key] = value;
+        }
+      } else {
+        // 不是JSON格式，直接使用字串值
+        data[key] = value;
+      }
     } else {
       // 如果 value 已經是物件，直接使用
       data[key] = value;
     }
-  } catch {
-    // 解析失敗時，直接使用原始值
-    data[key] = value;
+    writeAll(data);
+  } catch (error) {
+    console.error('kvSet失敗:', error);
+    throw error;
   }
-  writeAll(data);
 }

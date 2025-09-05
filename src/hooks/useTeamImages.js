@@ -13,14 +13,20 @@ export function useTeamImages() {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (res.ok) {
-          let json = null;
-          try { json = await res.json(); } catch { json = null; }
-          const d = json?.data || {};
-          if (d.teamImages) {
-            setTeamImages(d.teamImages || {});
-          }
-          if (d.selectedTeamForDisplay) {
-            setSelectedTeamForDisplay(d.selectedTeamForDisplay || '');
+          const text = await res.text();
+          if (text) {
+            try {
+              const json = JSON.parse(text);
+              const d = json?.data || {};
+              if (d.teamImages) {
+                setTeamImages(d.teamImages || {});
+              }
+              if (d.selectedTeamForDisplay) {
+                setSelectedTeamForDisplay(d.selectedTeamForDisplay || '');
+              }
+            } catch (parseError) {
+              console.warn('解析API回應JSON失敗:', parseError);
+            }
           }
         }
       } catch {}

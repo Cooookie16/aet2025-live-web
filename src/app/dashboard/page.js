@@ -5,6 +5,7 @@ import DisplaySelector from '@/components/dashboard/DisplaySelector';
 import TeamImageManager from '@/components/dashboard/TeamImageManager';
 import BracketEditor from '@/components/dashboard/BracketEditor';
 import MapScoreEditor from '@/components/dashboard/MapScoreEditor';
+import BanpickEditor from '@/components/dashboard/BanpickEditor';
 import StatusBar from '@/components/dashboard/StatusBar';
 import SideNavbar from '@/components/dashboard/SideNavbar';
 import { useDisplayState } from '@/hooks/useDisplayState';
@@ -29,8 +30,16 @@ export default function Dashboard() {
   // 載入隊伍清單
   useEffect(() => {
     const loadTeams = async () => {
-      const teams = await loadTeamOptions();
-      setTeamOptions(teams);
+      try {
+        const res = await fetch('/teams.json', { cache: 'no-store' });
+        if (res.ok) {
+          const teams = await res.json();
+          setTeamOptions(teams);
+        }
+      } catch (error) {
+        console.warn('載入隊伍資料失敗:', error);
+        setTeamOptions([]);
+      }
     };
     loadTeams();
   }, []);
@@ -61,6 +70,12 @@ export default function Dashboard() {
       name: '賽程表',
       description: '編輯對戰組合',
       icon: '🏆'
+    },
+    {
+      id: 'banpick-editor',
+      name: 'Banpick',
+      description: '管理禁用與選擇',
+      icon: '⚔️'
     },
     {
       id: 'map-scores',
@@ -149,6 +164,15 @@ export default function Dashboard() {
               onMatchChange={handleMatchChange}
               onSetBroadcastMatch={setBroadcastMatch}
               onResetBrackets={handleResetBrackets}
+            />
+          </div>
+
+          {/* Banpick 區域 */}
+          <div id="banpick-editor">
+            <BanpickEditor 
+              currentBroadcast={currentBroadcast}
+              teamOptions={teamOptions}
+              bracket={bracket}
             />
           </div>
 

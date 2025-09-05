@@ -46,7 +46,7 @@ export default function TeamImageManager({
         >
           <option value="">請選擇隊伍</option>
           {teamOptions.map(team => (
-            <option key={team} value={team}>{team}</option>
+            <option key={team.name || team} value={team.name || team}>{team.name || team}</option>
           ))}
         </select>
       </div>
@@ -54,23 +54,23 @@ export default function TeamImageManager({
       {/* 隊伍圖片上傳區域 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {teamOptions.map((team) => (
-          <div key={team} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+          <div key={team.name || team} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2 truncate">
-              {team}
+              {team.name || team}
             </h3>
             
             {/* 已上傳的圖片預覽 */}
-            {teamImages[team] && (
+            {teamImages[team.name || team] && (
               <div className="mb-3">
                 <div className="w-full h-24 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
                   <img
-                    src={teamImages[team].url}
-                    alt={`${team} 隊伍圖片`}
+                    src={teamImages[team.name || team].url}
+                    alt={`${team.name || team} 隊伍圖片`}
                     className="max-w-full max-h-full object-contain"
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                  已上傳: {teamImages[team].filename}
+                  已上傳: {teamImages[team.name || team].filename}
                 </p>
               </div>
             )}
@@ -83,36 +83,37 @@ export default function TeamImageManager({
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    onTeamImageUpload(team, file);
+                    onTeamImageUpload(team.name || team, file);
                   }
                 }}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <button className="w-full px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors">
-                {teamImages[team] ? '重新上傳' : '上傳圖片'}
+                {teamImages[team.name || team] ? '重新上傳' : '上傳圖片'}
               </button>
             </div>
 
             {/* 刪除按鈕 */}
             <button
               onClick={() => {
-                if (!teamImages[team]) {
+                const teamName = team.name || team;
+                if (!teamImages[teamName]) {
                   return;
                 }
                 try {
-                  const ok = window.confirm(`確認要刪除 ${team} 的圖片嗎？`);
+                  const ok = window.confirm(`確認要刪除 ${teamName} 的圖片嗎？`);
                   if (ok) {
-                    onDeleteTeamImage(team);
+                    onDeleteTeamImage(teamName);
                   }
                 } catch {}
               }}
-              disabled={!teamImages[team]}
+              disabled={!teamImages[team.name || team]}
               className={`w-full px-3 py-2 text-sm rounded-md transition-colors ${
-                teamImages[team]
+                teamImages[team.name || team]
                   ? 'bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400'
               }`}
-              title={teamImages[team] ? `刪除 ${team} 的圖片` : '該隊伍尚未上傳圖片'}
+              title={teamImages[team.name || team] ? `刪除 ${team.name || team} 的圖片` : '該隊伍尚未上傳圖片'}
             >
               🗑️ 刪除圖片
             </button>
