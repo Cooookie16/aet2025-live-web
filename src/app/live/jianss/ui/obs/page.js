@@ -9,8 +9,8 @@ import OBSMapScoreDisplay from '@/components/obs/OBSMapScoreDisplay';
 import OBSTeamImageDisplay from '@/components/obs/OBSTeamImageDisplay';
 import './obs.css';
 
-const OBS_DEBUG = false; // 關閉 OBS 端除錯輸出
-if (typeof window !== 'undefined' && !OBS_DEBUG) {
+// 關閉 OBS 端除錯輸出
+if (typeof window !== 'undefined') {
   try {
     const noop = () => {};
     console.log = noop;
@@ -39,19 +39,15 @@ export default function OBSLiveUI() {
   useEffect(() => { currentDisplayRef.current = currentDisplay; }, [currentDisplay]);
 
   useEffect(() => {
-    console.log('[OBS] init: start load /api/state');
     // 啟動時從後端讀取當前狀態，避免在沒有收到即時事件前畫面無法同步
     (async () => {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
-        console.log('[OBS] /api/state status:', res.status);
         if (res.ok) {
           let json = null;
           try { json = await res.json(); } catch { json = null; }
           const d = json?.data || {};
-          console.log('[OBS] /api/state data:', d);
           if (typeof d?.currentDisplay === 'string' && d.currentDisplay) {
-            console.log('[OBS] set currentDisplay from state:', d.currentDisplay);
             setCurrentDisplay(d.currentDisplay);
           }
           if (d?.bracket) {
@@ -77,7 +73,7 @@ export default function OBSLiveUI() {
           }
         }
       } catch (e) {
-        console.warn('[OBS] /api/state failed:', e);
+        // 靜默處理錯誤
       }
     })();
 
@@ -95,7 +91,6 @@ export default function OBSLiveUI() {
         const d = json?.data || {};
         const srv = typeof d?.currentDisplay === 'string' ? d.currentDisplay : null;
         if (srv && srv !== currentDisplayRef.current) {
-          console.log('[OBS] POLL sync display ->', srv, '(was:', currentDisplayRef.current, ')');
           setCurrentDisplay(srv);
         }
         if (d?.bracket) {
@@ -125,23 +120,19 @@ export default function OBSLiveUI() {
           try { esRef.current.close(); } catch {}
           esRef.current = null;
         }
-        console.log('[OBS] SSE connect -> /api/events');
         const es = new EventSource('/api/events');
         esRef.current = es;
 
         es.onopen = () => {
-          console.log('[OBS] SSE onopen');
           setIsConnected(true);
           retryAttemptRef.current = 0; // 重置退避
         };
         es.onerror = (evt) => {
-          console.warn('[OBS] SSE onerror:', evt);
           setIsConnected(false);
           try { es.close(); } catch {}
           esRef.current = null;
           // 指數退避（上限 30s）
           const nextDelay = Math.min(30000, 1000 * Math.pow(2, retryAttemptRef.current || 0));
-          console.log('[OBS] retry in', nextDelay, 'ms, attempt', retryAttemptRef.current);
           retryAttemptRef.current = (retryAttemptRef.current || 0) + 1;
           if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
           retryTimerRef.current = setTimeout(() => connect(), nextDelay);
@@ -152,13 +143,11 @@ export default function OBSLiveUI() {
             const raw = (evt && typeof evt.data === 'string') ? evt.data.trim() : '';
             if (!raw || raw[0] !== '{') return;
             const latestMessage = JSON.parse(raw);
-            console.log('[OBS] SSE message:', latestMessage);
             if (!latestMessage) return;
             if (latestMessage.timestamp && latestMessage.timestamp <= (lastUpdateRef.current || 0)) return;
 
             if (latestMessage.type === 'display-change') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] display-change ->', latestMessage.data?.displayId, 'ts:', lastUpdateRef.current);
               setCurrentDisplay(latestMessage.data.displayId);
               // 重要：合併，不要覆蓋既有 mapScores
               setDisplayData(prev => ({
@@ -168,7 +157,6 @@ export default function OBSLiveUI() {
               }));
             } else if (latestMessage.type === 'bracket-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] bracket-update');
               if (latestMessage?.data?.bracket) {
                 setBracket(latestMessage.data.bracket);
               }
@@ -179,7 +167,6 @@ export default function OBSLiveUI() {
               }
             } else if (latestMessage.type === 'map-score-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] map-score-update');
               if (latestMessage?.data?.mapScores) {
                 setDisplayData(prev => ({
                   ...prev,
@@ -195,7 +182,6 @@ export default function OBSLiveUI() {
               }
             } else if (latestMessage.type === 'custom-message') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] custom-message ->', latestMessage.data);
               setDisplayData(prev => ({
                 ...prev,
                 customMessage: latestMessage.data.message,
@@ -204,29 +190,25 @@ export default function OBSLiveUI() {
               }));
             } else if (latestMessage.type === 'team-images-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] team-images-update');
               if (latestMessage?.data?.teamImages) {
                 setTeamImages(latestMessage.data.teamImages);
               }
             } else if (latestMessage.type === 'selected-team-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] selected-team-update');
               if (latestMessage?.data?.selectedTeamForDisplay) {
                 setSelectedTeamForDisplay(latestMessage.data.selectedTeamForDisplay);
               }
             } else if (latestMessage.type === 'banpick-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              console.log('[OBS] banpick-update');
               if (latestMessage?.data?.banpickData) {
                 setBanpickData(latestMessage.data.banpickData);
               }
             }
           } catch (e) {
-            console.warn('[OBS] onmessage parse error:', e, 'raw:', evt?.data);
+            // 靜默處理錯誤
           }
         };
       } catch (e) {
-        console.error('[OBS] connect error:', e);
         setIsConnected(false);
       }
     };
@@ -248,20 +230,17 @@ export default function OBSLiveUI() {
 
     // 當頁面由隱藏轉為顯示、或網路回復時，嘗試重連
     const onVisible = () => {
-      console.log('[OBS] visibilitychange:', document.visibilityState);
       if (document.visibilityState === 'visible' && !esRef.current) {
         connect();
       }
     };
     const onOnline = () => {
-      console.log('[OBS] online');
       if (!esRef.current) connect();
     };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('online', onOnline);
 
     return () => {
-      console.log('[OBS] cleanup');
       try { document.removeEventListener('visibilitychange', onVisible); } catch {}
       try { window.removeEventListener('online', onOnline); } catch {}
       try { clearInterval(poll); } catch {}
@@ -293,15 +272,6 @@ export default function OBSLiveUI() {
     fetchForSwitch();
   }, [currentDisplay, currentBroadcast]);
 
-  // 顯示介面變更偵錯
-  useEffect(() => {
-    if (OBS_DEBUG) console.log('[OBS] render display ->', currentDisplay);
-  }, [currentDisplay]);
-
-  // 顯示資料變更偵錯
-  useEffect(() => {
-    if (OBS_DEBUG) console.log('[OBS] displayData updated ->', displayData);
-  }, [displayData]);
 
   // 渲染不同的顯示介面
   const renderDisplay = () => {

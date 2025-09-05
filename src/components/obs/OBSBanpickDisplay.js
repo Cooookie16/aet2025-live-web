@@ -18,7 +18,7 @@ export default function OBSBanpickDisplay({ data }) {
           setTeamsData(teams);
         }
       } catch (error) {
-        console.warn('載入隊伍資料失敗:', error);
+        // 靜默處理錯誤
       }
     };
     loadTeams();

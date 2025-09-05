@@ -108,25 +108,13 @@
     "index": 3
   },
   "dashboard:mapScores": {},
-  "dashboard:currentDisplay": "banpick",
-  "dashboard:teamImages": {},
-  "dashboard:selectedTeamForDisplay": "",
-  "dashboard:banpickData": {
-    "qf:3": {
-      "teamA": {
-        "bans": [
-          "8bit",
-          "carl",
-          "chester"
-        ]
-      },
-      "teamB": {
-        "bans": [
-          "Jae-Yong",
-          "byron",
-          "clancy"
-        ]
-      }
+  "dashboard:currentDisplay": "team-image",
+  "dashboard:teamImages": {
+    "Angelic But Bullied Megu": {
+      "filename": "Angelic_But_Bullied_Megu_1757049075492.jpg",
+      "url": "/team-images/Angelic_But_Bullied_Megu_1757049075492.jpg"
     }
-  }
+  },
+  "dashboard:selectedTeamForDisplay": "Angelic But Bullied Megu",
+  "dashboard:banpickData": {}
 }
