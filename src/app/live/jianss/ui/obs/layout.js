@@ -1,5 +1,5 @@
 export const metadata = {
-  title: '直播介面｜AET2025直播控制系統',
+  title: 'aet2025主bo直播介面',
   robots: {
     index: false,
     follow: false,
@@ -8,6 +8,6 @@ export const metadata = {
 
 export default function OBSLayout({ children }) {
   return children;
-}
+};
 
 
