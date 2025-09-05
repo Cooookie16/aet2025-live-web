@@ -5,16 +5,16 @@ const VAR_DIR = path.join(process.cwd(), 'var');
 const STATE_PATH = path.join(VAR_DIR, 'state.json');
 
 function ensureDir() {
-  if (!fs.existsSync(VAR_DIR)) fs.mkdirSync(VAR_DIR, { recursive: true });
+  if (!fs.existsSync(VAR_DIR)) {fs.mkdirSync(VAR_DIR, { recursive: true });}
 }
 
 function readAll() {
   try {
-    if (!fs.existsSync(STATE_PATH)) return {};
+    if (!fs.existsSync(STATE_PATH)) {return {};}
     const raw = fs.readFileSync(STATE_PATH, 'utf-8');
     return raw ? JSON.parse(raw) : {};
-  } catch (error) {
-    console.error('讀取狀態檔案失敗:', error);
+  } catch {
+    // 靜默處理錯誤
     return {};
   }
 }
@@ -23,8 +23,8 @@ function writeAll(obj) {
   try {
     ensureDir();
     fs.writeFileSync(STATE_PATH, JSON.stringify(obj || {}, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('寫入狀態檔案失敗:', error);
+  } catch {
+    // 靜默處理錯誤
   }
 }
 
@@ -42,8 +42,8 @@ export function kvSet(key, value) {
       if (value.trim().startsWith('{') || value.trim().startsWith('[')) {
         try {
           data[key] = JSON.parse(value);
-        } catch (parseError) {
-          console.warn(`解析JSON失敗，使用原始字串值:`, parseError);
+        } catch {
+          // 靜默處理錯誤
           data[key] = value;
         }
       } else {
@@ -56,7 +56,7 @@ export function kvSet(key, value) {
     }
     writeAll(data);
   } catch (error) {
-    console.error('kvSet失敗:', error);
+    // 靜默處理錯誤
     throw error;
   }
 }

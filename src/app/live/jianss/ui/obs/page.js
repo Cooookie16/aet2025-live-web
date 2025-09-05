@@ -13,8 +13,11 @@ import './obs.css';
 if (typeof window !== 'undefined') {
   try {
     const noop = () => {};
+    // eslint-disable-next-line no-console
     console.log = noop;
+    // eslint-disable-next-line no-console
     console.warn = noop;
+    // eslint-disable-next-line no-console
     console.error = noop;
   } catch {}
 }
@@ -24,7 +27,6 @@ export default function OBSLiveUI() {
   const [displayData, setDisplayData] = useState({});
   const [bracket, setBracket] = useState(null); // 從後端載入並由 SSE 即時更新
   const [currentBroadcast, setCurrentBroadcast] = useState({ stage: null, index: null });
-  const [isConnected, setIsConnected] = useState(false);
   const [teamImages, setTeamImages] = useState({});
   const [selectedTeamForDisplay, setSelectedTeamForDisplay] = useState('');
   const [banpickData, setBanpickData] = useState({});
@@ -72,7 +74,7 @@ export default function OBSLiveUI() {
             setBanpickData(d.banpickData);
           }
         }
-      } catch (e) {
+      } catch {
         // 靜默處理錯誤
       }
     })();
@@ -82,10 +84,14 @@ export default function OBSLiveUI() {
       // 若 SSE 連線存在但長時間未更新，也主動校正一次狀態
       const now = Date.now();
       const tooStale = (now - (lastUpdateRef.current || 0)) > 15000; // 15s 無事件視為過舊
-      if (esRef.current && !tooStale) return; // SSE 正常且不過舊時暫停輪詢
+      if (esRef.current && !tooStale) {
+        return; // SSE 正常且不過舊時暫停輪詢
+      }
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
-        if (!res.ok) return;
+        if (!res.ok) {
+          return;
+        }
         let json = null;
         try { json = await res.json(); } catch { json = null; }
         const d = json?.data || {};
@@ -124,27 +130,33 @@ export default function OBSLiveUI() {
         esRef.current = es;
 
         es.onopen = () => {
-          setIsConnected(true);
           retryAttemptRef.current = 0; // 重置退避
         };
-        es.onerror = (evt) => {
-          setIsConnected(false);
+        es.onerror = () => {
           try { es.close(); } catch {}
           esRef.current = null;
           // 指數退避（上限 30s）
           const nextDelay = Math.min(30000, 1000 * Math.pow(2, retryAttemptRef.current || 0));
           retryAttemptRef.current = (retryAttemptRef.current || 0) + 1;
-          if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+          if (retryTimerRef.current) {
+            clearTimeout(retryTimerRef.current);
+          }
           retryTimerRef.current = setTimeout(() => connect(), nextDelay);
         };
         es.onmessage = (evt) => {
           try {
             // 忽略空白或無效資料框，避免 JSON.parse 例外
             const raw = (evt && typeof evt.data === 'string') ? evt.data.trim() : '';
-            if (!raw || raw[0] !== '{') return;
+            if (!raw || raw[0] !== '{') {
+              return;
+            }
             const latestMessage = JSON.parse(raw);
-            if (!latestMessage) return;
-            if (latestMessage.timestamp && latestMessage.timestamp <= (lastUpdateRef.current || 0)) return;
+            if (!latestMessage) {
+              return;
+            }
+            if (latestMessage.timestamp && latestMessage.timestamp <= (lastUpdateRef.current || 0)) {
+              return;
+            }
 
             if (latestMessage.type === 'display-change') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
@@ -176,7 +188,7 @@ export default function OBSLiveUI() {
                 try {
                   const isEmpty = latestMessage && latestMessage.data && latestMessage.data.mapScores && Object.keys(latestMessage.data.mapScores).length === 0;
                   if (isEmpty) {
-                    lastMapsCacheRef.current = {};
+                    // 靜默處理快取清理
                   }
                 } catch {}
               }
@@ -204,12 +216,12 @@ export default function OBSLiveUI() {
                 setBanpickData(latestMessage.data.banpickData);
               }
             }
-          } catch (e) {
+          } catch {
             // 靜默處理錯誤
           }
         };
-      } catch (e) {
-        setIsConnected(false);
+      } catch {
+        // 靜默處理錯誤
       }
     };
     // 看門狗：若 25s 沒有任何事件，主動關閉 SSE 並觸發重連
@@ -235,7 +247,9 @@ export default function OBSLiveUI() {
       }
     };
     const onOnline = () => {
-      if (!esRef.current) connect();
+      if (!esRef.current) {
+        connect();
+      }
     };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('online', onOnline);
@@ -258,10 +272,14 @@ export default function OBSLiveUI() {
     const fetchForSwitch = async () => {
       const isMapScore = currentDisplay === 'map-score';
       const { stage, index } = currentBroadcast || {};
-      if (!isMapScore || (!stage && stage !== 0) || typeof index !== 'number') return;
+      if (!isMapScore || (!stage && stage !== 0) || typeof index !== 'number') {
+        return;
+      }
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
-        if (!res.ok) return;
+        if (!res.ok) {
+          return;
+        }
         const json = await res.json().catch(() => null);
         const d = json?.data || {};
         if (d?.mapScores) {
@@ -275,7 +293,9 @@ export default function OBSLiveUI() {
 
   // 渲染不同的顯示介面
   const renderDisplay = () => {
-    if (!currentDisplay) return null; // 尚未取得狀態前不渲染，避免 welcome 閃爍
+    if (!currentDisplay) {
+      return null; // 尚未取得狀態前不渲染，避免 welcome 閃爍
+    }
     switch (currentDisplay) {
       case 'welcome':
         return <OBSWelcomeDisplay data={displayData} />;

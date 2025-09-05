@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 
 // OBS 隊伍圖片顯示
 export default function OBSTeamImageDisplay({ data }) {
   const selectedTeamForDisplay = data?.selectedTeamForDisplay;
-  const teamImages = data?.teamImages || {};
+  const teamImages = useMemo(() => data?.teamImages || {}, [data?.teamImages]);
   const [teamsData, setTeamsData] = useState([]);
   const [imageTimestamp, setImageTimestamp] = useState(Date.now());
   
@@ -18,8 +19,8 @@ export default function OBSTeamImageDisplay({ data }) {
           const data = await res.json();
           setTeamsData(data);
         }
-      } catch (e) {
-        console.warn('載入隊伍資料失敗:', e);
+      } catch {
+        // 靜默處理錯誤
       }
     };
     loadTeams();
@@ -34,7 +35,7 @@ export default function OBSTeamImageDisplay({ data }) {
 
   // 根據隊伍名稱取得選手陣列
   const getTeamMembers = (teamName) => {
-    if (!teamName) return '';
+    if (!teamName) {return '';}
     const team = teamsData.find(t => t.name === teamName);
     return team ? team.members.join(', ') : '';
   };
@@ -50,9 +51,11 @@ export default function OBSTeamImageDisplay({ data }) {
             {selectedTeamImage ? (
               /* 有圖片時：顯示置中的圖片 */
               <div className="w-full h-full flex items-center justify-center">
-                <img
+                <Image
                   src={`${selectedTeamImage.url}?t=${imageTimestamp}`}
                   alt={`${selectedTeamForDisplay} 隊伍圖片`}
+                  width={790}
+                  height={600}
                   className="max-w-[790px] h-auto object-contain"
                   style={{ maxHeight: '100%' }}
                 />

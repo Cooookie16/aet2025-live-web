@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 // 隊伍圖片管理組件
 export default function TeamImageManager({ 
   teamOptions, 
@@ -21,6 +23,7 @@ export default function TeamImageManager({
         <button
           onClick={() => {
             try {
+              // eslint-disable-next-line no-alert
               const ok = window.confirm('確認要刪除所有隊伍圖片嗎？此動作無法復原。');
               if (ok) {
                 onDeleteAllImages();
@@ -63,9 +66,11 @@ export default function TeamImageManager({
             {teamImages[team.name || team] && (
               <div className="mb-3">
                 <div className="w-full h-24 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img
+                  <Image
                     src={teamImages[team.name || team].url}
                     alt={`${team.name || team} 隊伍圖片`}
+                    width={200}
+                    height={96}
                     className="max-w-full max-h-full object-contain"
                   />
                 </div>
@@ -101,6 +106,7 @@ export default function TeamImageManager({
                   return;
                 }
                 try {
+                  // eslint-disable-next-line no-alert
                   const ok = window.confirm(`確認要刪除 ${teamName} 的圖片嗎？`);
                   if (ok) {
                     onDeleteTeamImage(teamName);

@@ -24,8 +24,8 @@ export function useTeamImages() {
               if (d.selectedTeamForDisplay) {
                 setSelectedTeamForDisplay(d.selectedTeamForDisplay || '');
               }
-            } catch (parseError) {
-              console.warn('解析API回應JSON失敗:', parseError);
+            } catch {
+              // 靜默處理錯誤
             }
           }
         }

@@ -17,17 +17,15 @@ export async function POST(request) {
 
     // 刪除指定的圖片檔案
     if (teamImages && typeof teamImages === 'object') {
-      for (const [teamName, imageData] of Object.entries(teamImages)) {
+      for (const [, imageData] of Object.entries(teamImages)) {
         if (imageData && imageData.url) {
           try {
             const imagePath = join(process.cwd(), 'public', imageData.url);
             if (existsSync(imagePath)) {
               await unlink(imagePath);
               deletedCount++;
-              console.log('已刪除圖片:', imagePath);
             }
-          } catch (error) {
-            console.warn(`刪除圖片失敗 ${imageData.url}:`, error);
+          } catch {
             errorCount++;
           }
         }
@@ -44,16 +42,14 @@ export async function POST(request) {
             await unlink(filePath);
             if (!teamImages || !Object.values(teamImages).some(img => img.url?.includes(file))) {
               deletedCount++;
-              console.log('已刪除額外檔案:', filePath);
             }
-          } catch (error) {
-            console.warn(`刪除額外檔案失敗 ${file}:`, error);
+          } catch {
             errorCount++;
           }
         }
       }
-    } catch (error) {
-      console.warn('讀取目錄失敗:', error);
+    } catch {
+      // 靜默處理錯誤
     }
 
     return NextResponse.json({
@@ -63,8 +59,7 @@ export async function POST(request) {
       message: `成功刪除 ${deletedCount} 個檔案${errorCount > 0 ? `，${errorCount} 個檔案刪除失敗` : ''}`
     });
 
-  } catch (error) {
-    console.error('刪除全部圖片錯誤:', error);
+  } catch {
     return NextResponse.json({ error: '刪除全部圖片失敗' }, { status: 500 });
   }
 }

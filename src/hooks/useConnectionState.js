@@ -16,8 +16,8 @@ export function useConnectionState() {
         } else {
           setIsConnected(false);
         }
-      } catch (error) {
-        console.error('連線檢查失敗:', error);
+      } catch {
+        // 靜默處理錯誤
         setIsConnected(false);
       }
     };

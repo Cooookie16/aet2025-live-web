@@ -17,10 +17,9 @@ export async function POST(request) {
       const imagePath = join(process.cwd(), 'public', imageUrl);
       if (existsSync(imagePath)) {
         await unlink(imagePath);
-        console.log(`隊伍圖片刪除記錄 - 隊伍: ${teamName}, 檔名: ${imageUrl}, 時間: ${new Date().toISOString()}`);
       }
-    } catch (error) {
-      console.warn('刪除圖片檔案失敗:', error);
+    } catch {
+      // 靜默處理錯誤
     }
 
     return NextResponse.json({
@@ -29,8 +28,7 @@ export async function POST(request) {
       teamName: teamName
     });
 
-  } catch (error) {
-    console.error('刪除隊伍圖片錯誤:', error);
+  } catch {
     return NextResponse.json({ error: '刪除隊伍圖片失敗' }, { status: 500 });
   }
 }

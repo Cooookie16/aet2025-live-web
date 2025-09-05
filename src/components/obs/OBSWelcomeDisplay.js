@@ -3,7 +3,7 @@
 import Image from 'next/image';
 
 // OBS 優化的歡迎畫面組件
-export default function OBSWelcomeDisplay({ data }) {
+export default function OBSWelcomeDisplay() {
   return (
     <div className="w-full h-full flex items-center justify-center">
       {/* 歡迎畫面：僅顯示活動 Logo */}

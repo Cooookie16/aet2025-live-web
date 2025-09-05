@@ -18,7 +18,7 @@ export async function POST(request) {
     const uploadDir = join(process.cwd(), 'public', 'team-images');
     try {
       await mkdir(uploadDir, { recursive: true });
-    } catch (error) {
+    } catch {
       // 目錄可能已存在，忽略錯誤
     }
 
@@ -28,10 +28,8 @@ export async function POST(request) {
         const oldImagePath = join(process.cwd(), 'public', oldImageUrl);
         if (existsSync(oldImagePath)) {
           await unlink(oldImagePath);
-          console.log('已刪除舊圖片:', oldImagePath);
         }
-      } catch (error) {
-        console.warn('刪除舊圖片失敗:', error);
+      } catch {
         // 不中斷上傳流程，繼續處理新圖片
       }
     }
@@ -52,7 +50,6 @@ export async function POST(request) {
     const imageUrl = `/team-images/${filename}`;
     
     // 記錄檔名對照到日誌（每次修改都記錄）
-    console.log(`隊伍圖片更新記錄 - 隊伍: ${teamName}, 檔名: ${filename}, URL: ${imageUrl}, 時間: ${new Date().toISOString()}`);
     
     return NextResponse.json({
       success: true,
@@ -62,8 +59,7 @@ export async function POST(request) {
       timestamp: timestamp
     });
 
-  } catch (error) {
-    console.error('圖片上傳錯誤:', error);
+  } catch {
     return NextResponse.json({ error: '圖片上傳失敗' }, { status: 500 });
   }
 }

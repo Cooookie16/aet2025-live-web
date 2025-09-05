@@ -13,7 +13,6 @@ import { useTeamImages } from '@/hooks/useTeamImages';
 import { useBracketState } from '@/hooks/useBracketState';
 import { useMapScores } from '@/hooks/useMapScores';
 import { useConnectionState } from '@/hooks/useConnectionState';
-import { loadTeamOptions } from '@/utils/teamUtils';
 import { getStageLabel } from '@/utils/displayUtils';
 
 export default function Dashboard() {
@@ -36,8 +35,7 @@ export default function Dashboard() {
           const teams = await res.json();
           setTeamOptions(teams);
         }
-      } catch (error) {
-        console.warn('載入隊伍資料失敗:', error);
+      } catch {
         setTeamOptions([]);
       }
     };

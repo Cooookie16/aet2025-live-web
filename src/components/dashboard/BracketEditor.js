@@ -60,17 +60,10 @@ export default function BracketEditor({
 }) {
   // 是否為目前播報對戰
   const isCurrentMatch = (stage, index) => {
-    if (!currentBroadcast) return false;
+    if (!currentBroadcast) {
+      return false;
+    }
     return currentBroadcast.stage === stage && currentBroadcast.index === index;
-  };
-
-  // 轉換階段顯示標籤
-  const getStageLabel = (stage) => {
-    if (stage === 'qf') return '八強';
-    if (stage === 'sf') return '四強';
-    if (stage === 'lf') return '遺材賽';
-    if (stage === 'f') return '冠亞賽';
-    return '';
   };
 
   return (
@@ -92,7 +85,7 @@ export default function BracketEditor({
           {/* 八強（4 場） */}
           <div className="space-y-10 flex flex-col justify-center">
             {bracket.qf.map((m, i) => (
-              <div key={`qf-m-${i}`} className="relative">
+              <div key={`qf-match-${m.a.team}-${m.b.team}`} className="relative">
                 {/* 連接線（往四強） */}
                 <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
                 <MatchEditor
@@ -114,7 +107,7 @@ export default function BracketEditor({
             {/* 上方遺材賽 */}
             <div className="space-y-10">
               {bracket.lf.slice(0, 1).map((m, i) => (
-                <div key={`lf-top-${i}`} className="relative">
+                <div key={`lf-top-match-${m.a.team}-${m.b.team}`} className="relative">
                   {/* 連接線（左方彙入 & 往下） */}
                   <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
                   <div className="hidden md:block absolute bottom-[-16px] left-1/2 w-0.5 h-4 bg-gray-300 dark:bg-gray-600"></div>
@@ -135,7 +128,7 @@ export default function BracketEditor({
             {/* 四強 */}
             <div className="space-y-10">
               {bracket.sf.map((m, i) => (
-                <div key={`sf-m-${i}`} className="relative">
+                <div key={`sf-match-${m.a.team}-${m.b.team}`} className="relative">
                   {/* 連接線（左方彙入 & 往決賽） */}
                   <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
                   <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
@@ -156,7 +149,7 @@ export default function BracketEditor({
             {/* 下方遺材賽 */}
             <div className="space-y-10">
               {bracket.lf.slice(1, 2).map((m, i) => (
-                <div key={`lf-bottom-${i}`} className="relative">
+                <div key={`lf-bottom-match-${m.a.team}-${m.b.team}`} className="relative">
                   {/* 連接線（左方彙入 & 往上） */}
                   <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
                   <div className="hidden md:block absolute top-[-16px] left-1/2 w-0.5 h-4 bg-gray-300 dark:bg-gray-600"></div>
@@ -178,7 +171,7 @@ export default function BracketEditor({
           {/* 冠亞賽（1 場） */}
           <div className="flex flex-col justify-center">
             {bracket.f.map((m, i) => (
-              <div key={`f-m-${i}`} className="relative">
+              <div key={`f-match-${m.a.team}-${m.b.team}`} className="relative">
                 {/* 連接線（左方彙入） */}
                 <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
                 <MatchEditor

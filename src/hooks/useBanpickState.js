@@ -17,8 +17,8 @@ export function useBanpickState() {
           const data = await res.json();
           setBrawlersData(data);
         }
-      } catch (error) {
-        console.warn('載入角色資料失敗:', error);
+      } catch {
+        // 靜默處理錯誤
       }
     };
     loadBrawlers();
@@ -38,13 +38,13 @@ export function useBanpickState() {
               if (data.banpickData) {
                 setBanpickData(data.banpickData);
               }
-            } catch (parseError) {
-              console.warn('解析banpick資料失敗:', parseError);
+            } catch {
+              // 靜默處理錯誤
             }
           }
         }
-      } catch (error) {
-        console.warn('載入banpick資料失敗:', error);
+      } catch {
+        // 靜默處理錯誤
       }
       
       // 後備：從 localStorage 載入
@@ -53,8 +53,8 @@ export function useBanpickState() {
         if (rawBanpickData) {
           setBanpickData(JSON.parse(rawBanpickData));
         }
-      } catch (error) {
-        console.warn('載入localStorage banpick資料失敗:', error);
+      } catch {
+        // 靜默處理錯誤
       }
     };
     loadBanpickData();
@@ -64,8 +64,8 @@ export function useBanpickState() {
   useEffect(() => {
     try {
       localStorage.setItem('dashboard:banpickData', JSON.stringify(banpickData));
-    } catch (error) {
-      console.warn('儲存banpick資料到localStorage失敗:', error);
+    } catch {
+      // 靜默處理錯誤
     }
     
     // 同步到後端
@@ -76,15 +76,17 @@ export function useBanpickState() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ banpickData })
         });
-      } catch (error) {
-        console.warn('同步banpick資料到後端失敗:', error);
+      } catch {
+        // 靜默處理錯誤
       }
     })();
   }, [banpickData]);
 
   // 取得目前對戰的banpick資料
   const getCurrentMatchBanpick = (currentBroadcast) => {
-    if (!currentBroadcast) return null;
+    if (!currentBroadcast) {
+      return null;
+    }
     
     const matchKey = `${currentBroadcast.stage}:${currentBroadcast.index}`;
     return banpickData[matchKey] || null;
@@ -92,7 +94,9 @@ export function useBanpickState() {
 
   // 更新選手ban角
   const updatePlayerBan = (currentBroadcast, teamSide, playerIndex, brawlerName) => {
-    if (!currentBroadcast) return;
+    if (!currentBroadcast) {
+      return;
+    }
     
     const matchKey = `${currentBroadcast.stage}:${currentBroadcast.index}`;
     const newBanpickData = { ...banpickData };
@@ -110,7 +114,9 @@ export function useBanpickState() {
 
   // 重置對戰banpick資料
   const resetMatchBanpick = (currentBroadcast) => {
-    if (!currentBroadcast) return;
+    if (!currentBroadcast) {
+      return;
+    }
     
     const matchKey = `${currentBroadcast.stage}:${currentBroadcast.index}`;
     const newBanpickData = { ...banpickData };
@@ -124,7 +130,9 @@ export function useBanpickState() {
   // 取得選手已ban的角色
   const getPlayerBans = (currentBroadcast, teamSide, playerIndex) => {
     const matchData = getCurrentMatchBanpick(currentBroadcast);
-    if (!matchData || !matchData[teamSide]) return '';
+    if (!matchData || !matchData[teamSide]) {
+      return '';
+    }
     return matchData[teamSide].bans[playerIndex] || '';
   };
 

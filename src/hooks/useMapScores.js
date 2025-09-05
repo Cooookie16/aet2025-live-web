@@ -21,8 +21,8 @@ export function useMapScores() {
               if (d.mapScores) {
                 setMapScores(d.mapScores || {});
               }
-            } catch (parseError) {
-              console.warn('解析API回應JSON失敗:', parseError);
+            } catch {
+              // 靜默處理錯誤
             }
           }
         }
@@ -51,8 +51,8 @@ export function useMapScores() {
         if (Array.isArray(data)) {
           setMapsData(data);
         }
-      } catch (e) {
-        console.warn('載入地圖資料庫失敗:', e);
+      } catch {
+        // 靜默處理錯誤
         setMapsData([]);
       }
     };
@@ -87,20 +87,20 @@ export function useMapScores() {
   // 取得目前播報對戰的地圖資料
   const getCurrentMatchMaps = (currentBroadcast) => {
     const { stage, index } = currentBroadcast || {};
-    if (!stage && stage !== 0) return [];
-    if (typeof index !== 'number') return [];
+    if (!stage && stage !== 0) {return [];}
+    if (typeof index !== 'number') {return [];}
     
     const key = `${stage}:${index}`;
     const entry = mapScores[key];
-    if (Array.isArray(entry) && entry.length === 5) return entry;
+    if (Array.isArray(entry) && entry.length === 5) {return entry;}
     return Array.from({ length: 5 }, () => ({ mode: '', map: '', scoreA: '0', scoreB: '0' }));
   };
 
   // 更新目前對戰的地圖資料
   const updateCurrentMatchMap = (currentBroadcast, idx, field, value) => {
     const { stage, index } = currentBroadcast || {};
-    if (!stage && stage !== 0) return;
-    if (typeof index !== 'number') return;
+    if (!stage && stage !== 0) {return;}
+    if (typeof index !== 'number') {return;}
     
     const key = `${stage}:${index}`;
     setMapScores(prev => {
@@ -114,8 +114,11 @@ export function useMapScores() {
   // 重置地圖比數
   const handleResetMapScores = () => {
     try {
+      // eslint-disable-next-line no-alert
       const ok = window.confirm('確認要重置所有地圖與比數資料嗎？此動作無法復原。');
-      if (!ok) return;
+      if (!ok) {
+        return;
+      }
     } catch {}
     setMapScores({});
   };

@@ -27,14 +27,14 @@ export function useBracketState() {
             try {
               const json = JSON.parse(text);
               apiData = json?.data || {};
-            } catch (parseError) {
-              console.warn('解析API回應JSON失敗:', parseError);
+            } catch {
+              // 靜默處理錯誤
               apiData = {};
             }
           }
         }
-      } catch (error) {
-        console.warn('載入API狀態失敗:', error);
+      } catch {
+        // 靜默處理錯誤
       }
       
       // 載入bracket：API優先，localStorage為後備
@@ -46,8 +46,8 @@ export function useBracketState() {
           if (rawBracket) {
             setBracket(JSON.parse(rawBracket));
           }
-        } catch (error) {
-          console.warn('載入localStorage bracket失敗:', error);
+        } catch {
+          // 靜默處理錯誤
         }
       }
       
@@ -64,8 +64,8 @@ export function useBracketState() {
               setCurrentBroadcast(parsedBroadcast);
             }
           }
-        } catch (error) {
-          console.warn('載入localStorage currentBroadcast失敗:', error);
+        } catch {
+          // 靜默處理錯誤
         }
       }
     };
@@ -133,8 +133,11 @@ export function useBracketState() {
 
   const handleResetBrackets = () => {
     try {
+      // eslint-disable-next-line no-alert
       const ok = window.confirm('確認要清空所有賽程表資料嗎？此動作無法復原。');
-      if (!ok) return;
+      if (!ok) {
+        return;
+      }
     } catch {}
     setBracket(buildInitialBracket());
   };

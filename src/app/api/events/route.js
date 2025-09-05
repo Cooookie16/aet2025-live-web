@@ -12,7 +12,9 @@ export async function GET(request) {
     start(controller) {
       // 心跳（保護 enqueue）
       heartbeat = setInterval(() => {
-        if (isClosed) return;
+        if (isClosed) {
+          return;
+        }
         try {
           controller.enqueue(encoder.encode(`: heartbeat\n\n`));
         } catch {
@@ -49,7 +51,9 @@ export async function GET(request) {
 
       // 推送函式
       const send = (record) => {
-        if (isClosed) return;
+        if (isClosed) {
+          return;
+        }
         try {
           controller.enqueue(encoder.encode(`id: ${record.id}\n`));
           controller.enqueue(encoder.encode(`data: ${record.payload}\n\n`));
@@ -79,7 +83,9 @@ export async function GET(request) {
       // 嘗試監聽 abort（改用 request.signal）
       try {
         request?.signal?.addEventListener?.('abort', () => {
-          if (isClosed) return;
+          if (isClosed) {
+            return;
+          }
           isClosed = true;
           try { clearInterval(heartbeat); } catch {}
           try { unsubscribe(); } catch {}
@@ -88,7 +94,9 @@ export async function GET(request) {
       } catch {}
     },
     cancel() {
-      if (isClosed) return;
+      if (isClosed) {
+        return;
+      }
       isClosed = true;
       try { clearInterval(heartbeat); } catch {}
       try { unsubscribe(); } catch {}

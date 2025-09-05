@@ -23,21 +23,21 @@
       },
       {
         "a": {
-          "team": "",
+          "team": "秦始皇騎熊貓",
           "score": "0"
         },
         "b": {
-          "team": "",
+          "team": "Team BIG MOM",
           "score": "0"
         }
       },
       {
         "a": {
-          "team": "Angelic But Bullied Megu",
+          "team": "",
           "score": "0"
         },
         "b": {
-          "team": "HuyaTang",
+          "team": "",
           "score": "0"
         }
       }
@@ -77,11 +77,11 @@
       },
       {
         "a": {
-          "team": "Angelic But Bullied Megu",
+          "team": "",
           "score": "0"
         },
         "b": {
-          "team": "秦始皇騎熊貓",
+          "team": "",
           "score": "0"
         }
       }
@@ -105,16 +105,34 @@
   },
   "dashboard:currentBroadcast": {
     "stage": "qf",
-    "index": 3
+    "index": 2
   },
-  "dashboard:mapScores": {},
-  "dashboard:currentDisplay": "team-image",
-  "dashboard:teamImages": {
-    "Angelic But Bullied Megu": {
-      "filename": "Angelic_But_Bullied_Megu_1757049075492.jpg",
-      "url": "/team-images/Angelic_But_Bullied_Megu_1757049075492.jpg"
-    }
+  "dashboard:mapScores": {
+    "qf:2": [
+      {
+        "mode": "寶石爭奪戰",
+        "map": "堅石礦井 Hard Rock Mine"
+      },
+      {
+        "mode": "亂鬥足球",
+        "map": "綠蔭球場 Sneaky Fields"
+      },
+      {
+        "mode": "搶星大作戰",
+        "map": "神秘流星 Shooting Star"
+      },
+      {
+        "mode": "金庫攻防戰",
+        "map": "安全區域 Safe Zone"
+      },
+      {
+        "mode": "極限淘汰賽",
+        "map": "空礦地帶 Out in the Open"
+      }
+    ]
   },
-  "dashboard:selectedTeamForDisplay": "Angelic But Bullied Megu",
+  "dashboard:currentDisplay": "map-score",
+  "dashboard:teamImages": {},
+  "dashboard:selectedTeamForDisplay": "",
   "dashboard:banpickData": {}
 }

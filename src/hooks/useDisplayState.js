@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
 // 顯示介面狀態管理 hook
 export function useDisplayState() {
@@ -9,14 +9,14 @@ export function useDisplayState() {
 
   // 合法顯示介面清單與清理函式
   const VALID_DISPLAY_IDS = useMemo(() => ['welcome', 'bracket', 'banpick', 'map-score', 'team-image'], []);
-  const sanitizeDisplay = (val) => {
+  const sanitizeDisplay = useCallback((val) => {
     try {
       const s = (val ?? '').toString().trim();
       return VALID_DISPLAY_IDS.includes(s) ? s : null;
     } catch {
       return null;
     }
-  };
+  }, [VALID_DISPLAY_IDS]);
 
   // 供 UI 呈現選中狀態用：若當前值無效則回退為 welcome（不改動原始狀態）
   const selectedDisplayId = useMemo(() => {
@@ -24,7 +24,7 @@ export function useDisplayState() {
       return null;
     }
     return sanitizeDisplay(currentDisplay) || 'welcome';
-  }, [currentDisplay, displayLoaded]);
+  }, [currentDisplay, displayLoaded, sanitizeDisplay]);
 
   // 可用的顯示介面選項
   const displayOptions = useMemo(() => [
@@ -62,8 +62,8 @@ export function useDisplayState() {
               }
               setDisplayLoaded(true);
               return;
-            } catch (parseError) {
-              console.warn('解析API回應JSON失敗:', parseError);
+            } catch {
+              // 靜默處理錯誤
             }
           }
         }
@@ -80,7 +80,7 @@ export function useDisplayState() {
       setDisplayLoaded(true);
     };
     loadState();
-  }, []);
+  }, [sanitizeDisplay]);
 
   // 同步顯示介面到後端
   useEffect(() => {
@@ -97,7 +97,7 @@ export function useDisplayState() {
         });
       } catch {}
     })();
-  }, [currentDisplay, displayLoaded]);
+  }, [currentDisplay, displayLoaded, sanitizeDisplay]);
 
   // 切換顯示介面
   const switchDisplay = (displayId) => {

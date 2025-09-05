@@ -2,10 +2,10 @@
 
 // 轉換階段顯示標籤
 export function getStageLabel(stage) {
-  if (stage === 'qf') return '八強';
-  if (stage === 'sf') return '四強';
-  if (stage === 'lf') return '遺材賽';
-  if (stage === 'f') return '冠亞賽';
+  if (stage === 'qf') {return '八強';}
+  if (stage === 'sf') {return '四強';}
+  if (stage === 'lf') {return '遺材賽';}
+  if (stage === 'f') {return '冠亞賽';}
   return '';
 }
 
@@ -46,9 +46,9 @@ export async function sendCommand(command) {
     });
 
     if (response.ok) {
-      console.log('指令發送成功');
+      // 靜默處理成功
     }
-  } catch (error) {
-    console.error('發送指令失敗:', error);
+  } catch {
+    // 靜默處理錯誤
   }
 }

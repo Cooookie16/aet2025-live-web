@@ -17,16 +17,16 @@ export default function MapScoreEditor({
 
   // 轉換階段顯示標籤
   const getStageLabel = (stage) => {
-    if (stage === 'qf') return '八強';
-    if (stage === 'sf') return '四強';
-    if (stage === 'lf') return '遺材賽';
-    if (stage === 'f') return '冠亞賽';
+    if (stage === 'qf') {return '八強';}
+    if (stage === 'sf') {return '四強';}
+    if (stage === 'lf') {return '遺材賽';}
+    if (stage === 'f') {return '冠亞賽';}
     return '';
   };
 
   // 取得目前播報對戰的隊伍名稱
   const getCurrentBroadcastTeams = () => {
-    const { stage, index } = currentBroadcast || {};
+    const { stage } = currentBroadcast || {};
     if (!stage && stage !== 0) {
       return { a: '', b: '' };
     }
@@ -60,7 +60,7 @@ export default function MapScoreEditor({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {currentMatchMaps.map((m, i) => (
           <div
-            key={`map-${i}`}
+            key={`map-${m.map || `map-${i}`}`}
             className={
               `p-4 rounded-lg border-2 text-left transition-all ` +
               `border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600`

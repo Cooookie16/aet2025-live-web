@@ -9,9 +9,7 @@ export async function GET(request) {
 
     // 專門處理舊版輪詢端點：紀錄來源，回 410 並建議停止重試
     if (action === 'get-messages') {
-      const referer = request.headers.get('referer') || '';
-      const userAgent = request.headers.get('user-agent') || '';
-      console.warn('[Deprecated] GET /api/broadcast?action=get-messages 來自:', { referer, userAgent });
+      // 靜默處理deprecated警告
 
       return new Response(JSON.stringify({
         error: 'This endpoint is deprecated. Use SSE at /api/events.',

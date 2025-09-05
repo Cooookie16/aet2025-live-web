@@ -21,8 +21,8 @@ export async function GET() {
         'Expires': '0',
       },
     });
-  } catch (error) {
-    console.error('讀取角色列表失敗:', error);
+  } catch {
+    // 靜默處理錯誤
     return NextResponse.json(
       { error: '讀取角色列表失敗' },
       { status: 500 }

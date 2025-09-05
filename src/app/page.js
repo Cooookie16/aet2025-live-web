@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 // 自訂本頁頁籤標題
 export const metadata = {
@@ -11,7 +12,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-6">
         <div className="mb-8">
           <div className="flex items-center gap-3" style={{ fontSize: '1.875rem' }}>
-            <img src="/globe.svg" alt="Logo" className="h-[1em] w-[1em]" />
+            <Image src="/globe.svg" alt="Logo" width={30} height={30} className="h-[1em] w-[1em]" />
             <h1 className="text-3xl font-bold text-gray-900">
               AET2025直播控制系統
             </h1>

@@ -47,7 +47,7 @@ export function getSubscriberCount() {
 
 export function getSince(lastEventId) {
   const since = Number(lastEventId);
-  if (!Number.isFinite(since) || since < 0) return [...ringBuffer];
+  if (!Number.isFinite(since) || since < 0) {return [...ringBuffer];}
   return ringBuffer.filter(r => r.id > since);
 }
 

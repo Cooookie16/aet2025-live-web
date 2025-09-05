@@ -23,19 +23,33 @@ export async function GET() {
     const banpickData = kvGet(KEYS.banpickData);
     
     const responseData = {};
-    if (bracket) responseData.bracket = bracket;
-    if (broadcast && broadcast.stage !== null) responseData.currentBroadcast = broadcast;
-    if (display) responseData.currentDisplay = display;
-    if (mapScores) responseData.mapScores = mapScores;
-    if (teamImages) responseData.teamImages = teamImages;
-    if (selectedTeamForDisplay) responseData.selectedTeamForDisplay = selectedTeamForDisplay;
-    if (banpickData) responseData.banpickData = banpickData;
+    if (bracket) {
+      responseData.bracket = bracket;
+    }
+    if (broadcast && broadcast.stage !== null) {
+      responseData.currentBroadcast = broadcast;
+    }
+    if (display) {
+      responseData.currentDisplay = display;
+    }
+    if (mapScores) {
+      responseData.mapScores = mapScores;
+    }
+    if (teamImages) {
+      responseData.teamImages = teamImages;
+    }
+    if (selectedTeamForDisplay) {
+      responseData.selectedTeamForDisplay = selectedTeamForDisplay;
+    }
+    if (banpickData) {
+      responseData.banpickData = banpickData;
+    }
     
     return NextResponse.json({
       ok: true,
       data: responseData,
     }, { status: 200 });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ ok: false, error: 'READ_FAILED' }, { status: 500 });
   }
 }
@@ -51,21 +65,10 @@ export async function POST(request) {
     try {
       body = JSON.parse(text);
     } catch (parseError) {
-      console.error('解析請求JSON失敗:', parseError);
       return NextResponse.json({ ok: false, error: 'INVALID_JSON', details: parseError.message }, { status: 400 });
     }
     
     const { bracket, currentBroadcast, currentDisplay, mapScores, teamImages, selectedTeamForDisplay, banpickData } = body || {};
-
-    console.log('API接收到的資料:', {
-      bracket: bracket ? '有資料' : '無資料',
-      currentBroadcast: currentBroadcast ? '有資料' : '無資料',
-      currentDisplay: currentDisplay ? '有資料' : '無資料',
-      mapScores: mapScores ? '有資料' : '無資料',
-      teamImages: teamImages ? '有資料' : '無資料',
-      selectedTeamForDisplay: selectedTeamForDisplay ? '有資料' : '無資料',
-      banpickData: banpickData ? '有資料' : '無資料'
-    });
 
     if (bracket !== undefined) {
       kvSet(KEYS.bracket, bracket);
@@ -158,8 +161,6 @@ export async function POST(request) {
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e) {
-    console.error('API狀態更新失敗:', e);
-    console.error('錯誤堆疊:', e.stack);
     return NextResponse.json({ ok: false, error: 'WRITE_FAILED', details: e.message }, { status: 500 });
   }
 }

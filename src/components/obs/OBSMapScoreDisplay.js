@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 
-const OBS_DEBUG = false; // 關閉 OBS 端除錯輸出
+// 關閉 OBS 端除錯輸出
 
 // OBS 地圖與比數顯示
 export default function OBSMapScoreDisplay({ data }) {
@@ -19,17 +20,17 @@ export default function OBSMapScoreDisplay({ data }) {
     const fetchLatest = async () => {
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
-        if (!res.ok) return;
+        if (!res.ok) {return;}
         const json = await res.json().catch(() => null);
         const all = json?.data?.mapScores || {};
         const { stage, index } = currentBroadcast || {};
-        if (!stage && stage !== 0) return;
-        if (typeof index !== 'number') return;
+        if (!stage && stage !== 0) {return;}
+        if (typeof index !== 'number') {return;}
         const key = `${stage}:${index}`;
         const entry = all?.[key];
         if (Array.isArray(entry) && entry.length > 0) {
           const padded = [...entry];
-          while (padded.length < 5) padded.push({ mode: '', map: '', scoreA: '0', scoreB: '0' });
+          while (padded.length < 5) {padded.push({ mode: '', map: '', scoreA: '0', scoreB: '0' });}
           setOverrideMaps(padded.slice(0, 5));
         }
       } catch {}
@@ -52,7 +53,7 @@ export default function OBSMapScoreDisplay({ data }) {
     const entry = mapScores?.[key];
     if (Array.isArray(entry) && entry.length > 0) {
       const padded = [...entry];
-      while (padded.length < 5) padded.push({ mode: '', map: '', scoreA: '0', scoreB: '0' });
+      while (padded.length < 5) {padded.push({ mode: '', map: '', scoreA: '0', scoreB: '0' });}
       setOverrideMaps(padded.slice(0, 5));
     } else {
       setOverrideMaps(null);
@@ -68,8 +69,8 @@ export default function OBSMapScoreDisplay({ data }) {
           const data = await res.json();
           setTeamsData(data);
         }
-      } catch (e) {
-        console.warn('載入隊伍資料失敗:', e);
+      } catch {
+        // 靜默處理錯誤
       }
     };
     loadTeams();
@@ -84,8 +85,8 @@ export default function OBSMapScoreDisplay({ data }) {
           const data = await res.json();
           setMapsData(data);
         }
-      } catch (e) {
-        console.warn('載入地圖資料失敗:', e);
+      } catch {
+        // 靜默處理錯誤
       }
     };
     loadMaps();
@@ -93,7 +94,7 @@ export default function OBSMapScoreDisplay({ data }) {
 
   // 根據隊伍名稱取得選手陣列（未選隊伍時不顯示）
   const getTeamMembers = (teamName) => {
-    if (!teamName) return '';
+    if (!teamName) {return '';}
     const team = teamsData.find(t => t.name === teamName);
     return team ? team.members.join(', ') : '';
   };
@@ -101,7 +102,7 @@ export default function OBSMapScoreDisplay({ data }) {
   // 根據地圖名稱取得地圖圖片路徑
   const getMapImagePath = (mapName) => {
     if (!mapName) {
-      if (OBS_DEBUG) console.log('[OBS] getMapImagePath: mapName is null/empty');
+      // 靜默處理除錯
       return null;
     }
     
@@ -139,7 +140,7 @@ export default function OBSMapScoreDisplay({ data }) {
     };
     
     const imagePath = mapImageMap[mapName];
-    if (OBS_DEBUG) console.log('[OBS] getMapImagePath:', { mapName, imagePath, found: !!imagePath });
+    // 靜默處理除錯
     return imagePath || null;
   };
 
@@ -149,20 +150,13 @@ export default function OBSMapScoreDisplay({ data }) {
     const hasScoreA = map.scoreA !== undefined && map.scoreA !== null && map.scoreA !== '0' && map.scoreA !== '';
     const hasScoreB = map.scoreB !== undefined && map.scoreB !== null && map.scoreB !== '0' && map.scoreB !== '';
     const result = hasScoreA || hasScoreB;
-    if (OBS_DEBUG) console.log('[OBS] isRoundStarted:', { 
-      mapName: map.map, 
-      scoreA: map.scoreA, 
-      scoreB: map.scoreB, 
-      hasScoreA, 
-      hasScoreB, 
-      result 
-    });
+    // 靜默處理除錯
     return result;
   };
 
   // 從 mapsData 依地圖中文+英文名稱尋找所屬模式
   const findModeByMapName = (mapName) => {
-    if (!mapName || !Array.isArray(mapsData) || mapsData.length === 0) return { modeZh: null, modeEn: null };
+    if (!mapName || !Array.isArray(mapsData) || mapsData.length === 0) {return { modeZh: null, modeEn: null };}
     for (const entry of mapsData) {
       if (Array.isArray(entry.maps) && entry.maps.includes(mapName)) {
         return { modeZh: entry.mode || null, modeEn: entry.mode_en || null };
@@ -175,30 +169,30 @@ export default function OBSMapScoreDisplay({ data }) {
   const getModeInfo = (map) => {
     const modeZh = map?.mode || null;
     const modeEn = map?.mode_en || null;
-    if (modeZh && modeEn) return { modeZh, modeEn };
+    if (modeZh && modeEn) {return { modeZh, modeEn };}
 
     // 先用地圖名稱反推
     const byMap = findModeByMapName(map?.map);
-    if (byMap.modeZh || byMap.modeEn) return byMap;
+    if (byMap.modeZh || byMap.modeEn) {return byMap;}
 
     // 再以 mapsData 的中文模式對照英文
     if (modeZh && Array.isArray(mapsData)) {
       const hit = mapsData.find(e => e.mode === modeZh);
-      if (hit) return { modeZh: hit.mode || modeZh, modeEn: hit.mode_en || null };
+      if (hit) {return { modeZh: hit.mode || modeZh, modeEn: hit.mode_en || null };}
     }
     return { modeZh: modeZh || null, modeEn: modeEn || null };
   };
 
   // 依 mode_en 取得 icon 路徑
   const getModeIconPathByEn = (modeEn) => {
-    if (!modeEn) return null;
+    if (!modeEn) {return null;}
     return `/icons/${modeEn}.png`;
   };
 
   // 根據目前階段取得標籤（八強/四強/遺材賽/冠亞賽）
   const getStageLabel = () => {
     const stage = currentBroadcast?.stage;
-    if (!stage) return '';
+    if (!stage) {return '';}
     const mapStageToLabel = {
       qf: '八強',
       sf: '四強',
@@ -206,20 +200,6 @@ export default function OBSMapScoreDisplay({ data }) {
       f: '冠亞賽',
     };
     return mapStageToLabel[stage] || '';
-  };
-
-  // 取得模式 icon 路徑（/public/icons）
-  const getModeIconPath = (modeZh) => {
-    if (!modeZh) return null;
-    const modeMap = {
-      '寶石爭奪戰': '/icons/gem_grab.png',
-      '亂鬥足球': '/icons/brawl_ball.png',
-      '金庫攻防戰': '/icons/heist.png',
-      '搶星大作戰': '/icons/bounty.png',
-      '據點搶奪戰': '/icons/hot_zone.png',
-      '極限淘汰賽': '/icons/knock_out.png',
-    };
-    return modeMap[modeZh] || null;
   };
 
   // 取得目前播報對戰的隊伍名稱
@@ -240,12 +220,12 @@ export default function OBSMapScoreDisplay({ data }) {
   // 取得目前播報對戰的地圖資料
   const getCurrentMatchMaps = () => {
     const { stage, index } = currentBroadcast || {};
-    if (!stage && stage !== 0) return [];
-    if (typeof index !== 'number') return [];
+    if (!stage && stage !== 0) {return [];}
+    if (typeof index !== 'number') {return [];}
     
     const key = `${stage}:${index}`;
     const entry = mapScores?.[key];
-    if (OBS_DEBUG) console.log('[OBS] getCurrentMatchMaps:', { stage, index, key, entry, mapScores });
+    // 靜默處理除錯
     
     // 1) 優先使用 overrideMaps（剛抓回的最新值）
     if (Array.isArray(overrideMaps) && overrideMaps.length === 5) {
@@ -274,11 +254,11 @@ export default function OBSMapScoreDisplay({ data }) {
 
   // 計算隊伍贏的地圖數（得分==2 算贏 1 盤，封頂 5）
   const getTeamMapsWon = (list, team) => {
-    if (!Array.isArray(list)) return 0;
+    if (!Array.isArray(list)) {return 0;}
     const key = team === 'A' ? 'scoreA' : 'scoreB';
     const won = list.reduce((acc, m) => {
       const v = m?.[key];
-      if (v === undefined || v === null) return acc;
+      if (v === undefined || v === null) {return acc;}
       const n = Number(v);
       return acc + (n === 2 ? 1 : 0);
     }, 0);
@@ -287,9 +267,9 @@ export default function OBSMapScoreDisplay({ data }) {
 
   // 顯示用：將分數限制在 0~2，無效值顯示 '0'
   const formatScoreDisplay = (v) => {
-    if (v === undefined || v === null || v === '' || v === '0') return '0';
+    if (v === undefined || v === null || v === '' || v === '0') {return '0';}
     const n = Number(v);
-    if (!Number.isFinite(n)) return '0';
+    if (!Number.isFinite(n)) {return '0';}
     const clamped = Math.max(0, Math.min(2, n));
     return String(clamped);
   };
@@ -316,9 +296,9 @@ export default function OBSMapScoreDisplay({ data }) {
                 const iconPath = iconsReady && modeEn ? getModeIconPathByEn(modeEn) : null;
                 const showIcon = !!iconPath;
                 return (
-                  <div key={`mode-${index}`} className="w-24 h-12 bg-black p-2 flex items-center justify-center">
+                  <div key={`mode-${map?.map || `mode-${index}`}`} className="w-24 h-12 bg-black p-2 flex items-center justify-center">
                     {showIcon ? (
-                      <img src={iconPath} alt={modeEn || `第${index + 1}盤`} className="max-w-full max-h-full object-contain" />
+                      <Image src={iconPath} alt={modeEn || `第${index + 1}盤`} width={96} height={48} className="max-w-full max-h-full object-contain" />
                     ) : (
                       // 資料未就緒顯示空白；資料就緒但無 icon 顯示問號
                       iconsReady && mapsReady ? (
@@ -383,7 +363,7 @@ export default function OBSMapScoreDisplay({ data }) {
               
               return (
                 <div 
-                  key={`map-${index}`}
+                  key={`map-${map?.map || `map-${index}`}`}
                   className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center"
                 >
                   {roundStarted ? (
@@ -413,9 +393,11 @@ export default function OBSMapScoreDisplay({ data }) {
                         hasMap && mapImagePath ? (
                           <div className="w-full h-full flex flex-col">
                             <div className="flex-1 flex items-center justify-center">
-                              <img 
+                              <Image 
                                 src={mapImagePath} 
                                 alt={map.map || `第${index + 1}盤`}
+                                width={200}
+                                height={200}
                                 className="max-w-full max-h-full object-contain"
                               />
                             </div>

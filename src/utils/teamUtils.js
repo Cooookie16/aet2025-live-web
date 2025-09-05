@@ -14,8 +14,8 @@ export async function loadTeamOptions() {
     } else {
       return ['Team 1','Team 2','Team 3','Team 4','Team 5','Team 6','Team 7','Team 8'];
     }
-  } catch (e) {
-    console.warn('載入隊伍失敗，使用預設隊伍:', e);
+  } catch {
+    // 靜默處理錯誤
     return ['Team 1','Team 2','Team 3','Team 4','Team 5','Team 6','Team 7','Team 8'];
   }
 }
@@ -28,15 +28,15 @@ export async function loadTeamsData() {
       const data = await res.json();
       return data;
     }
-  } catch (e) {
-    console.warn('載入隊伍資料失敗:', e);
+  } catch {
+    // 靜默處理錯誤
   }
   return [];
 }
 
 // 根據隊伍名稱取得選手陣列
 export function getTeamMembers(teamName, teamsData) {
-  if (!teamName || !Array.isArray(teamsData)) return '';
+  if (!teamName || !Array.isArray(teamsData)) {return '';}
   const team = teamsData.find(t => t.name === teamName);
   return team ? team.members.join(', ') : '';
 }

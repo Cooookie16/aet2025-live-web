@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useBanpickState } from '@/hooks/useBanpickState';
 
 export default function BanpickEditor({ 
@@ -53,6 +52,7 @@ export default function BanpickEditor({
 
   // 重置目前對戰的banpick資料
   const handleResetBanpick = () => {
+    // eslint-disable-next-line no-alert
     if (confirm('確定要重置這場對戰的所有ban角選擇嗎？')) {
       resetMatchBanpick(currentBroadcast);
     }
@@ -118,7 +118,7 @@ export default function BanpickEditor({
               {/* 隊伍A的三個選手ban角選單 */}
               <div className="space-y-4">
                 {teamA.members.map((member, index) => (
-                  <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                  <div key={`teamA-${member}`} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                     <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">
                       {member}
                     </div>
@@ -132,8 +132,8 @@ export default function BanpickEditor({
                         className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">請選擇角色</option>
-                        {brawlersData.map((brawler, brawlerIndex) => (
-                          <option key={brawlerIndex} value={brawler}>
+                        {brawlersData.map((brawler) => (
+                          <option key={`brawler-${brawler}`} value={brawler}>
                             {brawler}
                           </option>
                         ))}
@@ -158,7 +158,7 @@ export default function BanpickEditor({
               {/* 隊伍B的三個選手ban角選單 */}
               <div className="space-y-4">
                 {teamB.members.map((member, index) => (
-                  <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                  <div key={`teamB-${member}`} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                     <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">
                       {member}
                     </div>
@@ -172,8 +172,8 @@ export default function BanpickEditor({
                         className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">請選擇角色</option>
-                        {brawlersData.map((brawler, brawlerIndex) => (
-                          <option key={brawlerIndex} value={brawler}>
+                        {brawlersData.map((brawler) => (
+                          <option key={`brawler-${brawler}`} value={brawler}>
                             {brawler}
                           </option>
                         ))}

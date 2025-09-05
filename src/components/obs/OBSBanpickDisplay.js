@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 // OBS Banpick 顯示
 export default function OBSBanpickDisplay({ data }) {
@@ -17,7 +18,7 @@ export default function OBSBanpickDisplay({ data }) {
           const teams = await res.json();
           setTeamsData(teams);
         }
-      } catch (error) {
+      } catch {
         // 靜默處理錯誤
       }
     };
@@ -60,7 +61,9 @@ export default function OBSBanpickDisplay({ data }) {
 
   // 取得banpick資料
   const getBanpickData = () => {
-    if (!currentBroadcast || !banpickData) return null;
+    if (!currentBroadcast || !banpickData) {
+      return null;
+    }
     
     const matchKey = `${currentBroadcast.stage}:${currentBroadcast.index}`;
     return banpickData[matchKey] || null;
@@ -98,7 +101,7 @@ export default function OBSBanpickDisplay({ data }) {
           {currentMatch.teamA.members.map((player, index) => {
             const bannedBrawler = banpick?.teamA?.bans?.[index] || '';
             return (
-              <div key={`teamA-${index}`} className="flex flex-col items-center gap-1">
+              <div key={`teamA-${player}`} className="flex flex-col items-center gap-1">
                 {/* 選手名稱 */}
                 <div className="text-sm font-medium text-white text-center">
                   {player}
@@ -107,9 +110,11 @@ export default function OBSBanpickDisplay({ data }) {
                 {/* 英雄圖片方塊 */}
                 <div className="w-24 h-24 rounded-lg border-2 border-emerald-500 bg-gray-800 overflow-hidden flex items-center justify-center">
                   {bannedBrawler ? (
-                    <img 
+                    <Image 
                       src={`/brawlers/${bannedBrawler}.png`}
                       alt={bannedBrawler}
+                      width={96}
+                      height={96}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.style.display = 'none';
@@ -140,7 +145,7 @@ export default function OBSBanpickDisplay({ data }) {
           {currentMatch.teamB.members.map((player, index) => {
             const bannedBrawler = banpick?.teamB?.bans?.[index] || '';
             return (
-              <div key={`teamB-${index}`} className="flex flex-col items-center gap-1">
+              <div key={`teamB-${player}`} className="flex flex-col items-center gap-1">
                 {/* 選手名稱 */}
                 <div className="text-sm font-medium text-white text-center">
                   {player}
@@ -149,9 +154,11 @@ export default function OBSBanpickDisplay({ data }) {
                 {/* 英雄圖片方塊 */}
                 <div className="w-24 h-24 rounded-lg border-2 border-sky-500 bg-gray-800 overflow-hidden flex items-center justify-center">
                   {bannedBrawler ? (
-                    <img 
+                    <Image 
                       src={`/brawlers/${bannedBrawler}.png`}
                       alt={bannedBrawler}
+                      width={96}
+                      height={96}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.style.display = 'none';
