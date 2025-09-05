@@ -116,8 +116,8 @@
         "scoreB": "2"
       },
       {
-        "mode": "",
-        "map": "",
+        "mode": "據點搶奪戰",
+        "map": "灼熱火圈 Ring of Fire",
         "scoreA": "0",
         "scoreB": "0"
       },
@@ -141,7 +141,7 @@
       }
     ]
   },
-  "dashboard:currentDisplay": "banpick",
+  "dashboard:currentDisplay": "map-score",
   "dashboard:banpickData": {
     "qf:0": {
       "teamA": {

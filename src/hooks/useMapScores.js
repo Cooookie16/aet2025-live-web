@@ -190,7 +190,7 @@ export function useMapScores() {
         }
       }
     } catch (error) {
-      console.error('同步總分到 Bracket 失敗:', error);
+      // 靜默處理錯誤
     }
   };
 

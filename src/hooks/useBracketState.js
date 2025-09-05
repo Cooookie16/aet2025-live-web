@@ -159,7 +159,7 @@ export function useBracketState() {
           }
         }
       } catch (error) {
-        console.error('檢查地圖分數並更新 Bracket 失敗:', error);
+        // 靜默處理錯誤
       }
     };
 
