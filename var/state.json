@@ -3,11 +3,11 @@
     "qf": [
       {
         "a": {
-          "team": "",
-          "score": "0"
+          "team": "Angelic But Bullied Megu",
+          "score": "2"
         },
         "b": {
-          "team": "",
+          "team": "HuyaTang",
           "score": "0"
         }
       },
@@ -112,30 +112,30 @@
       {
         "mode": "據點搶奪戰",
         "map": "灼熱火圈 Ring of Fire",
-        "scoreA": "1",
+        "scoreA": "2",
         "scoreB": "0"
       },
       {
-        "mode": "",
-        "map": "",
+        "mode": "據點搶奪戰",
+        "map": "開門大吉 Open Business",
+        "scoreA": "2",
+        "scoreB": "0"
+      },
+      {
+        "mode": "亂鬥足球",
+        "map": "綠蔭球場 Sneaky Fields",
         "scoreA": "0",
         "scoreB": "0"
       },
       {
-        "mode": "",
-        "map": "",
+        "mode": "金庫攻防戰",
+        "map": "安全區域 Safe Zone",
         "scoreA": "0",
         "scoreB": "0"
       },
       {
-        "mode": "",
-        "map": "",
-        "scoreA": "0",
-        "scoreB": "0"
-      },
-      {
-        "mode": "",
-        "map": "",
+        "mode": "極限淘汰賽",
+        "map": "金臂峽谷 Goldarm Gulch",
         "scoreA": "0",
         "scoreB": "0"
       }
@@ -171,7 +171,41 @@
         "scoreA": "0",
         "scoreB": "0"
       }
+    ],
+    "f:0": [
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      }
     ]
   },
-  "dashboard:currentDisplay": "map-score"
+  "dashboard:currentDisplay": "welcome",
+  "dashboard:teamImages": {},
+  "dashboard:selectedTeamForDisplay": "123 (1)"
 }

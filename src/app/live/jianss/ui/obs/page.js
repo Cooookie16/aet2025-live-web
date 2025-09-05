@@ -21,6 +21,8 @@ export default function OBSLiveUI() {
   const [bracket, setBracket] = useState(null); // 從後端載入並由 SSE 即時更新
   const [currentBroadcast, setCurrentBroadcast] = useState({ stage: null, index: null });
   const [isConnected, setIsConnected] = useState(false);
+  const [teamImages, setTeamImages] = useState({});
+  const [selectedTeamForDisplay, setSelectedTeamForDisplay] = useState('');
   
   // 以 SSE 取代輪詢（僅在掛載時建立一次連線）
   const lastUpdateRef = useRef(0);
@@ -59,6 +61,12 @@ export default function OBSLiveUI() {
               mapScores: d.mapScores
             }));
           }
+          if (d?.teamImages) {
+            setTeamImages(d.teamImages);
+          }
+          if (d?.selectedTeamForDisplay) {
+            setSelectedTeamForDisplay(d.selectedTeamForDisplay);
+          }
         }
       } catch (e) {
         console.warn('[OBS] /api/state failed:', e);
@@ -90,6 +98,12 @@ export default function OBSLiveUI() {
         }
         if (d?.mapScores) {
           setDisplayData(prev => ({ ...prev, mapScores: d.mapScores }));
+        }
+        if (d?.teamImages) {
+          setTeamImages(d.teamImages);
+        }
+        if (d?.selectedTeamForDisplay) {
+          setSelectedTeamForDisplay(d.selectedTeamForDisplay);
         }
       } catch {}
     }, 3000);
@@ -177,6 +191,18 @@ export default function OBSLiveUI() {
                 timestamp: latestMessage.data.timestamp,
                 lastUpdate: lastUpdateRef.current
               }));
+            } else if (latestMessage.type === 'team-images-update') {
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              console.log('[OBS] team-images-update');
+              if (latestMessage?.data?.teamImages) {
+                setTeamImages(latestMessage.data.teamImages);
+              }
+            } else if (latestMessage.type === 'selected-team-update') {
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              console.log('[OBS] selected-team-update');
+              if (latestMessage?.data?.selectedTeamForDisplay) {
+                setSelectedTeamForDisplay(latestMessage.data.selectedTeamForDisplay);
+              }
             }
           } catch (e) {
             console.warn('[OBS] onmessage parse error:', e, 'raw:', evt?.data);
@@ -272,6 +298,8 @@ export default function OBSLiveUI() {
         return <OBSBanpickDisplay data={displayData} />;
       case 'map-score':
         return <OBSMapScoreDisplay data={{ currentBroadcast, mapScores: displayData.mapScores, bracket }} />;
+      case 'team-image':
+        return <OBSTeamImageDisplay data={{ selectedTeamForDisplay, teamImages }} />;
       default:
         return null;
     }
@@ -1017,6 +1045,80 @@ function OBSMapScoreDisplay({ data }) {
         </div>
       </div>
     </div>
+      </div>
+    </div>
+  );
+}
+
+// OBS 隊伍圖片顯示
+function OBSTeamImageDisplay({ data }) {
+  const selectedTeamForDisplay = data?.selectedTeamForDisplay;
+  const teamImages = data?.teamImages || {};
+  const [teamsData, setTeamsData] = useState([]);
+  
+  // 載入隊伍資料
+  useEffect(() => {
+    const loadTeams = async () => {
+      try {
+        const res = await fetch('/teams.json', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setTeamsData(data);
+        }
+      } catch (e) {
+        console.warn('載入隊伍資料失敗:', e);
+      }
+    };
+    loadTeams();
+  }, []);
+
+  // 根據隊伍名稱取得選手陣列
+  const getTeamMembers = (teamName) => {
+    if (!teamName) return '';
+    const team = teamsData.find(t => t.name === teamName);
+    return team ? team.members.join(', ') : '';
+  };
+
+  // 取得選定隊伍的圖片
+  const selectedTeamImage = selectedTeamForDisplay ? teamImages[selectedTeamForDisplay] : null;
+
+  return (
+    <div className="w-full h-full flex items-center justify-center p-4">
+      <div className="w-full max-w-[760px] h-full flex flex-col items-center justify-center">
+        {selectedTeamForDisplay ? (
+          <>
+            {/* 隊伍名稱 */}
+            <div className="text-4xl font-bold text-white mb-6 text-center">
+              {selectedTeamForDisplay}
+            </div>
+            
+            {/* 選手名稱 */}
+            <div className="text-xl text-gray-300 mb-8 text-center">
+              {getTeamMembers(selectedTeamForDisplay)}
+            </div>
+            
+            {/* 隊伍圖片或佔位符 */}
+            <div className="w-full max-w-[600px] h-[400px] bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden">
+              {selectedTeamImage ? (
+                <img
+                  src={selectedTeamImage.url}
+                  alt={`${selectedTeamForDisplay} 隊伍圖片`}
+                  className="max-w-full max-h-full object-contain"
+                />
+              ) : (
+                <div className="text-center text-gray-400">
+                  <div className="text-6xl mb-4">📷</div>
+                  <div className="text-lg">尚未上傳隊伍圖片</div>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="text-center text-gray-400">
+            <div className="text-6xl mb-4">👥</div>
+            <div className="text-2xl">請在控制台選擇要顯示的隊伍</div>
+          </div>
+        )}
       </div>
     </div>
   );

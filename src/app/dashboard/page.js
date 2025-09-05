@@ -23,9 +23,13 @@ export default function Dashboard() {
   const [currentBroadcast, setCurrentBroadcast] = useState({ stage: null, index: null });
   // 初始載入完成旗標：避免在尚未載入前就將預設 welcome 覆蓋到後端
   const [displayLoaded, setDisplayLoaded] = useState(false);
+  // 隊伍圖片上傳狀態：每個隊伍對應一個圖片檔案
+  const [teamImages, setTeamImages] = useState({});
+  // 當前選定要顯示的隊伍
+  const [selectedTeamForDisplay, setSelectedTeamForDisplay] = useState('');
 
   // 合法顯示介面清單與清理函式
-  const VALID_DISPLAY_IDS = useMemo(() => ['welcome', 'bracket', 'banpick', 'map-score'], []);
+  const VALID_DISPLAY_IDS = useMemo(() => ['welcome', 'bracket', 'banpick', 'map-score', 'team-image'], []);
   const sanitizeDisplay = (val) => {
     try {
       const s = (val ?? '').toString().trim();
@@ -48,7 +52,9 @@ export default function Dashboard() {
     bracket: 'dashboard:bracket',
     broadcast: 'dashboard:currentBroadcast',
     display: 'dashboard:currentDisplay',
-    mapScores: 'dashboard:mapScores'
+    mapScores: 'dashboard:mapScores',
+    teamImages: 'dashboard:teamImages',
+    selectedTeamForDisplay: 'dashboard:selectedTeamForDisplay'
   };
 
   // 可用的顯示介面選項
@@ -56,7 +62,8 @@ export default function Dashboard() {
     { id: 'welcome', name: '歡迎畫面', description: '顯示活動歡迎畫面' },
     { id: 'bracket', name: '目前賽程 Bracket', description: '顯示當前賽程對戰樹' },
     { id: 'banpick', name: '目前 Banpick', description: '顯示當前 Ban/Pick 狀態' },
-    { id: 'map-score', name: '地圖與比數', description: '顯示地圖與當前比數' }
+    { id: 'map-score', name: '地圖與比數', description: '顯示地圖與當前比數' },
+    { id: 'team-image', name: '顯示選手圖', description: '顯示選定隊伍的選手圖片' }
   ];
 
   // 簡化的連線檢查（改用 /api/health，避免觸發舊的 get-messages）
@@ -97,6 +104,12 @@ export default function Dashboard() {
           if (d.mapScores) {
             setMapScores(d.mapScores || {});
           }
+          if (d.teamImages) {
+            setTeamImages(d.teamImages || {});
+          }
+          if (d.selectedTeamForDisplay) {
+            setSelectedTeamForDisplay(d.selectedTeamForDisplay || '');
+          }
           // 先嘗試使用後端值；若沒有再嘗試 localStorage
           let nextDisplay = sanitizeDisplay(d.currentDisplay);
           if (!nextDisplay) {
@@ -132,6 +145,18 @@ export default function Dashboard() {
         const rawMapScores = localStorage.getItem(STORAGE_KEYS.mapScores);
         if (rawMapScores) {
           setMapScores(JSON.parse(rawMapScores));
+        }
+      } catch {}
+      try {
+        const rawTeamImages = localStorage.getItem(STORAGE_KEYS.teamImages);
+        if (rawTeamImages) {
+          setTeamImages(JSON.parse(rawTeamImages));
+        }
+      } catch {}
+      try {
+        const rawSelectedTeam = localStorage.getItem(STORAGE_KEYS.selectedTeamForDisplay);
+        if (rawSelectedTeam) {
+          setSelectedTeamForDisplay(rawSelectedTeam);
         }
       } catch {}
       try {
@@ -202,6 +227,34 @@ export default function Dashboard() {
       } catch {}
     })();
   }, [mapScores]);
+
+  // 當隊伍圖片變更時同步到後端（亦寫入 localStorage 當作後備）
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEYS.teamImages, JSON.stringify(teamImages)); } catch {}
+    (async () => {
+      try {
+        await fetch('/api/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ teamImages })
+        });
+      } catch {}
+    })();
+  }, [teamImages]);
+
+  // 當選定隊伍變更時同步到後端（亦寫入 localStorage 當作後備）
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEYS.selectedTeamForDisplay, selectedTeamForDisplay); } catch {}
+    (async () => {
+      try {
+        await fetch('/api/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ selectedTeamForDisplay })
+        });
+      } catch {}
+    })();
+  }, [selectedTeamForDisplay]);
 
   // 載入隊伍清單
   useEffect(() => {
@@ -446,6 +499,40 @@ export default function Dashboard() {
     return modeData ? modeData.maps : [];
   };
 
+  // 處理隊伍圖片上傳
+  const handleTeamImageUpload = async (teamName, file) => {
+    if (!file) return;
+    
+    try {
+      // 建立 FormData 來上傳檔案
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('teamName', teamName);
+      
+      const response = await fetch('/api/upload-team-image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        // 更新本地狀態
+        setTeamImages(prev => ({
+          ...prev,
+          [teamName]: {
+            filename: result.filename,
+            url: result.url
+          }
+        }));
+        console.log('圖片上傳成功:', result);
+      } else {
+        console.error('圖片上傳失敗');
+      }
+    } catch (error) {
+      console.error('圖片上傳錯誤:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* 標題列 */}
@@ -512,6 +599,75 @@ export default function Dashboard() {
                     {option.description}
                   </div>
                 </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 隊伍圖片管理區域 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              隊伍圖片管理
+            </h2>
+            
+            {/* 當前選定顯示隊伍 */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                當前選定要顯示的隊伍
+              </label>
+              <select
+                value={selectedTeamForDisplay}
+                onChange={(e) => setSelectedTeamForDisplay(e.target.value)}
+                className="w-full max-w-md px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">請選擇隊伍</option>
+                {teamOptions.map(team => (
+                  <option key={team} value={team}>{team}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* 隊伍圖片上傳區域 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {teamOptions.map((team) => (
+                <div key={team} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2 truncate">
+                    {team}
+                  </h3>
+                  
+                  {/* 已上傳的圖片預覽 */}
+                  {teamImages[team] && (
+                    <div className="mb-3">
+                      <div className="w-full h-24 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
+                        <img
+                          src={teamImages[team].url}
+                          alt={`${team} 隊伍圖片`}
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                        已上傳: {teamImages[team].filename}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* 上傳按鈕 */}
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          handleTeamImageUpload(team, file);
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <button className="w-full px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors">
+                      {teamImages[team] ? '重新上傳' : '上傳圖片'}
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           </div>

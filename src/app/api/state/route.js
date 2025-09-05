@@ -7,6 +7,8 @@ const KEYS = {
   broadcast: 'dashboard:currentBroadcast',
   display: 'dashboard:currentDisplay',
   mapScores: 'dashboard:mapScores',
+  teamImages: 'dashboard:teamImages',
+  selectedTeamForDisplay: 'dashboard:selectedTeamForDisplay',
 };
 
 export async function GET() {
@@ -15,6 +17,8 @@ export async function GET() {
     const broadcast = kvGet(KEYS.broadcast);
     const display = kvGet(KEYS.display);
     const mapScores = kvGet(KEYS.mapScores);
+    const teamImages = kvGet(KEYS.teamImages);
+    const selectedTeamForDisplay = kvGet(KEYS.selectedTeamForDisplay);
     return NextResponse.json({
       ok: true,
       data: {
@@ -22,6 +26,8 @@ export async function GET() {
         currentBroadcast: broadcast ?? null,
         currentDisplay: display ?? null,
         mapScores: mapScores ?? null,
+        teamImages: teamImages ?? null,
+        selectedTeamForDisplay: selectedTeamForDisplay ?? null,
       },
     }, { status: 200 });
   } catch (e) {
@@ -32,7 +38,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { bracket, currentBroadcast, currentDisplay, mapScores } = body || {};
+    const { bracket, currentBroadcast, currentDisplay, mapScores, teamImages, selectedTeamForDisplay } = body || {};
 
     if (bracket !== undefined) {
       kvSet(KEYS.bracket, JSON.stringify(bracket));
@@ -79,6 +85,32 @@ export async function POST(request) {
           action: 'broadcast',
           type: 'map-score-update',
           data: { mapScores },
+          timestamp: Date.now(),
+        });
+      } catch {}
+    }
+
+    if (teamImages !== undefined) {
+      kvSet(KEYS.teamImages, JSON.stringify(teamImages));
+      // 廣播隊伍圖片更新
+      try {
+        sseBroadcast({
+          action: 'broadcast',
+          type: 'team-images-update',
+          data: { teamImages },
+          timestamp: Date.now(),
+        });
+      } catch {}
+    }
+
+    if (selectedTeamForDisplay !== undefined) {
+      kvSet(KEYS.selectedTeamForDisplay, String(selectedTeamForDisplay));
+      // 廣播選定隊伍更新
+      try {
+        sseBroadcast({
+          action: 'broadcast',
+          type: 'selected-team-update',
+          data: { selectedTeamForDisplay: String(selectedTeamForDisplay) },
           timestamp: Date.now(),
         });
       } catch {}
