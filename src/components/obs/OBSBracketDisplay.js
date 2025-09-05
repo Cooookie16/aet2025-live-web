@@ -47,7 +47,7 @@ export default function OBSBracketDisplay({ data }) {
             {/* 八強（4 場） */}
             <div className="space-y-3 flex flex-col justify-center">
               {qf.map((m, i) => (
-                <div key={`qf-match-${m.a.team}-${m.b.team}`} className="relative">
+                <div key={`qf-match-${i}`} className="relative">
                   {/* 往四強的水平連接線 */}
                   <div className="hidden md:block absolute right-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                   <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('qf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
@@ -85,7 +85,7 @@ export default function OBSBracketDisplay({ data }) {
               {/* 上方遺材賽 */}
               <div className="space-y-3">
                 {lf.slice(0, 1).map((m, i) => (
-                  <div key={`lf-top-match-${m.a.team}-${m.b.team}`} className="relative">
+                  <div key={`lf-top-match-${i}`} className="relative">
                     <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                     <div className="hidden md:block absolute bottom-[-6px] left-1/2 w-0.5 h-1.5 bg-pink-300"></div>
                     <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('lf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
@@ -115,7 +115,7 @@ export default function OBSBracketDisplay({ data }) {
               {/* 四強（往右推） */}
               <div className="space-y-3 ml-4">
                 {sf.map((m, i) => (
-                  <div key={`sf-match-${m.a.team}-${m.b.team}`} className="relative">
+                  <div key={`sf-match-${i}`} className="relative">
                     <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                     <div className="hidden md:block absolute right-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                     <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('sf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
@@ -147,7 +147,7 @@ export default function OBSBracketDisplay({ data }) {
               {/* 下方遺材賽 */}
               <div className="space-y-3">
                 {lf.slice(1, 2).map((m, i) => (
-                  <div key={`lf-bottom-match-${m.a.team}-${m.b.team}`} className="relative">
+                  <div key={`lf-bottom-match-${i}`} className="relative">
                     <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                     <div className="hidden md:block absolute top-[-6px] left-1/2 w-0.5 h-1.5 bg-pink-300"></div>
                     <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('lf', i + 1) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
@@ -178,7 +178,7 @@ export default function OBSBracketDisplay({ data }) {
             {/* 冠亞（1 場） */}
             <div className="flex flex-col justify-center">
               {f.map((m, i) => (
-                <div key={`f-match-${m.a.team}-${m.b.team}`} className="relative">
+                <div key={`f-match-${i}`} className="relative">
                   <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                   <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('f', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
                     {isLive('f', i) ? (

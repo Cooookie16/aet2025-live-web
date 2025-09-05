@@ -7,8 +7,6 @@ const KEYS = {
   broadcast: 'dashboard:currentBroadcast',
   display: 'dashboard:currentDisplay',
   mapScores: 'dashboard:mapScores',
-  teamImages: 'dashboard:teamImages',
-  selectedTeamForDisplay: 'dashboard:selectedTeamForDisplay',
   banpickData: 'dashboard:banpickData',
 };
 
@@ -18,8 +16,6 @@ export async function GET() {
     const broadcast = kvGet(KEYS.broadcast);
     const display = kvGet(KEYS.display);
     const mapScores = kvGet(KEYS.mapScores);
-    const teamImages = kvGet(KEYS.teamImages);
-    const selectedTeamForDisplay = kvGet(KEYS.selectedTeamForDisplay);
     const banpickData = kvGet(KEYS.banpickData);
     
     const responseData = {};
@@ -34,12 +30,6 @@ export async function GET() {
     }
     if (mapScores) {
       responseData.mapScores = mapScores;
-    }
-    if (teamImages) {
-      responseData.teamImages = teamImages;
-    }
-    if (selectedTeamForDisplay) {
-      responseData.selectedTeamForDisplay = selectedTeamForDisplay;
     }
     if (banpickData) {
       responseData.banpickData = banpickData;
@@ -68,7 +58,7 @@ export async function POST(request) {
       return NextResponse.json({ ok: false, error: 'INVALID_JSON', details: parseError.message }, { status: 400 });
     }
     
-    const { bracket, currentBroadcast, currentDisplay, mapScores, teamImages, selectedTeamForDisplay, banpickData } = body || {};
+    const { bracket, currentBroadcast, currentDisplay, mapScores, banpickData } = body || {};
 
     if (bracket !== undefined) {
       kvSet(KEYS.bracket, bracket);
@@ -120,31 +110,6 @@ export async function POST(request) {
       } catch {}
     }
 
-    if (teamImages !== undefined) {
-      kvSet(KEYS.teamImages, teamImages);
-      // 廣播隊伍圖片更新
-      try {
-        sseBroadcast({
-          action: 'broadcast',
-          type: 'team-images-update',
-          data: { teamImages },
-          timestamp: Date.now(),
-        });
-      } catch {}
-    }
-
-    if (selectedTeamForDisplay !== undefined) {
-      kvSet(KEYS.selectedTeamForDisplay, selectedTeamForDisplay);
-      // 廣播選定隊伍更新
-      try {
-        sseBroadcast({
-          action: 'broadcast',
-          type: 'selected-team-update',
-          data: { selectedTeamForDisplay: String(selectedTeamForDisplay) },
-          timestamp: Date.now(),
-        });
-      } catch {}
-    }
 
     if (banpickData !== undefined) {
       kvSet(KEYS.banpickData, banpickData);

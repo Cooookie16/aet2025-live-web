@@ -22,10 +22,50 @@ const nextConfig = {
 
   // 圖片優化
   images: {
-    formats: ['image/webp', 'image/avif'], // 使用現代圖片格式
+    formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30天快取
     dangerouslyAllowSVG: false, // 安全考量
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // 允許所有圖片來源（包括動態上傳的圖片）
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/team-images/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/maps/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/brawlers/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/images/**',
+      },
+      // 允許所有本地路徑
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        pathname: '/**',
+      },
+    ],
+    // 允許未優化的圖片（用於動態上傳的圖片）
+    unoptimized: true,
   },
 
   // 安全標頭（排除 Next 開發資源與 HMR 路徑，避免影響 WebSocket）

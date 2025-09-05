@@ -8,7 +8,7 @@ export function useDisplayState() {
   const [displayLoaded, setDisplayLoaded] = useState(false);
 
   // 合法顯示介面清單與清理函式
-  const VALID_DISPLAY_IDS = useMemo(() => ['welcome', 'bracket', 'banpick', 'map-score', 'team-image'], []);
+  const VALID_DISPLAY_IDS = useMemo(() => ['welcome', 'bracket', 'banpick', 'map-score'], []);
   const sanitizeDisplay = useCallback((val) => {
     try {
       const s = (val ?? '').toString().trim();
@@ -32,7 +32,6 @@ export function useDisplayState() {
     { id: 'bracket', name: '目前賽程 Bracket', description: '顯示當前賽程對戰樹' },
     { id: 'banpick', name: '目前 Banpick', description: '顯示當前 Ban/Pick 狀態' },
     { id: 'map-score', name: '地圖與比數', description: '顯示地圖與當前比數' },
-    { id: 'team-image', name: '顯示選手圖', description: '顯示選定隊伍的選手圖片' }
   ], []);
 
   // 載入狀態

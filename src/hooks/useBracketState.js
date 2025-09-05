@@ -100,6 +100,78 @@ export function useBracketState() {
     })();
   }, [currentBroadcast]);
 
+  // 監聽地圖分數變化並自動更新 Bracket 總分
+  useEffect(() => {
+    const checkMapScoresAndUpdateBracket = async () => {
+      try {
+        const res = await fetch('/api/state', { cache: 'no-store' });
+        if (res.ok) {
+          const text = await res.text();
+          if (text) {
+            const json = JSON.parse(text);
+            const mapScores = json?.data?.mapScores || {};
+            
+            // 檢查每個對戰的地圖分數並計算總分
+            Object.keys(mapScores).forEach(key => {
+              const [stage, index] = key.split(':');
+              const maps = mapScores[key];
+              
+              if (Array.isArray(maps)) {
+                // 計算贏得的地圖數量
+                const mapsWonA = maps.reduce((count, map) => {
+                  const scoreA = parseInt(map.scoreA || '0');
+                  const scoreB = parseInt(map.scoreB || '0');
+                  return count + (scoreA > scoreB ? 1 : 0);
+                }, 0);
+                
+                const mapsWonB = maps.reduce((count, map) => {
+                  const scoreA = parseInt(map.scoreA || '0');
+                  const scoreB = parseInt(map.scoreB || '0');
+                  return count + (scoreB > scoreA ? 1 : 0);
+                }, 0);
+                
+                // 檢查是否需要更新 Bracket 中的總分
+                setBracket(prev => {
+                  const updated = { ...prev };
+                  let needsUpdate = false;
+                  
+                  if (stage === 'champ') {
+                    if (updated.champ.score !== String(mapsWonA)) {
+                      updated.champ.score = String(mapsWonA);
+                      needsUpdate = true;
+                    }
+                  } else if (updated[stage] && Array.isArray(updated[stage]) && parseInt(index) < updated[stage].length) {
+                    const match = updated[stage][parseInt(index)];
+                    if (match && (match.a.score !== String(mapsWonA) || match.b.score !== String(mapsWonB))) {
+                      updated[stage][parseInt(index)] = {
+                        ...match,
+                        a: { ...match.a, score: String(mapsWonA) },
+                        b: { ...match.b, score: String(mapsWonB) }
+                      };
+                      needsUpdate = true;
+                    }
+                  }
+                  
+                  return needsUpdate ? updated : prev;
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('檢查地圖分數並更新 Bracket 失敗:', error);
+      }
+    };
+
+    // 每 2 秒檢查一次地圖分數變化
+    const interval = setInterval(checkMapScoresAndUpdateBracket, 2000);
+    
+    // 初始檢查
+    checkMapScoresAndUpdateBracket();
+    
+    return () => clearInterval(interval);
+  }, []);
+
   // bracket 單一位置（比賽、上下方）的欄位更新
   const handleMatchChange = (stage, matchIndex, side, field, value) => {
     setBracket(prev => {

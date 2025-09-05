@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import DisplaySelector from '@/components/dashboard/DisplaySelector';
-import TeamImageManager from '@/components/dashboard/TeamImageManager';
 import BracketEditor from '@/components/dashboard/BracketEditor';
 import MapScoreEditor from '@/components/dashboard/MapScoreEditor';
 import BanpickEditor from '@/components/dashboard/BanpickEditor';
 import StatusBar from '@/components/dashboard/StatusBar';
 import SideNavbar from '@/components/dashboard/SideNavbar';
 import { useDisplayState } from '@/hooks/useDisplayState';
-import { useTeamImages } from '@/hooks/useTeamImages';
 import { useBracketState } from '@/hooks/useBracketState';
 import { useMapScores } from '@/hooks/useMapScores';
 import { useConnectionState } from '@/hooks/useConnectionState';
@@ -18,7 +16,6 @@ import { getStageLabel } from '@/utils/displayUtils';
 export default function Dashboard() {
   // 使用自定義 hooks
   const { selectedDisplayId, displayOptions, switchDisplay } = useDisplayState();
-  const { teamImages, selectedTeamForDisplay, setSelectedTeamForDisplay, handleTeamImageUpload, handleDeleteTeamImage, handleDeleteAllImages } = useTeamImages();
   const { bracket, currentBroadcast, handleMatchChange, setBroadcastMatch, handleResetBrackets, getCurrentBroadcastTeams } = useBracketState();
   const { mapsData, modeOptions, getCurrentMatchMaps, updateCurrentMatchMap, handleResetMapScores } = useMapScores();
   const { isConnected } = useConnectionState();
@@ -56,12 +53,6 @@ export default function Dashboard() {
       name: '顯示選擇',
       description: '選擇OBS顯示內容',
       icon: '📺'
-    },
-    {
-      id: 'team-images',
-      name: '隊伍圖片',
-      description: '管理隊伍形象圖',
-      icon: '🖼️'
     },
     {
       id: 'bracket-editor',
@@ -140,18 +131,6 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* 隊伍圖片管理區域 */}
-          <div id="team-images">
-            <TeamImageManager
-              teamOptions={teamOptions}
-              teamImages={teamImages}
-              selectedTeamForDisplay={selectedTeamForDisplay}
-              onTeamImageUpload={handleTeamImageUpload}
-              onSelectedTeamChange={setSelectedTeamForDisplay}
-              onDeleteTeamImage={handleDeleteTeamImage}
-              onDeleteAllImages={handleDeleteAllImages}
-            />
-          </div>
 
           {/* 賽程表 Brackets 區域 */}
           <div id="bracket-editor">

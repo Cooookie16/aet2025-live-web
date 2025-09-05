@@ -6,7 +6,6 @@ import OBSWelcomeDisplay from '@/components/obs/OBSWelcomeDisplay';
 import OBSBracketDisplay from '@/components/obs/OBSBracketDisplay';
 import OBSBanpickDisplay from '@/components/obs/OBSBanpickDisplay';
 import OBSMapScoreDisplay from '@/components/obs/OBSMapScoreDisplay';
-import OBSTeamImageDisplay from '@/components/obs/OBSTeamImageDisplay';
 import './obs.css';
 
 // 關閉 OBS 端除錯輸出
@@ -27,8 +26,6 @@ export default function OBSLiveUI() {
   const [displayData, setDisplayData] = useState({});
   const [bracket, setBracket] = useState(null); // 從後端載入並由 SSE 即時更新
   const [currentBroadcast, setCurrentBroadcast] = useState({ stage: null, index: null });
-  const [teamImages, setTeamImages] = useState({});
-  const [selectedTeamForDisplay, setSelectedTeamForDisplay] = useState('');
   const [banpickData, setBanpickData] = useState({});
   
   // 以 SSE 取代輪詢（僅在掛載時建立一次連線）
@@ -63,12 +60,6 @@ export default function OBSLiveUI() {
               ...prev,
               mapScores: d.mapScores
             }));
-          }
-          if (d?.teamImages) {
-            setTeamImages(d.teamImages);
-          }
-          if (d?.selectedTeamForDisplay) {
-            setSelectedTeamForDisplay(d.selectedTeamForDisplay);
           }
           if (d?.banpickData) {
             setBanpickData(d.banpickData);
@@ -107,12 +98,6 @@ export default function OBSLiveUI() {
         }
         if (d?.mapScores) {
           setDisplayData(prev => ({ ...prev, mapScores: d.mapScores }));
-        }
-        if (d?.teamImages) {
-          setTeamImages(d.teamImages);
-        }
-        if (d?.selectedTeamForDisplay) {
-          setSelectedTeamForDisplay(d.selectedTeamForDisplay);
         }
         if (d?.banpickData) {
           setBanpickData(d.banpickData);
@@ -200,16 +185,6 @@ export default function OBSLiveUI() {
                 timestamp: latestMessage.data.timestamp,
                 lastUpdate: lastUpdateRef.current
               }));
-            } else if (latestMessage.type === 'team-images-update') {
-              lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              if (latestMessage?.data?.teamImages) {
-                setTeamImages(latestMessage.data.teamImages);
-              }
-            } else if (latestMessage.type === 'selected-team-update') {
-              lastUpdateRef.current = latestMessage.timestamp || Date.now();
-              if (latestMessage?.data?.selectedTeamForDisplay) {
-                setSelectedTeamForDisplay(latestMessage.data.selectedTeamForDisplay);
-              }
             } else if (latestMessage.type === 'banpick-update') {
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
               if (latestMessage?.data?.banpickData) {
@@ -305,8 +280,6 @@ export default function OBSLiveUI() {
         return <OBSBanpickDisplay data={{ currentBroadcast, banpickData, bracket }} />;
       case 'map-score':
         return <OBSMapScoreDisplay data={{ currentBroadcast, mapScores: displayData.mapScores, bracket }} />;
-      case 'team-image':
-        return <OBSTeamImageDisplay data={{ selectedTeamForDisplay, teamImages }} />;
       default:
         return null;
     }
