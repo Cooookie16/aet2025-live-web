@@ -4,7 +4,7 @@
     "mode_en": "gem_grab",
     "maps": [
       "戈壁陷阱 Deathcap Trap",
-      "咻咻作響 Double Swoosh",
+      "地下礦坑 Undermine",
       "堅石礦井 Hard Rock Mine"
     ]
   },
@@ -13,17 +13,17 @@
     "mode_en": "brawl_ball",
     "maps": [
       "精準射門 Pinhole Punt",
-      "綠蔭球場 Sneaky Fields",
-      "三重威脅 Triple Dribble"
+      "超級海灘 Super Beach",
+      "陽光球場 Sunny Soccer"
     ]
   },
   {
     "mode": "金庫攻防戰",
     "mode_en": "heist",
     "maps": [
-      "遙遠的橋 Bridge Too Far",
+      "維修站 Pit Stop",
       "轟隆峽谷 Kaboom Canyon",
-      "安全區域 Safe Zone"
+      "燙手山芋 Hot Potato"
     ]
   },
   {
@@ -32,7 +32,7 @@
     "maps": [
       "草叢迷蹤 Hideout",
       "夾心蛋糕 Layer Cake",
-      "神秘流星 Shooting Star"
+      "酷熱地帶 Dry Season"
     ]
   },
   {
@@ -50,7 +50,7 @@
     "maps": [
       "搖滾蓓爾 Belle's Rock",
       "金臂峽谷 Goldarm Gulch",
-      "空礦地帶 Out in the Open"
+      "新地平線 New Horizons"
     ]
   }
 ]

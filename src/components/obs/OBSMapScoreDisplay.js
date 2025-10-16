@@ -128,23 +128,23 @@ export default function OBSMapScoreDisplay({ data }) {
     const mapImageMap = {
       // 寶石爭奪戰
       '戈壁陷阱 Deathcap Trap': '/maps/deathcap_trap.png',
-      '咻咻作響 Double Swoosh': '/maps/double_swoosh.png',
+      '地下礦坑 Undermine': '/maps/undermine.png',
       '堅石礦井 Hard Rock Mine': '/maps/hard_rock_mine.png',
       
       // 亂鬥足球
       '精準射門 Pinhole Punt': '/maps/pinhole_punt.png',
-      '綠蔭球場 Sneaky Fields': '/maps/sneaky_fields.png',
-      '三重威脅 Triple Dribble': '/maps/triple_dribble.png',
+      '超級海灘 Super Beach': '/maps/super_beach.png',
+      '陽光球場 Sunny Soccer': '/maps/sunny_soccer.png',
       
       // 金庫攻防戰
-      '遙遠的橋 Bridge Too Far': '/maps/bridge_too_far.png',
+      '維修站 Pit Stop': '/maps/pit_stop.png',
       '轟隆峽谷 Kaboom Canyon': '/maps/kaboom_canyon.png',
-      '安全區域 Safe Zone': '/maps/safe_zone.png',
+      '燙手山芋 Hot Potato': '/maps/hot_potato.png',
       
       // 搶星大作戰
       '草叢迷蹤 Hideout': '/maps/hideout.png',
       '夾心蛋糕 Layer Cake': '/maps/layer_cake.png',
-      '神秘流星 Shooting Star': '/maps/shooting_star.png',
+      '酷熱地帶 Dry Season': '/maps/dry_season.png',
       
       // 據點搶奪戰
       '甲蟲決鬥 Dueling Beetles': '/maps/dueling_beetles.png',
@@ -154,7 +154,7 @@ export default function OBSMapScoreDisplay({ data }) {
       // 極限淘汰賽
       '搖滾蓓爾 Belle\'s Rock': '/maps/belles_rock.png',
       '金臂峽谷 Goldarm Gulch': '/maps/goldarm_gulch.png',
-      '空礦地帶 Out in the Open': '/maps/out_in_the_open.png'
+      '新地平線 New Horizons': '/maps/new_horizons.png'
     };
     
     const imagePath = mapImageMap[mapName];
@@ -207,14 +207,14 @@ export default function OBSMapScoreDisplay({ data }) {
     return `/icons/${modeEn}.png`;
   };
 
-  // 根據目前階段取得標籤（八強/四強/遺材賽/冠亞賽）
+  // 根據目前階段取得標籤（八強/四強/季軍賽/冠亞賽）
   const getStageLabel = () => {
     const stage = currentBroadcast?.stage;
     if (!stage) {return '';}
     const mapStageToLabel = {
       qf: '八強',
       sf: '四強',
-      lf: '遺材賽',
+      tp: '季軍賽',
       f: '冠亞賽',
     };
     return mapStageToLabel[stage] || '';

@@ -88,7 +88,7 @@ export default function BracketEditor({
         </button>
       </div>
 
-      {/* 對戰樹佈局：四欄（八強/四強+遺材賽/冠亞/冠軍） */}
+      {/* 對戰樹佈局：四欄（八強/四強+季軍賽/冠亞/冠軍） */}
       <div className="w-full overflow-x-auto">
         <div className="min-w-[900px] grid grid-cols-4 gap-8">
           {/* 八強（4 場） */}
@@ -111,23 +111,22 @@ export default function BracketEditor({
             ))}
           </div>
 
-          {/* 四強與遺材賽（同欄位，遺材賽在上方和下方） */}
+          {/* 四強與季軍賽（同欄位，季軍賽在上方） */}
           <div className="space-y-28 flex flex-col justify-center">
-            {/* 上方遺材賽 */}
+            {/* 上方季軍賽 */}
             <div className="space-y-10">
-              {bracket.lf.slice(0, 1).map((m, i) => (
-                <div key={generateMatchKey('lf-top', m, i)} className="relative">
-                  {/* 連接線（左方彙入 & 往下） */}
+              {bracket.tp.map((m, i) => (
+                <div key={generateMatchKey('tp', m, i)} className="relative">
+                  {/* 連接線（左方彙入） */}
                   <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                  <div className="hidden md:block absolute bottom-[-16px] left-1/2 w-0.5 h-4 bg-gray-300 dark:bg-gray-600"></div>
                   <MatchEditor
-                    stage="lf"
+                    stage="tp"
                     index={i}
                     match={m}
                     teams={teamOptions}
                     onChange={onMatchChange}
-                    label={`遺材賽 ${i + 1}`}
-                    isCurrent={isCurrentMatch('lf', i)}
+                    label="季軍賽"
+                    isCurrent={isCurrentMatch('tp', i)}
                     onSetCurrent={onSetBroadcastMatch}
                   />
                 </div>
@@ -155,26 +154,6 @@ export default function BracketEditor({
               ))}
             </div>
 
-            {/* 下方遺材賽 */}
-            <div className="space-y-10">
-              {bracket.lf.slice(1, 2).map((m, i) => (
-                <div key={generateMatchKey('lf-bottom', m, i)} className="relative">
-                  {/* 連接線（左方彙入 & 往上） */}
-                  <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                  <div className="hidden md:block absolute top-[-16px] left-1/2 w-0.5 h-4 bg-gray-300 dark:bg-gray-600"></div>
-                  <MatchEditor
-                    stage="lf"
-                    index={i + 1}
-                    match={m}
-                    teams={teamOptions}
-                    onChange={onMatchChange}
-                    label={`遺材賽 ${i + 2}`}
-                    isCurrent={isCurrentMatch('lf', i + 1)}
-                    onSetCurrent={onSetBroadcastMatch}
-                  />
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* 冠亞賽（1 場） */}

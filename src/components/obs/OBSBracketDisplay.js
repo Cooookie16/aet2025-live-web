@@ -60,7 +60,7 @@ export default function OBSBracketDisplay({ data }) {
 
   const qf = bracket?.qf || Array.from({ length: 4 }).map(() => ({ a: { team: '隊伍 A', score: '0' }, b: { team: '隊伍 B', score: '0' } }));
   const sf = bracket?.sf || Array.from({ length: 2 }).map(() => ({ a: { team: '勝者', score: '0' }, b: { team: '勝者', score: '0' } }));
-  const lf = bracket?.lf || Array.from({ length: 2 }).map(() => ({ a: { team: '敗者', score: '0' }, b: { team: '敗者', score: '0' } }));
+  const tp = bracket?.tp || Array.from({ length: 1 }).map(() => ({ a: { team: '季軍', score: '0' }, b: { team: '季軍', score: '0' } }));
   const f = bracket?.f || [{ a: { team: '勝者', score: '0' }, b: { team: '勝者', score: '0' } }];
   const champ = bracket?.champ || { team: '最終勝者', score: '0' };
   const isLive = (stage, idx) => currentBroadcast && currentBroadcast.stage === stage && currentBroadcast.index === idx;
@@ -107,31 +107,32 @@ export default function OBSBracketDisplay({ data }) {
               ))}
             </div>
 
-            {/* 四強與遺材賽（同欄位，四強往右推） */}
+            {/* 四強與季軍賽（同欄位，季軍賽在上方） */}
             <div className="space-y-3 flex flex-col justify-center">
-              {/* 上方遺材賽 */}
+              {/* 上方季軍賽 */}
               <div className="space-y-3">
-                {lf.slice(0, 1).map((m, i) => (
-                  <div key={generateMatchKey('lf-top', m, i)} className="relative">
+                {tp.map((m, i) => (
+                  <div key={generateMatchKey('tp', m, i)} className="relative">
                     <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
-                    <div className="hidden md:block absolute bottom-[-6px] left-1/2 w-0.5 h-1.5 bg-pink-300"></div>
-                    <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('lf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
-                      {isLive('lf', i) ? (
+                    <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('tp', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
+                      {isLive('tp', i) ? (
                         <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
                       ) : null}
-                      <div className="text-[10px] leading-none text-black mb-1 text-left">遺材賽 {i + 1}</div>
+                      <div className="text-[10px] leading-none text-black mb-1 text-left">季軍賽</div>
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                           <div className="flex flex-col">
-                            <span className="text-black text-xs truncate">{m?.a?.team || '敗者'}</span>
+                            <span className="text-black text-xs truncate">{m?.a?.team || '季軍'}</span>
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
                           </div>
+                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.a?.score && m.a.score !== '0') ? m.a.score : '0'}</span>
                         </div>
                         <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
                           <div className="flex flex-col">
-                            <span className="text-black text-xs truncate">{m?.b?.team || '敗者'}</span>
+                            <span className="text-black text-xs truncate">{m?.b?.team || '季軍'}</span>
                             <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
                           </div>
+                          <span className="text-pink-700 font-extrabold text-base ml-1">{(m?.b?.score && m.b.score !== '0') ? m.b.score : '0'}</span>
                         </div>
                       </div>
                     </div>
@@ -171,35 +172,6 @@ export default function OBSBracketDisplay({ data }) {
                 ))}
               </div>
 
-              {/* 下方遺材賽 */}
-              <div className="space-y-3">
-                {lf.slice(1, 2).map((m, i) => (
-                  <div key={generateMatchKey('lf-bottom', m, i)} className="relative">
-                    <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
-                    <div className="hidden md:block absolute top-[-6px] left-1/2 w-0.5 h-1.5 bg-pink-300"></div>
-                    <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('lf', i + 1) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
-                      {isLive('lf', i + 1) ? (
-                        <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
-                      ) : null}
-                      <div className="text-[10px] leading-none text-black mb-1 text-left">遺材賽 {i + 2}</div>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
-                          <div className="flex flex-col">
-                            <span className="text-black text-xs truncate">{m?.a?.team || '敗者'}</span>
-                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.a?.team)}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between rounded px-1.5 py-1 bg-pink-50">
-                          <div className="flex flex-col">
-                            <span className="text-black text-xs truncate">{m?.b?.team || '敗者'}</span>
-                            <span className="text-pink-600 text-[10px]">{getTeamMembers(m?.b?.team)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* 冠亞（1 場） */}

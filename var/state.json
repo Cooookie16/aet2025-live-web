@@ -64,17 +64,7 @@
         }
       }
     ],
-    "lf": [
-      {
-        "a": {
-          "team": "",
-          "score": "0"
-        },
-        "b": {
-          "team": "",
-          "score": "0"
-        }
-      },
+    "tp": [
       {
         "a": {
           "team": "",
@@ -110,8 +100,8 @@
   "dashboard:mapScores": {
     "qf:0": [
       {
-        "mode": "據點搶奪戰",
-        "map": "開門大吉 Open Business",
+        "mode": "極限淘汰賽",
+        "map": "新地平線 New Horizons",
         "scoreA": "0",
         "scoreB": "0"
       },
