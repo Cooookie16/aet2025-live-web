@@ -7,17 +7,7 @@
           "score": "0"
         },
         "b": {
-          "team": "GUGU",
-          "score": "0"
-        }
-      },
-      {
-        "a": {
-          "team": "bp不重要",
-          "score": "0"
-        },
-        "b": {
-          "team": "HuyaTang",
+          "team": "Team BIG MOM",
           "score": "0"
         }
       },
@@ -33,11 +23,21 @@
       },
       {
         "a": {
-          "team": "GUGU",
+          "team": "",
           "score": "0"
         },
         "b": {
-          "team": "123 (1)123123",
+          "team": "",
+          "score": "0"
+        }
+      },
+      {
+        "a": {
+          "team": "",
+          "score": "0"
+        },
+        "b": {
+          "team": "",
           "score": "0"
         }
       }
@@ -111,7 +111,7 @@
     "qf:0": [
       {
         "mode": "據點搶奪戰",
-        "map": "灼熱火圈 Ring of Fire",
+        "map": "開門大吉 Open Business",
         "scoreA": "0",
         "scoreB": "0"
       },
@@ -141,6 +141,6 @@
       }
     ]
   },
-  "dashboard:currentDisplay": "bracket",
+  "dashboard:currentDisplay": "map-score",
   "dashboard:banpickData": {}
 }

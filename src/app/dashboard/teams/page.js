@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 
 function createEmptyTeams() {
   return Array.from({ length: 8 }).map((_, i) => ({ name: `Team ${i + 1}`, members: ['', '', ''] }));
@@ -11,6 +12,13 @@ export default function TeamsEditorPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+
+  // 產生穩定 key（避免使用索引）
+  const getTeamKey = (t) => {
+    const name = (t && typeof t.name === 'string' && t.name.trim()) ? t.name.trim() : 'team';
+    const members = Array.isArray(t?.members) ? t.members.join('|') : '';
+    return `${name}-${members}`;
+  };
 
   // 載入現有 teams.json
   useEffect(() => {
@@ -34,7 +42,9 @@ export default function TeamsEditorPage() {
         } else {
           setTeams(createEmptyTeams());
         }
-      } catch (e) {
+      } catch (loadError) {
+        // 最小化日誌：僅在開發/伺服端協助定位問題
+        logger.warn('[Dashboard][Teams] 載入 teams 失敗:', loadError?.message || loadError);
         setMessage('載入失敗，使用預設資料');
         setTeams(createEmptyTeams());
       } finally {
@@ -95,7 +105,7 @@ export default function TeamsEditorPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {teams.map((team, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+              <div key={getTeamKey(team)} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
                 <div className="mb-3">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">隊伍 {i + 1} 名稱</label>
                   <input

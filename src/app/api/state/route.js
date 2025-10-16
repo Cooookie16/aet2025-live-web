@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/db';
 import { broadcast as sseBroadcast } from '@/lib/sse';
+import logger from '@/lib/logger';
 
 const KEYS = {
   bracket: 'dashboard:bracket',
@@ -40,7 +41,7 @@ export async function GET() {
       data: responseData,
     }, { status: 200 });
   } catch (error) {
-    console.error('[API] GET /api/state 失敗:', error.message);
+    logger.error('[API] GET /api/state 失敗:', error.message);
     return NextResponse.json({ ok: false, error: 'READ_FAILED' }, { status: 500 });
   }
 }

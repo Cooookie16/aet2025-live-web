@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { broadcast as sseBroadcast } from '@/lib/sse';
+import logger from '@/lib/logger';
 
 const TEAMS_PATH = path.join(process.cwd(), 'public', 'teams.json');
 
@@ -13,7 +14,7 @@ function readTeamsFile() {
     const raw = fs.readFileSync(TEAMS_PATH, 'utf-8');
     return raw ? JSON.parse(raw) : null;
   } catch (error) {
-    console.error('[API][teams] 讀取 teams.json 失敗:', error.message);
+    logger.error('[API][teams] 讀取 teams.json 失敗:', error.message);
     return null;
   }
 }
@@ -22,7 +23,7 @@ function writeTeamsFile(data) {
   try {
     fs.writeFileSync(TEAMS_PATH, JSON.stringify(data, null, 2), 'utf-8');
   } catch (error) {
-    console.error('[API][teams] 寫入 teams.json 失敗:', error.message);
+    logger.error('[API][teams] 寫入 teams.json 失敗:', error.message);
     throw error;
   }
 }
@@ -53,6 +54,8 @@ export async function GET() {
     const teams = Array.isArray(data) && data.length ? data : createDefaultTeams();
     return NextResponse.json({ ok: true, data: teams }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
+    // 加入日誌以協助追蹤讀取失敗原因（僅在伺服端輸出）
+    logger.error('[API][teams][GET] 讀取失敗:', error?.message || error);
     return NextResponse.json({ ok: false, error: 'READ_FAILED' }, { status: 500 });
   }
 }
@@ -67,14 +70,16 @@ export async function PUT(request) {
     let body;
     try {
       body = JSON.parse(text);
-    } catch (e) {
+    } catch (parseError) {
+      // 加入日誌以驗證是否為 JSON 解析錯誤
+      logger.warn('[API][teams][PUT] JSON 解析失敗:', parseError?.message || parseError);
       return NextResponse.json({ ok: false, error: 'INVALID_JSON' }, { status: 400 });
     }
 
     const { teams } = body || {};
     const err = validateTeamsPayload(teams);
     if (err) {
-      console.warn('[API][teams] 驗證失敗:', err);
+      logger.warn('[API][teams] 驗證失敗:', err);
       return NextResponse.json({ ok: false, error: err }, { status: 400 });
     }
 

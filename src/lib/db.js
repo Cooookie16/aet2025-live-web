@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import logger from '@/lib/logger';
 
 const VAR_DIR = path.join(process.cwd(), 'var');
 const STATE_PATH = path.join(VAR_DIR, 'state.json');
@@ -9,7 +10,7 @@ function ensureDir() {
     try {
       fs.mkdirSync(VAR_DIR, { recursive: true });
     } catch (error) {
-      console.error('[DB] 建立目錄失敗:', error.message);
+      logger.error('[DB] 建立目錄失敗:', error.message);
       throw error;
     }
   }
@@ -23,7 +24,7 @@ function readAll() {
     const raw = fs.readFileSync(STATE_PATH, 'utf-8');
     return raw ? JSON.parse(raw) : {};
   } catch (error) {
-    console.error('[DB] 讀取狀態檔案失敗:', error.message);
+    logger.error('[DB] 讀取狀態檔案失敗:', error.message);
     return {};
   }
 }
@@ -33,7 +34,7 @@ function writeAll(obj) {
     ensureDir();
     fs.writeFileSync(STATE_PATH, JSON.stringify(obj || {}, null, 2), 'utf-8');
   } catch (error) {
-    console.error('[DB] 狀態檔案寫入失敗:', error.message);
+    logger.error('[DB] 狀態檔案寫入失敗:', error.message);
     throw error;
   }
 }

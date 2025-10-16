@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -24,7 +25,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('[API] Health check 失敗:', error.message);
+    logger.error('[API] Health check 失敗:', error.message);
     return NextResponse.json(
       { 
         status: 'unhealthy', 

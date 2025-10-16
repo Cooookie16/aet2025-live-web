@@ -1,3 +1,4 @@
+import logger from '@/lib/logger';
 // 簡易的 SSE 事件匯流排（記憶體級，僅適合單實例）
 /** @type {Set<(record: { id: number, payload: string }) => void>} */
 const subscribers = new Set();
@@ -37,7 +38,8 @@ export function broadcast(event) {
     try {
       send(record);
     } catch (error) {
-      console.error('[SSE] 客戶端廣播失敗:', error.message);
+      // 使用輕量 logger 降低生產環境噪音
+      logger.error('[SSE] 客戶端廣播失敗:', error.message);
     }
   }
 }

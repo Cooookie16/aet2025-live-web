@@ -7,6 +7,7 @@ import OBSBracketDisplay from '@/components/obs/OBSBracketDisplay';
 import OBSBanpickDisplay from '@/components/obs/OBSBanpickDisplay';
 import OBSMapScoreDisplay from '@/components/obs/OBSMapScoreDisplay';
 import './obs.css';
+import logger from '@/lib/logger';
 
 // 關閉 OBS 端除錯輸出
 if (typeof window !== 'undefined') {
@@ -118,7 +119,7 @@ export default function OBSLiveUI() {
           retryAttemptRef.current = 0; // 重置退避
         };
         es.onerror = () => {
-          console.error('[OBS] SSE 連線錯誤，嘗試重連...');
+          logger.error('[OBS] SSE 連線錯誤，嘗試重連...');
           try { es.close(); } catch {}
           esRef.current = null;
           // 指數退避（上限 30s）
