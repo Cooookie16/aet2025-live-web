@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { broadcast as sseBroadcast } from '@/lib/sse';
 
 const TEAMS_PATH = path.join(process.cwd(), 'public', 'teams.json');
 
@@ -78,6 +79,14 @@ export async function PUT(request) {
     }
 
     writeTeamsFile(teams);
+    try {
+      sseBroadcast({
+        action: 'broadcast',
+        type: 'teams-update',
+        data: { updated: true },
+        timestamp: Date.now(),
+      });
+    } catch {}
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ ok: false, error: 'WRITE_FAILED', details: error.message }, { status: 500 });

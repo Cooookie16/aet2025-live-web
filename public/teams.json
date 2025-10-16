@@ -1,10 +1,66 @@
 [
-  { "name": "Angelic But Bullied Megu", "members": ["Kanga", "Korone", "Sago"] },
-  { "name": "秦始皇騎熊貓", "members": ["Iruka", "LBJ", "Sigh"] },
-  { "name": "Team BIG MOM", "members": ["Lamine", "NeoLU", "SunRise"] },
-  { "name": "123 (1)", "members": ["CV", "ZM", "Kyle"] },
-  { "name": "boogiebandit", "members": ["Megu", "Hiroshii", "Response"] },
-  { "name": "bp不重要", "members": ["Pigboy", "Yeachai", "Surf T"] },
-  { "name": "Tom and Jerry", "members": ["Colmou", "Harrison", "Psychic"] },
-  { "name": "HuyaTang", "members": ["Galatampo", "冷飲", "Tang"] }
+  {
+    "name": "Nyanya",
+    "members": [
+      "Kanga",
+      "Korone",
+      "Sago"
+    ]
+  },
+  {
+    "name": "秦始皇騎熊貓",
+    "members": [
+      "Iruka",
+      "LBJ",
+      "Sigh"
+    ]
+  },
+  {
+    "name": "Team BIG MOM",
+    "members": [
+      "Lamine",
+      "NeoLU",
+      "SunRise"
+    ]
+  },
+  {
+    "name": "123 (1)",
+    "members": [
+      "CV",
+      "ZM",
+      "Kyle"
+    ]
+  },
+  {
+    "name": "boogiebandit",
+    "members": [
+      "Megu",
+      "Hiroshii",
+      "Response"
+    ]
+  },
+  {
+    "name": "bp不重要",
+    "members": [
+      "Pigboy",
+      "Yeachai",
+      "Surf T"
+    ]
+  },
+  {
+    "name": "Tom and Jerry",
+    "members": [
+      "Colmou",
+      "Harrison",
+      "Psychic"
+    ]
+  },
+  {
+    "name": "HuyaTang",
+    "members": [
+      "Galatampo",
+      "冷飲",
+      "Tang"
+    ]
+  }
 ]

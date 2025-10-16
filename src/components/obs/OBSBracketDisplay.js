@@ -31,6 +31,24 @@ export default function OBSBracketDisplay({ data }) {
       }
     };
     loadTeams();
+    // 訂閱 SSE：隊伍更新時自動重新載入
+    let es;
+    try {
+      es = new EventSource('/api/events');
+      es.onmessage = (evt) => {
+        try {
+          const raw = (evt && typeof evt.data === 'string') ? evt.data.trim() : '';
+          if (!raw || raw[0] !== '{') {return;}
+          const msg = JSON.parse(raw);
+          if (msg?.type === 'teams-update') {
+            loadTeams();
+          }
+        } catch {}
+      };
+    } catch {}
+    return () => {
+      try { es?.close?.(); } catch {}
+    };
   }, []);
 
   // 根據隊伍名稱取得選手陣列（未選隊伍時不顯示）

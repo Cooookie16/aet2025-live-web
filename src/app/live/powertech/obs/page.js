@@ -288,9 +288,11 @@ export default function OBSLiveUI() {
 
   return (
     <div className="obs-container bg-transparent text-white">
-      {/* 主要顯示區域 - 限制在 800x600 */}
-      <div className="w-[800px] h-[600px] flex items-center justify-center overflow-hidden">
-        {renderDisplay()}
+      {/* 主要顯示區域 - 限制在 1600x1200，基準畫布 800x600 左上角原點等比放大 */}
+      <div className="w-[1600px] h-[1200px] overflow-hidden">
+        <div className="w-[800px] h-[600px]" style={{ transform: 'scale(2)', transformOrigin: 'top left' }}>
+          {renderDisplay()}
+        </div>
       </div>
     </div>
   );
