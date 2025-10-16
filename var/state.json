@@ -7,6 +7,16 @@
           "score": "0"
         },
         "b": {
+          "team": "GUGU",
+          "score": "0"
+        }
+      },
+      {
+        "a": {
+          "team": "bp不重要",
+          "score": "0"
+        },
+        "b": {
           "team": "HuyaTang",
           "score": "0"
         }
@@ -23,21 +33,11 @@
       },
       {
         "a": {
-          "team": "",
+          "team": "GUGU",
           "score": "0"
         },
         "b": {
-          "team": "",
-          "score": "0"
-        }
-      },
-      {
-        "a": {
-          "team": "",
-          "score": "0"
-        },
-        "b": {
-          "team": "",
+          "team": "123 (1)123123",
           "score": "0"
         }
       }
@@ -141,6 +141,6 @@
       }
     ]
   },
-  "dashboard:currentDisplay": "map-score",
+  "dashboard:currentDisplay": "bracket",
   "dashboard:banpickData": {}
 }

@@ -37,6 +37,24 @@ export default function Dashboard() {
       }
     };
     loadTeams();
+    // 訂閱 SSE：收到 teams-update 事件時重新載入隊伍
+    let es;
+    try {
+      es = new EventSource('/api/events');
+      es.onmessage = (evt) => {
+        try {
+          const raw = (evt && typeof evt.data === 'string') ? evt.data.trim() : '';
+          if (!raw || raw[0] !== '{') {return;}
+          const msg = JSON.parse(raw);
+          if (msg?.type === 'teams-update') {
+            loadTeams();
+          }
+        } catch {}
+      };
+    } catch {}
+    return () => {
+      try { es?.close?.(); } catch {}
+    };
   }, []);
 
   // 依據地圖比分自動計算每場對戰的總和分數，並更新 bracket 顯示

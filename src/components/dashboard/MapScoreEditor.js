@@ -60,7 +60,7 @@ export default function MapScoreEditor({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {currentMatchMaps.map((m, i) => (
           <div
-            key={`map-${m.map || `map-${i}`}`}
+            key={`map-${i}-${m.map || 'empty'}`}
             className={
               `p-4 rounded-lg border-2 text-left transition-all ` +
               `border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600`
