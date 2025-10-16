@@ -117,6 +117,7 @@ export default function OBSBanpickDisplay({ data }) {
                       height={96}
                       className="w-full h-full object-cover"
                       onError={(e) => {
+                        console.error('[OBS] 角色圖片載入失敗:', bannedBrawler, e.target.src);
                         e.target.style.display = 'none';
                         e.target.nextSibling.style.display = 'flex';
                       }}
@@ -161,6 +162,7 @@ export default function OBSBanpickDisplay({ data }) {
                       height={96}
                       className="w-full h-full object-cover"
                       onError={(e) => {
+                        console.error('[OBS] 角色圖片載入失敗:', bannedBrawler, e.target.src);
                         e.target.style.display = 'none';
                         e.target.nextSibling.style.display = 'flex';
                       }}

@@ -39,7 +39,8 @@ export async function GET() {
       ok: true,
       data: responseData,
     }, { status: 200 });
-  } catch {
+  } catch (error) {
+    console.error('[API] GET /api/state 失敗:', error.message);
     return NextResponse.json({ ok: false, error: 'READ_FAILED' }, { status: 500 });
   }
 }

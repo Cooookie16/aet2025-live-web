@@ -108,12 +108,20 @@ export default function Dashboard() {
               
               {/* 前往 OBS 直播畫面按鈕 */}
               <a
-                href="/live/jianss/ui/obs"
+                href="/live/powertech/obs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
               >
                 前往直播畫面
+              </a>
+              <a
+                href="/dashboard/teams"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              >
+                編輯隊伍與選手
               </a>
             </div>
           </div>

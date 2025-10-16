@@ -118,6 +118,7 @@ export default function OBSLiveUI() {
           retryAttemptRef.current = 0; // 重置退避
         };
         es.onerror = () => {
+          console.error('[OBS] SSE 連線錯誤，嘗試重連...');
           try { es.close(); } catch {}
           esRef.current = null;
           // 指數退避（上限 30s）

@@ -24,6 +24,7 @@ export async function GET() {
       },
     });
   } catch (error) {
+    console.error('[API] Health check 失敗:', error.message);
     return NextResponse.json(
       { 
         status: 'unhealthy', 

@@ -5,16 +5,25 @@ const VAR_DIR = path.join(process.cwd(), 'var');
 const STATE_PATH = path.join(VAR_DIR, 'state.json');
 
 function ensureDir() {
-  if (!fs.existsSync(VAR_DIR)) {fs.mkdirSync(VAR_DIR, { recursive: true });}
+  if (!fs.existsSync(VAR_DIR)) {
+    try {
+      fs.mkdirSync(VAR_DIR, { recursive: true });
+    } catch (error) {
+      console.error('[DB] 建立目錄失敗:', error.message);
+      throw error;
+    }
+  }
 }
 
 function readAll() {
   try {
-    if (!fs.existsSync(STATE_PATH)) {return {};}
+    if (!fs.existsSync(STATE_PATH)) {
+      return {};
+    }
     const raw = fs.readFileSync(STATE_PATH, 'utf-8');
     return raw ? JSON.parse(raw) : {};
-  } catch {
-    // 靜默處理錯誤
+  } catch (error) {
+    console.error('[DB] 讀取狀態檔案失敗:', error.message);
     return {};
   }
 }
@@ -23,8 +32,9 @@ function writeAll(obj) {
   try {
     ensureDir();
     fs.writeFileSync(STATE_PATH, JSON.stringify(obj || {}, null, 2), 'utf-8');
-  } catch {
-    // 靜默處理錯誤
+  } catch (error) {
+    console.error('[DB] 狀態檔案寫入失敗:', error.message);
+    throw error;
   }
 }
 

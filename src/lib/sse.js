@@ -25,6 +25,7 @@ export function broadcast(event) {
   const payload = JSON.stringify(enriched);
   const record = { id, payload };
 
+
   // 寫入環形緩存
   ringBuffer.push(record);
   if (ringBuffer.length > RING_CAPACITY) {
@@ -35,8 +36,8 @@ export function broadcast(event) {
   for (const send of subscribers) {
     try {
       send(record);
-    } catch {
-      // 忽略單一客戶端錯誤
+    } catch (error) {
+      console.error('[SSE] 客戶端廣播失敗:', error.message);
     }
   }
 }

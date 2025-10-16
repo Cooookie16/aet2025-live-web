@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 // 自訂本頁頁籤標題
 export const metadata = {
@@ -12,7 +11,6 @@ export default function Home() {
       <div className="container mx-auto px-4 py-6">
         <div className="mb-8">
           <div className="flex items-center gap-3" style={{ fontSize: '1.875rem' }}>
-            <Image src="/globe.svg" alt="Logo" width={30} height={30} className="h-[1em] w-[1em]" />
             <h1 className="text-3xl font-bold text-gray-900">
               AET2025直播控制系統
             </h1>
@@ -46,7 +44,7 @@ export default function Home() {
           </Link>
 
           {/* Live UI 卡片（改為 OBS 版本） */}
-          <Link href="/live/jianss/ui/obs" className="group" target="_blank" rel="noopener noreferrer">
+          <Link href="/live/powertech/obs" className="group" target="_blank" rel="noopener noreferrer">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 aspect-square flex flex-col items-center justify-center transition-colors">
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 dark:group-hover:bg-green-800 transition-colors">

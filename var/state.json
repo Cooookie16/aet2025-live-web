@@ -3,12 +3,12 @@
     "qf": [
       {
         "a": {
-          "team": "Angelic But Bullied Megu",
+          "team": "",
           "score": "0"
         },
         "b": {
-          "team": "Team BIG MOM",
-          "score": "1"
+          "team": "",
+          "score": "0"
         }
       },
       {
@@ -104,8 +104,8 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": "qf",
-    "index": 0
+    "stage": null,
+    "index": null
   },
   "dashboard:mapScores": {
     "qf:0": [
