@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +7,6 @@ import { useRouter } from 'next/navigation';
 export default function EditBannerPage() {
   const router = useRouter();
   const [bannerUrl, setBannerUrl] = useState('');
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -24,10 +24,8 @@ export default function EditBannerPage() {
             setBannerUrl('/images/AET2025_full_title_logo.png');
           }
         }
-      } catch (e) {
+      } catch {
         // quiet
-      } finally {
-        setLoading(false);
       }
     };
     load();

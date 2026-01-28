@@ -15,6 +15,7 @@ export async function GET() {
       },
     });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Failed to read maps.json', e);
     return NextResponse.json({ error: 'Failed to read maps' }, { status: 500 });
   }
@@ -31,6 +32,7 @@ export async function POST(req) {
     
     return NextResponse.json({ ok: true });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Failed to save maps.json', e);
     return NextResponse.json({ error: 'Failed to save maps' }, { status: 500 });
   }

@@ -1,3 +1,4 @@
+/* eslint-disable no-alert, no-console, react/no-array-index-key */
 'use client';
 
 import { useState, useEffect } from 'react';

@@ -27,6 +27,7 @@ export async function POST(req) {
 
     return NextResponse.json({ ok: true, url: `/maps/${filename}` });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Upload error:', e);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
@@ -57,6 +58,7 @@ export async function DELETE(req) {
 
     return NextResponse.json({ ok: true });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Delete error:', e);
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
   }

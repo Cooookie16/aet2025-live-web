@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
-
-const pump = promisify(pipeline);
 
 export async function POST(req) {
   try {
@@ -40,6 +36,7 @@ export async function POST(req) {
       url: `/uploads/${filename}` 
     });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Upload error:', e);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }

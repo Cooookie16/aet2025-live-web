@@ -59,6 +59,7 @@ export async function POST(req) {
 
     return NextResponse.json({ ok: true, name: safeName });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Upload brawler error:', e);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
@@ -80,7 +81,7 @@ export async function DELETE(req) {
     await unlink(filePath);
 
     return NextResponse.json({ ok: true });
-  } catch (e) {
+  } catch {
     // console.error('Delete brawler error:', e);
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
   }
@@ -128,6 +129,7 @@ export async function PUT(req) {
 
     return NextResponse.json({ ok: true, name: safeNewName });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Rename error:', e);
     return NextResponse.json({ error: 'Rename failed' }, { status: 500 });
   }

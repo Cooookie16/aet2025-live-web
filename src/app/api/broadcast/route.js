@@ -11,6 +11,7 @@ export async function GET(request) {
     if (action === 'get-messages') {
       const referer = request.headers.get('referer') || '';
       const userAgent = request.headers.get('user-agent') || '';
+      // eslint-disable-next-line no-console
       console.warn('[Deprecated] GET /api/broadcast?action=get-messages 來自:', { referer, userAgent });
 
       return new Response(JSON.stringify({

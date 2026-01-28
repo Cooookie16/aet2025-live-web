@@ -1,3 +1,4 @@
+/* eslint-disable no-alert, no-console */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -46,7 +47,7 @@ export default function BrawlersPage() {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !newName.trim()) return;
+    if (!selectedFile || !newName.trim()) {return;}
 
     setUploading(true);
     const formData = new FormData();
@@ -105,7 +106,7 @@ export default function BrawlersPage() {
             const json = await res.json();
             alert(`重新命名失敗: ${json.error || 'Unknown error'}`);
         }
-    } catch (e) {
+    } catch {
         alert('重新命名失敗');
     } finally {
         setRenaming(false);
@@ -113,7 +114,7 @@ export default function BrawlersPage() {
   };
 
   const handleDelete = async (name) => {
-    if (!confirm(`確定要刪除 ${name} 嗎？此操作無法復原。`)) return;
+    if (!confirm(`確定要刪除 ${name} 嗎？此操作無法復原。`)) {return;}
 
     try {
       const res = await fetch(`/api/brawlers?name=${encodeURIComponent(name)}`, {
@@ -215,8 +216,8 @@ export default function BrawlersPage() {
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleRename();
-                        if (e.key === 'Escape') cancelEdit();
+                        if (e.key === 'Enter') {handleRename();}
+                        if (e.key === 'Escape') {cancelEdit();}
                       }}
                       autoFocus
                     />
