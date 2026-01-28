@@ -141,6 +141,30 @@ export default function Dashboard() {
               >
                 編輯隊伍與選手
               </a>
+              <a
+                href="/dashboard/editbanner"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              >
+                編輯 Banner
+              </a>
+              <a
+                href="/dashboard/brawlers"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              >
+                編輯 Brawlers
+              </a>
+              <a
+                href="/dashboard/maps"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              >
+                編輯地圖與模式
+              </a>
             </div>
           </div>
         </div>

@@ -6,7 +6,7 @@ import OBSWelcomeDisplay from '@/components/obs/OBSWelcomeDisplay';
 import OBSBracketDisplay from '@/components/obs/OBSBracketDisplay';
 import OBSBanpickDisplay from '@/components/obs/OBSBanpickDisplay';
 import OBSMapScoreDisplay from '@/components/obs/OBSMapScoreDisplay';
-import './obs.css';
+// import './obs.css'; // Removed unused CSS
 import logger from '@/lib/logger';
 
 // 關閉 OBS 端除錯輸出
@@ -64,6 +64,9 @@ export default function OBSLiveUI() {
           }
           if (d?.banpickData) {
             setBanpickData(d.banpickData);
+          }
+          if (d?.welcomeConfig) {
+            setDisplayData(prev => ({ ...prev, welcomeConfig: d.welcomeConfig }));
           }
         }
       } catch {
@@ -192,6 +195,15 @@ export default function OBSLiveUI() {
               if (latestMessage?.data?.banpickData) {
                 setBanpickData(latestMessage.data.banpickData);
               }
+            } else if (latestMessage.type === 'welcome-config-update') {
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              if (latestMessage?.data?.welcomeConfig) {
+                setDisplayData(prev => ({
+                  ...prev,
+                  welcomeConfig: latestMessage.data.welcomeConfig,
+                  lastUpdate: lastUpdateRef.current
+                }));
+              }
             }
           } catch {
             // 靜默處理錯誤
@@ -275,6 +287,7 @@ export default function OBSLiveUI() {
     }
     switch (currentDisplay) {
       case 'welcome':
+        // 將 displayData 傳遞給 WelcomeDisplay，包含 welcomeConfig
         return <OBSWelcomeDisplay data={displayData} />;
       case 'bracket':
         return <OBSBracketDisplay data={{ bracket, currentBroadcast }} />;
@@ -288,13 +301,29 @@ export default function OBSLiveUI() {
   };
 
   return (
-    <div className="obs-container bg-transparent text-white">
-      {/* 主要顯示區域 - 限制在 1600x1200，基準畫布 800x600 左上角原點等比放大 */}
-      <div className="w-[1600px] h-[1200px] overflow-hidden">
-        <div className="w-[800px] h-[600px]" style={{ transform: 'scale(2)', transformOrigin: 'top left' }}>
-          {renderDisplay()}
+    <>
+      <style jsx global>{`
+        html, body {
+          margin: 0;
+          padding: 0;
+          width: 1600px;
+          height: 1200px;
+          overflow: hidden;
+          background: transparent !important;
+        }
+        /* 移除 Next.js 可能的預設背景 */
+        #__next {
+          background: transparent !important;
+        }
+      `}</style>
+      <div className="w-[1600px] h-[1200px] overflow-hidden relative bg-transparent text-white">
+        {/* 主要顯示區域 - 限制在 1600x1200，基準畫布 800x600 左上角原點等比放大 */}
+        <div className="w-[1600px] h-[1200px] overflow-hidden">
+          <div className="w-[800px] h-[600px]" style={{ transform: 'scale(2)', transformOrigin: 'top left' }}>
+            {renderDisplay()}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

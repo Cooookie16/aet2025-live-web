@@ -3,11 +3,11 @@
     "qf": [
       {
         "a": {
-          "team": "Nyanya",
+          "team": "",
           "score": "0"
         },
         "b": {
-          "team": "Team BIG MOM",
+          "team": "",
           "score": "0"
         }
       },
@@ -94,8 +94,8 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": "qf",
-    "index": 0
+    "stage": null,
+    "index": null
   },
   "dashboard:mapScores": {
     "qf:0": [
@@ -129,8 +129,43 @@
         "scoreA": "0",
         "scoreB": "0"
       }
+    ],
+    "f:0": [
+      {
+        "mode": "寶石爭奪戰",
+        "map": "戈壁陷阱 Deathcap Trap",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "",
+        "map": "",
+        "scoreA": "0",
+        "scoreB": "0"
+      }
     ]
   },
   "dashboard:currentDisplay": "map-score",
-  "dashboard:banpickData": {}
+  "dashboard:banpickData": {},
+  "dashboard:welcomeConfig": {
+    "bannerUrl": "/uploads/banner-1769604336784.png"
+  }
 }

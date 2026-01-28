@@ -12,7 +12,8 @@ export default function MapScoreEditor({
   // 根據選擇的模式取得對應的地圖選項
   const getMapOptionsForMode = (mode) => {
     const modeData = mapsData.find(item => item.mode === mode);
-    return modeData ? modeData.maps : [];
+    // mapsData 更新為物件陣列，這裡只回傳名稱供下拉選單使用
+    return modeData ? modeData.maps.map(m => m.name) : [];
   };
 
   // 轉換階段顯示標籤

@@ -9,7 +9,9 @@ export async function GET(request) {
 
     // 專門處理舊版輪詢端點：紀錄來源，回 410 並建議停止重試
     if (action === 'get-messages') {
-      // 靜默處理deprecated警告
+      const referer = request.headers.get('referer') || '';
+      const userAgent = request.headers.get('user-agent') || '';
+      console.warn('[Deprecated] GET /api/broadcast?action=get-messages 來自:', { referer, userAgent });
 
       return new Response(JSON.stringify({
         error: 'This endpoint is deprecated. Use SSE at /api/events.',
@@ -23,7 +25,7 @@ export async function GET(request) {
       });
     }
 
-    // 其他 query 一律 404
+    // 其他 query 一律 404, 此處只處理 get-messages
     return new Response(JSON.stringify({ error: 'Not found' }), {
       status: 404,
       headers: { 'Content-Type': 'application/json' }

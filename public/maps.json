@@ -3,54 +3,108 @@
     "mode": "寶石爭奪戰",
     "mode_en": "gem_grab",
     "maps": [
-      "戈壁陷阱 Deathcap Trap",
-      "地下礦坑 Undermine",
-      "堅石礦井 Hard Rock Mine"
+      {
+        "name": "戈壁陷阱 Deathcap Trap",
+        "image": "/maps/deathcap_trap.png"
+      },
+      {
+        "name": "地下礦坑 Undermine",
+        "image": "/maps/undermine.png"
+      },
+      {
+        "name": "堅石礦井 Hard Rock Mine",
+        "image": "/maps/hard_rock_mine.png"
+      }
     ]
   },
   {
     "mode": "亂鬥足球",
     "mode_en": "brawl_ball",
     "maps": [
-      "精準射門 Pinhole Punt",
-      "超級海灘 Super Beach",
-      "陽光球場 Sunny Soccer"
+      {
+        "name": "精準射門 Pinhole Punt",
+        "image": "/maps/pinhole_punt.png"
+      },
+      {
+        "name": "超級海灘 Super Beach",
+        "image": "/maps/super_beach.png"
+      },
+      {
+        "name": "陽光球場 Sunny Soccer",
+        "image": "/maps/sunny_soccer.png"
+      }
     ]
   },
   {
     "mode": "金庫攻防戰",
     "mode_en": "heist",
     "maps": [
-      "維修站 Pit Stop",
-      "轟隆峽谷 Kaboom Canyon",
-      "燙手山芋 Hot Potato"
+      {
+        "name": "維修站 Pit Stop",
+        "image": "/maps/pit_stop.png"
+      },
+      {
+        "name": "轟隆峽谷 Kaboom Canyon",
+        "image": "/maps/kaboom_canyon.png"
+      },
+      {
+        "name": "燙手山芋 Hot Potato",
+        "image": "/maps/hot_potato.png"
+      }
     ]
   },
   {
     "mode": "搶星大作戰",
     "mode_en": "bounty",
     "maps": [
-      "草叢迷蹤 Hideout",
-      "夾心蛋糕 Layer Cake",
-      "酷熱地帶 Dry Season"
+      {
+        "name": "草叢迷蹤 Hideout",
+        "image": "/maps/hideout.png"
+      },
+      {
+        "name": "夾心蛋糕 Layer Cake",
+        "image": "/maps/layer_cake.png"
+      },
+      {
+        "name": "酷熱地帶 Dry Season",
+        "image": "/maps/dry_season.png"
+      }
     ]
   },
   {
     "mode": "據點搶奪戰",
     "mode_en": "hot_zone",
     "maps": [
-      "甲蟲決鬥 Dueling Beetles",
-      "開門大吉 Open Business",
-      "灼熱火圈 Ring of Fire"
+      {
+        "name": "甲蟲決鬥 Dueling Beetles",
+        "image": "/maps/dueling_beetles.png"
+      },
+      {
+        "name": "開門大吉 Open Business",
+        "image": "/maps/open_business.png"
+      },
+      {
+        "name": "灼熱火圈 Ring of Fire",
+        "image": "/maps/ring_of_fire.png"
+      }
     ]
   },
   {
     "mode": "極限淘汰賽",
     "mode_en": "knock_out",
     "maps": [
-      "搖滾蓓爾 Belle's Rock",
-      "金臂峽谷 Goldarm Gulch",
-      "新地平線 New Horizons"
+      {
+        "name": "搖滾蓓爾 Belle's Rock",
+        "image": "/maps/belles_rock.png"
+      },
+      {
+        "name": "金臂峽谷 Goldarm Gulch",
+        "image": "/maps/goldarm_gulch.png"
+      },
+      {
+        "name": "新地平線 New Horizons",
+        "image": "/maps/new_horizons.png"
+      }
     ]
   }
 ]

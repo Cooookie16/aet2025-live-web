@@ -119,47 +119,23 @@ export default function OBSMapScoreDisplay({ data }) {
 
   // 根據地圖名稱取得地圖圖片路徑
   const getMapImagePath = (mapName) => {
-    if (!mapName) {
-      // 靜默處理除錯
+    if (!mapName || !Array.isArray(mapsData) || mapsData.length === 0) {
       return null;
     }
     
-    // 地圖名稱對應圖片檔名的映射（根據 maps.json 和實際圖片檔案名稱）
-    const mapImageMap = {
-      // 寶石爭奪戰
-      '戈壁陷阱 Deathcap Trap': '/maps/deathcap_trap.png',
-      '地下礦坑 Undermine': '/maps/undermine.png',
-      '堅石礦井 Hard Rock Mine': '/maps/hard_rock_mine.png',
-      
-      // 亂鬥足球
-      '精準射門 Pinhole Punt': '/maps/pinhole_punt.png',
-      '超級海灘 Super Beach': '/maps/super_beach.png',
-      '陽光球場 Sunny Soccer': '/maps/sunny_soccer.png',
-      
-      // 金庫攻防戰
-      '維修站 Pit Stop': '/maps/pit_stop.png',
-      '轟隆峽谷 Kaboom Canyon': '/maps/kaboom_canyon.png',
-      '燙手山芋 Hot Potato': '/maps/hot_potato.png',
-      
-      // 搶星大作戰
-      '草叢迷蹤 Hideout': '/maps/hideout.png',
-      '夾心蛋糕 Layer Cake': '/maps/layer_cake.png',
-      '酷熱地帶 Dry Season': '/maps/dry_season.png',
-      
-      // 據點搶奪戰
-      '甲蟲決鬥 Dueling Beetles': '/maps/dueling_beetles.png',
-      '開門大吉 Open Business': '/maps/open_business.png',
-      '灼熱火圈 Ring of Fire': '/maps/ring_of_fire.png',
-      
-      // 極限淘汰賽
-      '搖滾蓓爾 Belle\'s Rock': '/maps/belles_rock.png',
-      '金臂峽谷 Goldarm Gulch': '/maps/goldarm_gulch.png',
-      '新地平線 New Horizons': '/maps/new_horizons.png'
-    };
+    // 遍歷所有模式的所有地圖尋找匹配的名稱
+    for (const mode of mapsData) {
+      if (Array.isArray(mode.maps)) {
+        const map = mode.maps.find(m => m.name === mapName);
+        if (map && map.image) {
+          return map.image;
+        }
+      }
+    }
     
-    const imagePath = mapImageMap[mapName];
-    // 靜默處理除錯
-    return imagePath || null;
+    // 找不到時嘗試回退到舊邏輯（如果有的話，或是直接返回 null）
+    // 這裡我們假設所有地圖都已遷移到新格式
+    return null;
   };
 
   // 檢查該盤是否已開始（有分數且不為0）
@@ -176,8 +152,11 @@ export default function OBSMapScoreDisplay({ data }) {
   const findModeByMapName = (mapName) => {
     if (!mapName || !Array.isArray(mapsData) || mapsData.length === 0) {return { modeZh: null, modeEn: null };}
     for (const entry of mapsData) {
-      if (Array.isArray(entry.maps) && entry.maps.includes(mapName)) {
-        return { modeZh: entry.mode || null, modeEn: entry.mode_en || null };
+      if (Array.isArray(entry.maps)) {
+        // maps 現在是物件陣列，需檢查 m.name
+        if (entry.maps.some(m => m.name === mapName)) {
+          return { modeZh: entry.mode || null, modeEn: entry.mode_en || null };
+        }
       }
     }
     return { modeZh: null, modeEn: null };

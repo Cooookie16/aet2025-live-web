@@ -9,6 +9,7 @@ const KEYS = {
   display: 'dashboard:currentDisplay',
   mapScores: 'dashboard:mapScores',
   banpickData: 'dashboard:banpickData',
+  welcomeConfig: 'dashboard:welcomeConfig',
 };
 
 export async function GET() {
@@ -35,6 +36,10 @@ export async function GET() {
     if (banpickData) {
       responseData.banpickData = banpickData;
     }
+    const welcomeConfig = kvGet(KEYS.welcomeConfig);
+    if (welcomeConfig) {
+      responseData.welcomeConfig = welcomeConfig;
+    }
     
     return NextResponse.json({
       ok: true,
@@ -60,7 +65,7 @@ export async function POST(request) {
       return NextResponse.json({ ok: false, error: 'INVALID_JSON', details: parseError.message }, { status: 400 });
     }
     
-    const { bracket, currentBroadcast, currentDisplay, mapScores, banpickData } = body || {};
+    const { bracket, currentBroadcast, currentDisplay, mapScores, banpickData, welcomeConfig } = body || {};
 
     if (bracket !== undefined) {
       kvSet(KEYS.bracket, bracket);
@@ -121,6 +126,19 @@ export async function POST(request) {
           action: 'broadcast',
           type: 'banpick-update',
           data: { banpickData },
+          timestamp: Date.now(),
+        });
+      } catch {}
+    }
+
+    if (welcomeConfig !== undefined) {
+      kvSet(KEYS.welcomeConfig, welcomeConfig);
+      // 廣播 welcomeConfig 更新
+      try {
+        sseBroadcast({
+          action: 'broadcast',
+          type: 'welcome-config-update',
+          data: { welcomeConfig },
           timestamp: Date.now(),
         });
       } catch {}
