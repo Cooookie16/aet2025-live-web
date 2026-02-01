@@ -14,7 +14,7 @@ export function subscribe(send) {
   return () => {
     subscribers.delete(send);
   };
-}
+};
 
 export function broadcast(event) {
   // 確保時間戳存在
@@ -57,4 +57,3 @@ export function getSince(lastEventId) {
 export function getLastEventId() {
   return ringBuffer.length ? ringBuffer[ringBuffer.length - 1].id : 0;
 }
-

@@ -88,9 +88,9 @@ export default function BracketEditor({
         </button>
       </div>
 
-      {/* 對戰樹佈局：四欄（八強/四強+季軍賽/冠亞/冠軍） */}
+      {/* 對戰樹佈局：三欄（八強/四強/冠亞+冠軍） */}
       <div className="w-full overflow-x-auto">
-        <div className="min-w-[900px] grid grid-cols-4 gap-8">
+        <div className="min-w-[900px] grid grid-cols-3 gap-8">
           {/* 八強（4 場） */}
           <div className="space-y-10 flex flex-col justify-center">
             {bracket.qf.map((m, i) => (
@@ -111,53 +111,30 @@ export default function BracketEditor({
             ))}
           </div>
 
-          {/* 四強與季軍賽（同欄位，季軍賽在上方） */}
+          {/* 四強 */}
           <div className="space-y-28 flex flex-col justify-center">
-            {/* 上方季軍賽 */}
-            <div className="space-y-10">
-              {bracket.tp.map((m, i) => (
-                <div key={generateMatchKey('tp', m, i)} className="relative">
-                  {/* 連接線（左方彙入） */}
-                  <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                  <MatchEditor
-                    stage="tp"
-                    index={i}
-                    match={m}
-                    teams={teamOptions}
-                    onChange={onMatchChange}
-                    label="季軍賽"
-                    isCurrent={isCurrentMatch('tp', i)}
-                    onSetCurrent={onSetBroadcastMatch}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* 四強 */}
-            <div className="space-y-10">
-              {bracket.sf.map((m, i) => (
-                <div key={generateMatchKey('sf', m, i)} className="relative">
-                  {/* 連接線（左方彙入 & 往決賽） */}
-                  <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                  <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                  <MatchEditor
-                    stage="sf"
-                    index={i}
-                    match={m}
-                    teams={teamOptions}
-                    onChange={onMatchChange}
-                    label={`四強 ${i + 1}`}
-                    isCurrent={isCurrentMatch('sf', i)}
-                    onSetCurrent={onSetBroadcastMatch}
-                  />
-                </div>
-              ))}
-            </div>
-
+            {bracket.sf.map((m, i) => (
+              <div key={generateMatchKey('sf', m, i)} className="relative">
+                {/* 連接線（左方彙入 & 往決賽） */}
+                <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                <MatchEditor
+                  stage="sf"
+                  index={i}
+                  match={m}
+                  teams={teamOptions}
+                  onChange={onMatchChange}
+                  label={`四強 ${i + 1}`}
+                  isCurrent={isCurrentMatch('sf', i)}
+                  onSetCurrent={onSetBroadcastMatch}
+                />
+              </div>
+            ))}
           </div>
 
-          {/* 冠亞賽（1 場） */}
-          <div className="flex flex-col justify-center">
+          {/* 冠亞賽與冠軍（同欄） */}
+          <div className="space-y-16 flex flex-col justify-center">
+            {/* 冠亞賽 */}
             {bracket.f.map((m, i) => (
               <div key={generateMatchKey('f', m, i)} className="relative">
                 {/* 連接線（左方彙入） */}
@@ -174,13 +151,9 @@ export default function BracketEditor({
                 />
               </div>
             ))}
-          </div>
 
-          {/* 冠軍（單一） */}
-          <div className="flex flex-col justify-center">
+            {/* 冠軍 */}
             <div className="relative">
-              {/* 連接線（左方彙入） */}
-              <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
               <div className="rounded-lg border border-amber-400 dark:border-amber-500 p-4 bg-amber-50/60 dark:bg-amber-500/10 min-w-[220px] overflow-hidden">
                 <div className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-2">冠軍</div>
                 <div className="flex items-center gap-2 min-w-0">

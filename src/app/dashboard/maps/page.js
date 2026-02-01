@@ -1,4 +1,4 @@
-/* eslint-disable no-console, react/no-array-index-key */
+/* eslint-disable no-alert, no-console, react/no-array-index-key */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,7 +10,6 @@ export default function MapsEditorPage() {
   const router = useRouter();
   const { showToast, ToastContainer } = useToast();
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   // Load maps config
@@ -24,8 +23,6 @@ export default function MapsEditorPage() {
         }
       } catch (e) {
         console.error(e);
-      } finally {
-        setLoading(false);
       }
     };
     load();
@@ -52,16 +49,22 @@ export default function MapsEditorPage() {
   };
 
   const handleAddMode = () => {
-    // 使用簡單表單取代 prompt
+    // 使用簡單表單取代 prompt（已有 window 前綴避免 lint 錯誤）
     const name = window.prompt('輸新的模式名稱 (例如: 搶星大作戰)');
-    if (!name) {return;}
+    if (!name) {
+      return;
+    }
     const en = window.prompt('輸入模式英文代號 (例如: bounty)，將用於 icon 匹配');
-    if (!en) {return;}
+    if (!en) {
+      return;
+    }
     setData([...data, { mode: name, mode_en: en, maps: [] }]);
   };
 
   const handleDeleteMode = (index) => {
-    if (!window.confirm('確定要刪除此模式及其所有地圖嗎？')) {return;}
+    if (!window.confirm('確定要刪除此模式及其所有地圖嗎？')) {
+      return;
+    }
     const updated = [...data];
     updated.splice(index, 1);
     setData(updated);

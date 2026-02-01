@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
+import { broadcast as sseBroadcast } from '@/lib/sse';
 
 export async function POST(req) {
   try {
@@ -31,9 +32,21 @@ export async function POST(req) {
 
     fs.writeFileSync(filePath, buffer);
 
+    const url = `/uploads/${filename}`;
+
+    // 廣播 banner 更新事件，讓 OBS 頁面即時更新
+    try {
+      sseBroadcast({
+        action: 'broadcast',
+        type: 'banner-update',
+        data: { url, timestamp: Date.now() },
+        timestamp: Date.now(),
+      });
+    } catch {}
+
     return NextResponse.json({ 
       ok: true, 
-      url: `/uploads/${filename}` 
+      url 
     });
   } catch (e) {
     // eslint-disable-next-line no-console

@@ -7,10 +7,10 @@ export async function GET() {
     const brawlersDir = join(process.cwd(), 'public', 'brawlers');
     const files = await readdir(brawlersDir);
     
-    // 過濾出.png檔案並移除副檔名
+    // 過濾出.png檔案並移除副檔名，強制轉為小寫
     const brawlers = files
       .filter(file => file.endsWith('.png'))
-      .map(file => file.replace('.png', ''))
+      .map(file => file.replace('.png', '').toLowerCase())
       .sort(); // 按字母順序排序
     
     return NextResponse.json(brawlers, { 
@@ -40,8 +40,8 @@ export async function POST(req) {
     }
 
     const brawlersDir = join(process.cwd(), 'public', 'brawlers');
-    // Sanitize name to prevent path traversal
-    const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '');
+    // Sanitize name to prevent path traversal and convert to lowercase
+    const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
     const buffer = Buffer.from(await file.arrayBuffer());
     
     // Check file signature or extension if needed, currently assuming .png from client or converting? 
@@ -74,7 +74,7 @@ export async function DELETE(req) {
       return NextResponse.json({ error: 'Missing name' }, { status: 400 });
     }
 
-    const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '');
+    const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
     const filePath = join(process.cwd(), 'public', 'brawlers', `${safeName}.png`);
     
     const { unlink } = require('fs/promises');
@@ -97,9 +97,9 @@ export async function PUT(req) {
     }
 
     const brawlersDir = join(process.cwd(), 'public', 'brawlers');
-    // Sanitize
-    const safeOldName = oldName.replace(/[^a-zA-Z0-9_-]/g, '');
-    const safeNewName = newName.replace(/[^a-zA-Z0-9_-]/g, '');
+    // Sanitize and convert to lowercase
+    const safeOldName = oldName.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+    const safeNewName = newName.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
 
     if (!safeNewName) {
          return NextResponse.json({ error: 'Invalid new name' }, { status: 400 });

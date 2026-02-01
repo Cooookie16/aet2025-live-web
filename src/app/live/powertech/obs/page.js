@@ -28,6 +28,7 @@ export default function OBSLiveUI() {
   const [bracket, setBracket] = useState(null); // 從後端載入並由 SSE 即時更新
   const [currentBroadcast, setCurrentBroadcast] = useState({ stage: null, index: null });
   const [banpickData, setBanpickData] = useState({});
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now()); // 用於強制重新載入圖片
   
   // 以 SSE 取代輪詢（僅在掛載時建立一次連線）
   const lastUpdateRef = useRef(0);
@@ -204,6 +205,14 @@ export default function OBSLiveUI() {
                   lastUpdate: lastUpdateRef.current
                 }));
               }
+            } else if (latestMessage.type === 'banner-update') {
+              // 收到 banner 更新通知，更新時間戳以強制重新載入圖片
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              setImageTimestamp(Date.now());
+            } else if (latestMessage.type === 'maps-config-update') {
+              // 收到地圖配置更新通知，更新時間戳以強制重新載入地圖圖片
+              lastUpdateRef.current = latestMessage.timestamp || Date.now();
+              setImageTimestamp(Date.now());
             }
           } catch {
             // 靜默處理錯誤
@@ -288,13 +297,13 @@ export default function OBSLiveUI() {
     switch (currentDisplay) {
       case 'welcome':
         // 將 displayData 傳遞給 WelcomeDisplay，包含 welcomeConfig
-        return <OBSWelcomeDisplay data={displayData} />;
+        return <OBSWelcomeDisplay data={displayData} imageTimestamp={imageTimestamp} />;
       case 'bracket':
-        return <OBSBracketDisplay data={{ bracket, currentBroadcast }} />;
+        return <OBSBracketDisplay data={{ bracket, currentBroadcast }} imageTimestamp={imageTimestamp} />;
       case 'banpick':
-        return <OBSBanpickDisplay data={{ currentBroadcast, banpickData, bracket }} />;
+        return <OBSBanpickDisplay data={{ currentBroadcast, banpickData, bracket }} imageTimestamp={imageTimestamp} />;
       case 'map-score':
-        return <OBSMapScoreDisplay data={{ currentBroadcast, mapScores: displayData.mapScores, bracket }} />;
+        return <OBSMapScoreDisplay data={{ currentBroadcast, mapScores: displayData.mapScores, bracket }} imageTimestamp={imageTimestamp} />;
       default:
         return null;
     }

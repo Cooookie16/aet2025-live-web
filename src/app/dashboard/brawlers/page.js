@@ -56,7 +56,8 @@ export default function BrawlersPage() {
     setUploading(true);
     const formData = new FormData();
     formData.append('file', selectedFile);
-    formData.append('name', newName.trim());
+    // 強制轉為小寫
+    formData.append('name', newName.trim().toLowerCase());
 
     try {
       const res = await fetch('/api/brawlers', {
@@ -124,7 +125,9 @@ export default function BrawlersPage() {
   };
 
   const handleDelete = async () => {
-    if (!deleteConfirm) return;
+    if (!deleteConfirm) {
+      return;
+    }
     const name = deleteConfirm;
     setDeleteConfirm(null);
 

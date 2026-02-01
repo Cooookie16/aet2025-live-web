@@ -6,7 +6,7 @@ import Image from 'next/image';
 // 關閉 OBS 端除錯輸出
 
 // OBS 地圖與比數顯示
-export default function OBSMapScoreDisplay({ data }) {
+export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }) {
   const currentBroadcast = data?.currentBroadcast;
   const mapScores = data?.mapScores;
   const bracket = data?.bracket;
@@ -94,7 +94,7 @@ export default function OBSMapScoreDisplay({ data }) {
     };
   }, []);
 
-  // 載入地圖資料
+  // 載入地圖資料（並在 imageTimestamp 變化時重新載入）
   useEffect(() => {
     const loadMaps = async () => {
       try {
@@ -108,7 +108,7 @@ export default function OBSMapScoreDisplay({ data }) {
       }
     };
     loadMaps();
-  }, []);
+  }, [imageTimestamp]); // 當 imageTimestamp 變化時重新載入
 
   // 根據隊伍名稱取得選手陣列（未選隊伍時不顯示）
   const getTeamMembers = (teamName) => {
@@ -186,14 +186,13 @@ export default function OBSMapScoreDisplay({ data }) {
     return `/icons/${modeEn}.png`;
   };
 
-  // 根據目前階段取得標籤（八強/四強/季軍賽/冠亞賽）
+  // 根據目前階段取得標籤（八強/四強/冠亞賽）
   const getStageLabel = () => {
     const stage = currentBroadcast?.stage;
     if (!stage) {return '';}
     const mapStageToLabel = {
       qf: '八強',
       sf: '四強',
-      tp: '季軍賽',
       f: '冠亞賽',
     };
     return mapStageToLabel[stage] || '';
@@ -391,7 +390,7 @@ export default function OBSMapScoreDisplay({ data }) {
                           <div className="w-full h-full flex flex-col">
                             <div className="flex-1 flex items-center justify-center">
                               <Image 
-                                src={mapImagePath} 
+                                src={mapImagePath ? `${mapImagePath}?t=${imageTimestamp}` : mapImagePath} 
                                 alt={map.map || `第${index + 1}盤`}
                                 width={200}
                                 height={200}

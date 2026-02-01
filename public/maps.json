@@ -16,8 +16,12 @@
         "image": "/maps/hard_rock_mine.png"
       },
       {
-        "name": "新地圖",
-        "image": "/maps/map_1769914173749.png"
+        "name": "咻咻作響 Double Swoosh",
+        "image": "/maps/map_1769918040902.png"
+      },
+      {
+        "name": "寶石要塞 Gem Fort",
+        "image": "/maps/map_1769918283766.png"
       }
     ]
   },
@@ -36,6 +40,18 @@
       {
         "name": "陽光球場 Sunny Soccer",
         "image": "/maps/sunny_soccer.png"
+      },
+      {
+        "name": "中心舞台 Center Stage",
+        "image": "/maps/map_1769918332716.png"
+      },
+      {
+        "name": "夢幻彈珠 Pinball Dreams",
+        "image": "/maps/map_1769918359120.png"
+      },
+      {
+        "name": "綠蔭球場 Sneaky Fields",
+        "image": "/maps/map_1769918481697.png"
       }
     ]
   },
@@ -108,6 +124,14 @@
       {
         "name": "新地平線 New Horizons",
         "image": "/maps/new_horizons.png"
+      },
+      {
+        "name": "烈焰鳳凰 Flaring Phoenix",
+        "image": "/maps/map_1769918413758.png"
+      },
+      {
+        "name": "空曠荒野 Out In The Open",
+        "image": "/maps/map_1769918443570.png"
       }
     ]
   }

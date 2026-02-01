@@ -104,7 +104,8 @@ const nextConfig = {
   },
 
   // 輸出配置 - 僅在正式環境使用 standalone，避免干擾開發 HMR
-  ...(process.env.NODE_ENV === 'production' && { output: 'standalone' }),
+  // 註解：暫時停用 standalone 模式以支援本地 npm start
+  // ...(process.env.NODE_ENV === 'production' && { output: 'standalone' }),
   trailingSlash: false, // 統一 URL 格式
   
   // 開發環境優化

@@ -1,7 +1,7 @@
 'use client';
 
 import * as ToastPrimitive from '@radix-ui/react-toast';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // Toast Provider 元件
 export function ToastProvider({ children }) {

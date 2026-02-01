@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
+import { broadcast as sseBroadcast } from '@/lib/sse';
 
 const MAPS_FILE = join(process.cwd(), 'public', 'maps.json');
 
@@ -29,6 +30,16 @@ export async function POST(req) {
     }
 
     await writeFile(MAPS_FILE, JSON.stringify(body, null, 2), 'utf-8');
+    
+    // 廣播地圖配置更新事件，讓 OBS 頁面即時重新載入地圖資料
+    try {
+      sseBroadcast({
+        action: 'broadcast',
+        type: 'maps-config-update',
+        data: { timestamp: Date.now() },
+        timestamp: Date.now(),
+      });
+    } catch {}
     
     return NextResponse.json({ ok: true });
   } catch (e) {

@@ -60,6 +60,7 @@ export default function TeamsEditorPage() {
       }
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateTeamName = (index, value) => {

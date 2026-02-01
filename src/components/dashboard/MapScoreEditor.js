@@ -20,7 +20,6 @@ export default function MapScoreEditor({
   const getStageLabel = (stage) => {
     if (stage === 'qf') {return '八強';}
     if (stage === 'sf') {return '四強';}
-    if (stage === 'tp') {return '季軍賽';}
     if (stage === 'f') {return '冠亞賽';}
     return '';
   };

@@ -33,12 +33,12 @@
       },
       {
         "a": {
-          "team": "",
-          "score": "0"
+          "team": "123 (1)123123",
+          "score": "1"
         },
         "b": {
-          "team": "",
-          "score": "0"
+          "team": "GUGU",
+          "score": "1"
         }
       }
     ],
@@ -53,18 +53,6 @@
           "score": "0"
         }
       },
-      {
-        "a": {
-          "team": "",
-          "score": "0"
-        },
-        "b": {
-          "team": "",
-          "score": "0"
-        }
-      }
-    ],
-    "tp": [
       {
         "a": {
           "team": "",
@@ -95,7 +83,7 @@
   },
   "dashboard:currentBroadcast": {
     "stage": "qf",
-    "index": 0
+    "index": 3
   },
   "dashboard:mapScores": {
     "qf:0": [
@@ -161,11 +149,60 @@
         "scoreA": "0",
         "scoreB": "0"
       }
+    ],
+    "qf:3": [
+      {
+        "mode": "寶石爭奪戰",
+        "map": "堅石礦井 Hard Rock Mine",
+        "scoreA": "1",
+        "scoreB": "2"
+      },
+      {
+        "mode": "寶石爭奪戰",
+        "map": "咻咻作響 Double Swoosh",
+        "scoreA": "2",
+        "scoreB": "1"
+      },
+      {
+        "mode": "亂鬥足球",
+        "map": "綠蔭球場 Sneaky Fields",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "極限淘汰賽",
+        "map": "空曠荒野 Out In The Open",
+        "scoreA": "0",
+        "scoreB": "0"
+      },
+      {
+        "mode": "亂鬥足球",
+        "map": "超級海灘 Super Beach",
+        "scoreA": "0",
+        "scoreB": "0"
+      }
     ]
   },
   "dashboard:currentDisplay": "welcome",
-  "dashboard:banpickData": {},
+  "dashboard:banpickData": {
+    "qf:3": {
+      "teamA": {
+        "bans": [
+          "ziggy",
+          "gigi",
+          "glowbert"
+        ]
+      },
+      "teamB": {
+        "bans": [
+          "brock",
+          "rico",
+          "spike"
+        ]
+      }
+    }
+  },
   "dashboard:welcomeConfig": {
-    "bannerUrl": "/uploads/banner-1769604336784.png"
+    "bannerUrl": "/uploads/banner-1769918621606.png"
   }
 }
