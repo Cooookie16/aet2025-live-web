@@ -7,6 +7,8 @@ import MapScoreEditor from '@/components/dashboard/MapScoreEditor';
 import BanpickEditor from '@/components/dashboard/BanpickEditor';
 import StatusBar from '@/components/dashboard/StatusBar';
 import SideNavbar from '@/components/dashboard/SideNavbar';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { useDisplayState } from '@/hooks/useDisplayState';
 import { useBracketState } from '@/hooks/useBracketState';
 import { useMapScores } from '@/hooks/useMapScores';
@@ -94,24 +96,26 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* 側邊導航 */}
-      <SideNavbar sections={navSections} />
+      {/* 側邊導航 - 桌面版顯示，手機版隱藏 */}
+      <div className="hidden lg:block">
+        <SideNavbar sections={navSections} />
+      </div>
       
       {/* 主要內容區域 */}
       <div>
       {/* 標題列 */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 sm:py-6 gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                直播控制台
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                AET2026 直播控制台
               </h1>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                控制遠端顯示介面的內容
+                Website developed by Cookie
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap w-full sm:w-auto">
               {/* 連線狀態 */}
               <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
                 isConnected 
@@ -124,96 +128,188 @@ export default function Dashboard() {
                 <span>{isConnected ? '已連線' : '未連線'}</span>
               </div>
               
-              {/* 前往 OBS 直播畫面按鈕 */}
+              {/* 前往 OBS 直播畫面按鈕 - 永遠顯示 */}
               <a
                 href="/live/powertech/obs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+                className="px-3 sm:px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors whitespace-nowrap"
               >
-                前往直播畫面
+                直播畫面
               </a>
-              <a
-                href="/dashboard/teams"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              >
-                編輯隊伍與選手
-              </a>
-              <a
-                href="/dashboard/editbanner"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              >
-                編輯 Banner
-              </a>
-              <a
-                href="/dashboard/brawlers"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              >
-                編輯 Brawlers
-              </a>
-              <a
-                href="/dashboard/maps"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              >
-                編輯地圖與模式
-              </a>
+
+              {/* 工具按鈕群組 - 桌面版全顯示，手機版使用 Dropdown */}
+              <div className="hidden sm:flex items-center gap-2">
+                <a
+                  href="/dashboard/teams"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
+                >
+                  隊伍與選手
+                </a>
+                <a
+                  href="/dashboard/editbanner"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
+                >
+                  編輯 Banner
+                </a>
+                <a
+                  href="/dashboard/brawlers"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
+                >
+                  編輯 Brawlers
+                </a>
+                <a
+                  href="/dashboard/maps"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
+                >
+                  地圖與模式
+                </a>
+              </div>
+
+              {/* 手機版工具選單 */}
+              <div className="block sm:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors">
+                    工具 ▾
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem asChild>
+                      <a href="/dashboard/teams" target="_blank" rel="noopener noreferrer" className="w-full">
+                        隊伍與選手
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <a href="/dashboard/editbanner" target="_blank" rel="noopener noreferrer" className="w-full">
+                        編輯 Banner
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <a href="/dashboard/brawlers" target="_blank" rel="noopener noreferrer" className="w-full">
+                        編輯 Brawlers
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <a href="/dashboard/maps" target="_blank" rel="noopener noreferrer" className="w-full">
+                        地圖與模式
+                      </a>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 gap-8">
-          {/* 顯示介面選擇 */}
-          <div id="display-selector">
-            <DisplaySelector 
-              displayOptions={displayOptions}
-              selectedDisplayId={selectedDisplayId}
-              onSwitchDisplay={switchDisplay}
-            />
-          </div>
+      {/* 主要內容區 - 桌面版使用垂直佈局，手機版使用 Tabs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {/* 桌面版：傳統垂直佈局 */}
+        <div className="hidden lg:block">
+          <div className="grid grid-cols-1 gap-8">
+            {/* 顯示介面選擇 */}
+            <div id="display-selector">
+              <DisplaySelector 
+                displayOptions={displayOptions}
+                selectedDisplayId={selectedDisplayId}
+                onSwitchDisplay={switchDisplay}
+              />
+            </div>
 
+            {/* 賽程表 Brackets 區域 */}
+            <div id="bracket-editor">
+              <BracketEditor 
+                bracket={bracket}
+                teamOptions={teamOptions}
+                currentBroadcast={currentBroadcast}
+                onMatchChange={handleMatchChange}
+                onSetBroadcastMatch={setBroadcastMatch}
+                onResetBrackets={handleResetBrackets}
+              />
+            </div>
 
-          {/* 賽程表 Brackets 區域 */}
-          <div id="bracket-editor">
-            <BracketEditor 
-              bracket={bracket}
-              teamOptions={teamOptions}
-              currentBroadcast={currentBroadcast}
-              onMatchChange={handleMatchChange}
-              onSetBroadcastMatch={setBroadcastMatch}
-              onResetBrackets={handleResetBrackets}
-            />
-          </div>
+            {/* Banpick 區域 */}
+            <div id="banpick-editor">
+              <BanpickEditor 
+                currentBroadcast={currentBroadcast}
+                teamOptions={teamOptions}
+                bracket={bracket}
+              />
+            </div>
 
-          {/* Banpick 區域 */}
-          <div id="banpick-editor">
-            <BanpickEditor 
-              currentBroadcast={currentBroadcast}
-              teamOptions={teamOptions}
-              bracket={bracket}
-            />
+            {/* 地圖與比數 區域 */}
+            <div id="map-scores">
+              <MapScoreEditor 
+                currentBroadcast={currentBroadcast}
+                currentMatchMaps={currentMatchMaps}
+                modeOptions={modeOptions}
+                mapsData={mapsData}
+                onUpdateMap={(idx, field, value) => updateCurrentMatchMap(currentBroadcast, idx, field, value)}
+                onResetMapScores={handleResetMapScores}
+              />
+            </div>
           </div>
+        </div>
 
-          {/* 地圖與比數 區域 */}
-          <div id="map-scores">
-            <MapScoreEditor 
-              currentBroadcast={currentBroadcast}
-              currentMatchMaps={currentMatchMaps}
-              modeOptions={modeOptions}
-              mapsData={mapsData}
-              onUpdateMap={(idx, field, value) => updateCurrentMatchMap(currentBroadcast, idx, field, value)}
-              onResetMapScores={handleResetMapScores}
-            />
-          </div>
+        {/* 手機版：Tabs 佈局 */}
+        <div className="block lg:hidden">
+          <Tabs defaultValue="display-selector" className="w-full">
+            <TabsList className="w-full grid grid-cols-4 mb-6">
+              <TabsTrigger value="display-selector" className="text-xs sm:text-sm">
+                📺 顯示
+              </TabsTrigger>
+              <TabsTrigger value="bracket-editor" className="text-xs sm:text-sm">
+                🏆 賽程
+              </TabsTrigger>
+              <TabsTrigger value="banpick-editor" className="text-xs sm:text-sm">
+                ⚔️ Banpick
+              </TabsTrigger>
+              <TabsTrigger value="map-scores" className="text-xs sm:text-sm">
+                🗺️ 地圖
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="display-selector">
+              <DisplaySelector 
+                displayOptions={displayOptions}
+                selectedDisplayId={selectedDisplayId}
+                onSwitchDisplay={switchDisplay}
+              />
+            </TabsContent>
+
+            <TabsContent value="bracket-editor">
+              <BracketEditor 
+                bracket={bracket}
+                teamOptions={teamOptions}
+                currentBroadcast={currentBroadcast}
+                onMatchChange={handleMatchChange}
+                onSetBroadcastMatch={setBroadcastMatch}
+                onResetBrackets={handleResetBrackets}
+              />
+            </TabsContent>
+
+            <TabsContent value="banpick-editor">
+              <BanpickEditor 
+                currentBroadcast={currentBroadcast}
+                teamOptions={teamOptions}
+                bracket={bracket}
+              />
+            </TabsContent>
+
+            <TabsContent value="map-scores">
+              <MapScoreEditor 
+                currentBroadcast={currentBroadcast}
+                currentMatchMaps={currentMatchMaps}
+                modeOptions={modeOptions}
+                mapsData={mapsData}
+                onUpdateMap={(idx, field, value) => updateCurrentMatchMap(currentBroadcast, idx, field, value)}
+                onResetMapScores={handleResetMapScores}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
       
@@ -227,4 +323,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-}
+};

@@ -1,16 +1,20 @@
-/* eslint-disable no-alert, no-console */
+/* eslint-disable no-console */
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ToastProvider, useToast } from '@/components/ui/Toast';
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/Dialog';
 
 export default function BrawlersPage() {
   const router = useRouter();
+  const { showToast, ToastContainer } = useToast();
   const [brawlers, setBrawlers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [newName, setNewName] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   
   // Renaming state
   const [editingId, setEditingId] = useState(null);
@@ -64,12 +68,13 @@ export default function BrawlersPage() {
         setSelectedFile(null);
         // Clear file input manually if needed, or rely on React key reset
         document.getElementById('fileInput').value = '';
+        showToast({ title: '上傳成功!', variant: 'success' });
         await loadBrawlers();
       } else {
-        alert('上傳失敗');
+        showToast({ title: '上傳失敗!', variant: 'error' });
       }
     } catch {
-      alert('上傳失敗');
+      showToast({ title: '上傳失敗!', variant: 'error' });
     } finally {
       setUploading(false);
     }
@@ -102,50 +107,84 @@ export default function BrawlersPage() {
         if (res.ok) {
             await loadBrawlers();
             cancelEdit();
+            showToast({ title: '重新命名成功!', variant: 'success' });
         } else {
             const json = await res.json();
-            alert(`重新命名失敗: ${json.error || 'Unknown error'}`);
+            showToast({ title: '重新命名失敗!', description: json.error || 'Unknown error', variant: 'error' });
         }
     } catch {
-        alert('重新命名失敗');
+        showToast({ title: '重新命名失敗!', variant: 'error' });
     } finally {
         setRenaming(false);
     }
   };
 
-  const handleDelete = async (name) => {
-    if (!confirm(`確定要刪除 ${name} 嗎？此操作無法復原。`)) {return;}
+  const confirmDelete = (name) => {
+    setDeleteConfirm(name);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+    const name = deleteConfirm;
+    setDeleteConfirm(null);
 
     try {
       const res = await fetch(`/api/brawlers?name=${encodeURIComponent(name)}`, {
         method: 'DELETE',
       });
       if (res.ok) {
+        showToast({ title: '刪除成功!', variant: 'success' });
         await loadBrawlers();
       } else {
-        alert('刪除失敗');
+        showToast({ title: '刪除失敗!', variant: 'error' });
       }
     } catch {
-      alert('刪除失敗');
+      showToast({ title: '刪除失敗!', variant: 'error' });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
+    <ToastProvider>
+      <ToastContainer />
+      
+      {/* 刪除確認 Dialog */}
+      <Dialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+        <DialogContent>
+          <DialogTitle>確認刪除</DialogTitle>
+          <DialogDescription>
+            確定要刪除「{deleteConfirm}」嗎？此操作無法復原。
+          </DialogDescription>
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={handleDelete}
+              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              確認刪除
+            </button>
+            <DialogClose asChild>
+              <button className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                取消
+              </button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Brawlers 角色管理</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">英雄管理</h1>
           <button
             onClick={() => router.push('/dashboard')}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
           >
-            返回控制台
+            返回至主控台
           </button>
         </div>
 
         {/* Upload Section */}
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">新增角色</h2>
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">新增英雄</h2>
           <div className="flex flex-col sm:flex-row gap-4 items-end">
             <div className="flex-1 w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -168,7 +207,7 @@ export default function BrawlersPage() {
             </div>
             <div className="flex-1 w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                角色名稱 (ID)
+                英雄名稱 (ID)
               </label>
               <input
                 type="text"
@@ -247,7 +286,7 @@ export default function BrawlersPage() {
                 )}
                 
                 <button
-                  onClick={() => handleDelete(name)}
+                  onClick={() => confirmDelete(name)}
                   className="absolute top-1 right-1 p-1 bg-red-100 text-red-600 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-200 transition-opacity z-10"
                   title="刪除"
                 >
@@ -266,5 +305,6 @@ export default function BrawlersPage() {
         )}
       </div>
     </div>
+    </ToastProvider>
   );
 }

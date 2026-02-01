@@ -1,11 +1,13 @@
-/* eslint-disable no-alert */
+/* eslint-disable */
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ToastProvider, useToast } from '@/components/ui/Toast';
 
 export default function EditBannerPage() {
   const router = useRouter();
+  const { showToast, ToastContainer } = useToast ();
   const [bannerUrl, setBannerUrl] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -44,12 +46,15 @@ export default function EditBannerPage() {
         }),
       });
       if (res.ok) {
-        router.push('/dashboard');
+        showToast({ title: '儲存成功', variant: 'success' });
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 500);
       } else {
-        alert('儲存失敗');
+        showToast({ title: '儲存失敗', variant: 'error' });
       }
     } catch {
-      alert('儲存失敗');
+      showToast({ title: '儲存失敗', variant: 'error' });
     } finally {
       setSaving(false);
     }
@@ -72,18 +77,21 @@ export default function EditBannerPage() {
       const json = await res.json();
       if (res.ok && json.url) {
         setBannerUrl(json.url);
+        showToast({ title: '上傳成功', variant: 'success' });
       } else {
-        alert('上傳失敗');
+        showToast({ title: '上傳失敗', variant: 'error' });
       }
     } catch {
-      alert('上傳失敗');
+      showToast({ title: '上傳失敗', variant: 'error' });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
+    <ToastProvider>
+      <ToastContainer />
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">歡迎畫面設定</h1>
         
@@ -154,5 +162,6 @@ export default function EditBannerPage() {
         </div>
       </div>
     </div>
+    </ToastProvider>
   );
 }

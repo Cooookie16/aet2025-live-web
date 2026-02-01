@@ -14,6 +14,10 @@
       {
         "name": "堅石礦井 Hard Rock Mine",
         "image": "/maps/hard_rock_mine.png"
+      },
+      {
+        "name": "新地圖",
+        "image": "/maps/map_1769914173749.png"
       }
     ]
   },

@@ -94,16 +94,16 @@
     }
   },
   "dashboard:currentBroadcast": {
-    "stage": null,
-    "index": null
+    "stage": "qf",
+    "index": 0
   },
   "dashboard:mapScores": {
     "qf:0": [
       {
-        "mode": "極限淘汰賽",
-        "map": "新地平線 New Horizons",
+        "mode": "寶石爭奪戰",
+        "map": "堅石礦井 Hard Rock Mine",
         "scoreA": "0",
-        "scoreB": "1"
+        "scoreB": "0"
       },
       {
         "mode": "",
@@ -163,7 +163,7 @@
       }
     ]
   },
-  "dashboard:currentDisplay": "map-score",
+  "dashboard:currentDisplay": "welcome",
   "dashboard:banpickData": {},
   "dashboard:welcomeConfig": {
     "bannerUrl": "/uploads/banner-1769604336784.png"

@@ -27,9 +27,12 @@ body {
 
 /* 自定義動畫 */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -67,12 +70,83 @@ html {
   ::-webkit-scrollbar-track {
     background: #2a2a2a;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background: #555;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     background: #777;
   }
+}
+
+/* RadixUI 元件動畫 */
+@keyframes slideIn {
+  from {
+    transform: translateX(calc(100% + 1rem));
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes hide {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes swipeOut {
+  from {
+    transform: translateX(var(--radix-toast-swipe-end-x));
+  }
+
+  to {
+    transform: translateX(calc(100% + 1rem));
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-hide {
+  animation: hide 100ms ease-in;
+}
+
+.animate-swipeOut {
+  animation: swipeOut 100ms ease-out;
+}
+
+.animate-accordion-down {
+  animation: accordion-down 200ms ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 200ms ease-out;
 }
