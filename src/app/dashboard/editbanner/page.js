@@ -137,7 +137,6 @@ export default function EditBannerPage() {
           {/* 預覽 */}
           <div className="mb-6 border border-gray-200 dark:border-gray-700 rounded p-4 bg-gray-50 dark:bg-gray-900 flex justify-center">
             {bannerUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={bannerUrl} alt="Preview" className="max-w-full max-h-[300px] object-contain" />
             ) : (
               <span className="text-gray-400">無圖片預覽</span>

@@ -36,10 +36,8 @@ export function useBanpickState() {
         const rawBanpickData = localStorage.getItem('dashboard:banpickData');
         if (rawBanpickData) {
           localData = JSON.parse(rawBanpickData);
-          console.log('[useBanpickState] 從 localStorage 載入:', localData);
         }
-      } catch (e) {
-        console.error('[useBanpickState] localStorage 載入失敗:', e);
+      } catch {
       }
       
       // 從 API 載入
@@ -51,30 +49,23 @@ export function useBanpickState() {
             try {
               const json = JSON.parse(text);
               apiData = json?.data || {};
-              console.log('[useBanpickState] 從 API 載入:', apiData);
             } catch {
-              console.error('[useBanpickState] API 解析失敗');
             }
           }
         }
-      } catch (e) {
-        console.error('[useBanpickState] API 載入失敗:', e);
+      } catch {
       }
       
       // 優先使用有資料的來源
       if (apiData.banpickData && Object.keys(apiData.banpickData).length > 0) {
-        console.log('[useBanpickState] 使用 API banpickData');
         setBanpickData(apiData.banpickData);
       } else if (localData) {
-        console.log('[useBanpickState] 使用 localStorage banpickData');
         setBanpickData(localData);
       } else {
-        console.log('[useBanpickState] 沒有可用的 banpickData，使用空物件');
       }
       
       // 標記初始化完成
       setIsInitialized(true);
-      console.log('[useBanpickState] 初始化完成');
     };
     loadBanpickData();
   }, []);
@@ -82,16 +73,12 @@ export function useBanpickState() {
   // 同步banpick資料到後端（只在初始化完成後才保存）
   useEffect(() => {
     if (!isInitialized) {
-      console.log('[useBanpickState] 跳過保存：尚未初始化完成');
       return;
     }
     
-    console.log('[useBanpickState] banpickData 變更，準備保存:', banpickData);
     try {
       localStorage.setItem('dashboard:banpickData', JSON.stringify(banpickData));
-      console.log('[useBanpickState] 已保存到 localStorage');
-    } catch (e) {
-      console.error('[useBanpickState] localStorage 保存失敗:', e);
+    } catch {
     }
     
     // 同步到後端
@@ -102,9 +89,7 @@ export function useBanpickState() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ banpickData })
         });
-        console.log('[useBanpickState] 已保存到 API');
-      } catch (e) {
-        console.error('[useBanpickState] API 保存失敗:', e);
+      } catch {
       }
     })();
   }, [banpickData, isInitialized]);

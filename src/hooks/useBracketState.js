@@ -25,12 +25,9 @@ export function useBracketState() {
         const rawBracket = localStorage.getItem('dashboard:bracket');
         if (rawBracket) {
           localBracket = JSON.parse(rawBracket);
-          console.log('[useBracketState] 從 localStorage 載入 bracket:', localBracket);
         } else {
-          console.log('[useBracketState] localStorage 中沒有 bracket');
         }
-      } catch (e) {
-        console.error('[useBracketState] localStorage 載入 bracket 失敗:', e);
+      } catch {
       }
 
       try {
@@ -39,11 +36,9 @@ export function useBracketState() {
           const parsed = JSON.parse(rawBroadcast);
           if (parsed && parsed.stage !== null) {
             localBroadcast = parsed;
-            console.log('[useBracketState] 從 localStorage 載入 broadcast:', localBroadcast);
           }
         }
-      } catch (e) {
-        console.error('[useBracketState] localStorage 載入 broadcast 失敗:', e);
+      } catch {
       }
       
       // 從 API 載入
@@ -55,26 +50,20 @@ export function useBracketState() {
             try {
               const json = JSON.parse(text);
               apiData = json?.data || {};
-              console.log('[useBracketState] 從 API 載入:', apiData);
             } catch {
-              console.error('[useBracketState] API 回應解析失敗');
               apiData = {};
             }
           }
         }
-      } catch (e) {
-        console.error('[useBracketState] API 載入失敗:', e);
+      } catch {
       }
       
       // 載入 bracket：優先使用有資料的來源
       if (apiData.bracket && Object.keys(apiData.bracket).length > 0) {
-        console.log('[useBracketState] 使用 API bracket');
         setBracket(apiData.bracket);
       } else if (localBracket) {
-        console.log('[useBracketState] 使用 localStorage bracket');
         setBracket(localBracket);
       } else {
-        console.log('[useBracketState] 沒有可用的 bracket 資料，使用初始值');
       }
       
       // 載入 currentBroadcast：優先使用有資料的來源
@@ -83,28 +72,23 @@ export function useBracketState() {
       if (apiData.currentBroadcast && apiData.currentBroadcast.stage !== null) {
         // 驗證 API 資料的 stage 是否有效
         if (validStages.includes(apiData.currentBroadcast.stage)) {
-          console.log('[useBracketState] 使用 API broadcast');
           setCurrentBroadcast(apiData.currentBroadcast);
         } else {
           // 無效的 stage，重置為 null
-          console.log('[useBracketState] API broadcast stage 無效，重置');
           setCurrentBroadcast({ stage: null, index: null });
         }
       } else if (localBroadcast) {
         // 驗證 localStorage 資料的 stage 是否有效
         if (validStages.includes(localBroadcast.stage)) {
-          console.log('[useBracketState] 使用 localStorage broadcast');
           setCurrentBroadcast(localBroadcast);
         } else {
           // 無效的 stage，重置為 null
-          console.log('[useBracketState] localStorage broadcast stage 無效，重置');
           setCurrentBroadcast({ stage: null, index: null });
         }
       }
       
       // 標記初始化完成
       setIsInitialized(true);
-      console.log('[useBracketState] 初始化完成');
     };
     loadState();
   }, []);
@@ -112,16 +96,12 @@ export function useBracketState() {
   // 同步賽程表到後端（只在初始化完成後才保存）
   useEffect(() => {
     if (!isInitialized) {
-      console.log('[useBracketState] 跳過保存：尚未初始化完成');
       return;
     }
     
-    console.log('[useBracketState] bracket 變更，準備保存:', bracket);
     try { 
       localStorage.setItem('dashboard:bracket', JSON.stringify(bracket)); 
-      console.log('[useBracketState] 已保存到 localStorage');
-    } catch (e) {
-      console.error('[useBracketState] localStorage 保存失敗:', e);
+    } catch {
     }
     (async () => {
       try {
@@ -130,9 +110,7 @@ export function useBracketState() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ bracket })
         });
-        console.log('[useBracketState] 已保存到 API');
-      } catch (e) {
-        console.error('[useBracketState] API 保存失敗:', e);
+      } catch {
       }
     })();
   }, [bracket, isInitialized]);
@@ -140,7 +118,6 @@ export function useBracketState() {
   // 同步目前播報對戰到後端（只在初始化完成後才保存）
   useEffect(() => {
     if (!isInitialized) {
-      console.log('[useBracketState] 跳過保存 broadcast：尚未初始化完成');
       return;
     }
     
