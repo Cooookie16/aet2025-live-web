@@ -1,11 +1,11 @@
 export const metadata = {
-  title: 'AET 直播介面',
+  title: 'AET直播介面 - ScoreBar',
   robots: {
     index: false,
     follow: false,
   },
 };
 
-export default function OBSLayout({ children }) {
+export default function ScoreBarLayout({ children }) {
   return children;
 };

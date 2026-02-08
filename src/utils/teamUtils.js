@@ -3,11 +3,12 @@
 // 載入隊伍清單
 export async function loadTeamOptions() {
   try {
-    const res = await fetch('/teams.json', { cache: 'no-store' });
+    const res = await fetch('/api/teams', { cache: 'no-store' });
     if (!res.ok) {
-      throw new Error('teams.json 載入失敗');
+      throw new Error('teams 資料載入失敗');
     }
-    const data = await res.json();
+    const body = await res.json();
+    const data = body.data || [];
     const names = Array.isArray(data) ? data.map(t => t.name).filter(Boolean) : [];
     if (names.length) {
       return names;
@@ -23,10 +24,10 @@ export async function loadTeamOptions() {
 // 載入完整隊伍資料（包含選手）
 export async function loadTeamsData() {
   try {
-    const res = await fetch('/teams.json', { cache: 'no-store' });
+    const res = await fetch('/api/teams', { cache: 'no-store' });
     if (res.ok) {
-      const data = await res.json();
-      return data;
+      const body = await res.json();
+      return body.data || [];
     }
   } catch {
     // 靜默處理錯誤

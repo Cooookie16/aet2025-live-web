@@ -89,7 +89,7 @@ export default function TeamsEditorPage() {
       if (!res.ok || !body?.ok) { throw new Error(body?.error || '儲存失敗'); }
       showToast({
         title: '儲存成功',
-        description: '正在返回控制台...',
+        description: '正在返回主頁...',
         variant: 'success'
       });
       setTimeout(() => {
@@ -166,7 +166,7 @@ export default function TeamsEditorPage() {
               disabled={saving}
               className="w-full sm:w-auto px-6 py-3 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-60 transition-colors shadow-sm"
             >
-              {saving ? '儲存中...' : '儲存並返回控制台'}
+              {saving ? '儲存中...' : '儲存並返回主頁'}
             </button>
             <button
               onClick={() => router.push('/dashboard')}

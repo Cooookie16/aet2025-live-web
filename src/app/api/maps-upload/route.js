@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { join } from 'path';
 import { writeFile, unlink } from 'fs/promises';
+import { optimizeImage } from '@/lib/imageOptimizer';
 
 const UPLOAD_DIR = join(process.cwd(), 'public', 'maps');
 
@@ -15,15 +16,18 @@ export async function POST(req) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // Generate a unique filename or use logic to match map name?
-    // Plan: Use a unique timestamped name to avoid cache, or just clean filename.
-    // Dashboard will manage the association.
-    const ext = file.name.split('.').pop() || 'png';
+    // Optimize the image locally
+    const optimizedBuffer = await optimizeImage(buffer);
+    
+    // Use .webp extension for optimized images
+    const ext = 'webp'; 
     const timestamp = Date.now();
-    const filename = `map_${timestamp}.${ext}`;
+    // Use original name base if possible, but safely
+    const safeName = file.name.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
+    const filename = `${safeName}_${timestamp}.${ext}`;
     const filePath = join(UPLOAD_DIR, filename);
 
-    await writeFile(filePath, buffer);
+    await writeFile(filePath, optimizedBuffer);
 
     return NextResponse.json({ ok: true, url: `/maps/${filename}` });
   } catch (e) {

@@ -206,9 +206,19 @@ export default function OBSLiveUI() {
                 }));
               }
             } else if (latestMessage.type === 'banner-update') {
-              // 收到 banner 更新通知，更新時間戳以強制重新載入圖片
+              // 收到 banner 更新通知，立即更新顯示並強制重載
               lastUpdateRef.current = latestMessage.timestamp || Date.now();
               setImageTimestamp(Date.now());
+              if (latestMessage?.data?.url) {
+                setDisplayData(prev => ({
+                  ...prev,
+                  welcomeConfig: {
+                    ...prev.welcomeConfig,
+                    bannerUrl: latestMessage.data.url
+                  },
+                  lastUpdate: lastUpdateRef.current
+                }));
+              }
             } else if (latestMessage.type === 'maps-config-update') {
               // 收到地圖配置更新通知，更新時間戳以強制重新載入地圖圖片
               lastUpdateRef.current = latestMessage.timestamp || Date.now();

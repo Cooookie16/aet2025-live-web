@@ -42,3 +42,7 @@ next-env.d.ts
 
 # team images
 /public/team-images/
+
+# Allow SQLite databases (Config/Content)
+!db/*.db
+!db/

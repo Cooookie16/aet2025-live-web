@@ -1,32 +1,7 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { getAllTeams, updateTeams } from '@/lib/db';
 import { broadcast as sseBroadcast } from '@/lib/sse';
 import logger from '@/lib/logger';
-
-const TEAMS_PATH = path.join(process.cwd(), 'public', 'teams.json');
-
-function readTeamsFile() {
-  try {
-    if (!fs.existsSync(TEAMS_PATH)) {
-      return null;
-    }
-    const raw = fs.readFileSync(TEAMS_PATH, 'utf-8');
-    return raw ? JSON.parse(raw) : null;
-  } catch (error) {
-    logger.error('[API][teams] 讀取 teams.json 失敗:', error.message);
-    return null;
-  }
-}
-
-function writeTeamsFile(data) {
-  try {
-    fs.writeFileSync(TEAMS_PATH, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    logger.error('[API][teams] 寫入 teams.json 失敗:', error.message);
-    throw error;
-  }
-}
 
 function createDefaultTeams() {
   return Array.from({ length: 8 }).map((_, i) => ({
@@ -50,11 +25,12 @@ function validateTeamsPayload(payload) {
 
 export async function GET() {
   try {
-    const data = readTeamsFile();
-    const teams = Array.isArray(data) && data.length ? data : createDefaultTeams();
+    let teams = getAllTeams();
+    if (!Array.isArray(teams) || teams.length === 0) {
+      teams = createDefaultTeams();
+    }
     return NextResponse.json({ ok: true, data: teams }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
-    // 加入日誌以協助追蹤讀取失敗原因（僅在伺服端輸出）
     logger.error('[API][teams][GET] 讀取失敗:', error?.message || error);
     return NextResponse.json({ ok: false, error: 'READ_FAILED' }, { status: 500 });
   }
@@ -71,7 +47,6 @@ export async function PUT(request) {
     try {
       body = JSON.parse(text);
     } catch (parseError) {
-      // 加入日誌以驗證是否為 JSON 解析錯誤
       logger.warn('[API][teams][PUT] JSON 解析失敗:', parseError?.message || parseError);
       return NextResponse.json({ ok: false, error: 'INVALID_JSON' }, { status: 400 });
     }
@@ -83,7 +58,7 @@ export async function PUT(request) {
       return NextResponse.json({ ok: false, error: err }, { status: 400 });
     }
 
-    writeTeamsFile(teams);
+    updateTeams(teams);
     try {
       sseBroadcast({
         action: 'broadcast',

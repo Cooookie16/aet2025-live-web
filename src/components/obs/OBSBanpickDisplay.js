@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 // OBS Banpick 顯示
-export default function OBSBanpickDisplay({ data }) {
+export default function OBSBanpickDisplay({ data, imageTimestamp = Date.now() }) {
   const { currentBroadcast, banpickData, bracket } = data || {};
   const [teamsData, setTeamsData] = useState([]);
   const [currentMatch, setCurrentMatch] = useState(null);
@@ -13,10 +13,10 @@ export default function OBSBanpickDisplay({ data }) {
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const res = await fetch('/teams.json', { cache: 'no-store' });
+        const res = await fetch('/api/teams', { cache: 'no-store' });
         if (res.ok) {
-          const teams = await res.json();
-          setTeamsData(teams);
+          const body = await res.json();
+          setTeamsData(body.data || []);
         }
       } catch {
         // 靜默處理錯誤
@@ -104,7 +104,7 @@ export default function OBSBanpickDisplay({ data }) {
     <div className="w-full h-full flex flex-col items-center justify-center p-6">
       {/* 最上方新增標題：兩方BAN角 */}
       <div className="w-full text-center mb-4">
-        <h1 className="text-4xl font-extrabold text-white tracking-wide">兩方BAN角</h1>
+        <h1 className="text-4xl font-extrabold text-white tracking-wide">雙方BAN角</h1>
       </div>
       {/* 已移除 Banpick 次標題 */}
       
@@ -114,25 +114,20 @@ export default function OBSBanpickDisplay({ data }) {
         <div className="flex flex-col gap-2">
           {/* 隊伍名稱 */}
           <div className="text-center mb-2">
-            <h3 className="text-xl font-bold text-emerald-400">{currentMatch.teamA.name}</h3>
+            <h3 className="text-xl font-bold text-blue-400">{currentMatch.teamA.name}</h3>
           </div>
           
-          {/* 三個選手ban角 */}
-          {currentMatch.teamA.members.map((player, index) => {
+          {/* 三個選手ban角 - 使用固定索引 0~2，不顯示玩家名稱 */}
+          {[0, 1, 2].map((index) => {
             const bannedBrawler = banpick?.teamA?.bans?.[index] || '';
             return (
-              <div key={`teamA-${player}`} className="flex flex-col items-center gap-1">
-                {/* 選手名稱 */}
-                <div className="text-sm font-medium text-white text-center">
-                  {player}
-                </div>
-                
+              <div key={`teamA-ban-${index}`} className="flex flex-col items-center gap-1">
                 {/* 英雄圖片方塊 */}
-                <div className="w-24 h-24 rounded-lg border-2 border-emerald-500 bg-gray-800 overflow-hidden flex items-center justify-center relative">
+                <div className="w-24 h-24 rounded-lg border-2 border-blue-500 bg-gray-800 overflow-hidden flex items-center justify-center relative">
                   {bannedBrawler ? (
                     <>
                       <Image 
-                        src={`/brawlers/${bannedBrawler}.png`}
+                        src={`/brawlers/${bannedBrawler}.png?t=${imageTimestamp}`}
                         alt={bannedBrawler}
                         width={96}
                         height={96}
@@ -146,14 +141,14 @@ export default function OBSBanpickDisplay({ data }) {
                       {/* 禁止樣式：45度紅色粗線，不超出方框（由外層 overflow-hidden 控制） */}
                       <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-4 bg-red-600 rotate-45 rounded"></div>
                     </>
-                  ) : null}
-                  <div 
-                    className="w-full h-full flex items-center justify-center text-gray-500 text-xs"
-                    data-fallback
-                    style={{ display: bannedBrawler ? 'none' : 'flex' }}
-                  >
-                    未選擇
-                  </div>
+                  ) : (
+                    <div 
+                      className="w-full h-full flex items-center justify-center text-gray-500 text-xs"
+                      data-fallback
+                    >
+                      未選擇
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -164,25 +159,20 @@ export default function OBSBanpickDisplay({ data }) {
         <div className="flex flex-col gap-2">
           {/* 隊伍名稱 */}
           <div className="text-center mb-2">
-            <h3 className="text-xl font-bold text-sky-400">{currentMatch.teamB.name}</h3>
+            <h3 className="text-xl font-bold text-red-400">{currentMatch.teamB.name}</h3>
           </div>
           
-          {/* 三個選手ban角 */}
-          {currentMatch.teamB.members.map((player, index) => {
+          {/* 三個選手ban角 - 使用固定索引 0~2，不顯示玩家名稱 */}
+          {[0, 1, 2].map((index) => {
             const bannedBrawler = banpick?.teamB?.bans?.[index] || '';
             return (
-              <div key={`teamB-${player}`} className="flex flex-col items-center gap-1">
-                {/* 選手名稱 */}
-                <div className="text-sm font-medium text-white text-center">
-                  {player}
-                </div>
-                
+              <div key={`teamB-ban-${index}`} className="flex flex-col items-center gap-1">
                 {/* 英雄圖片方塊 */}
-                <div className="w-24 h-24 rounded-lg border-2 border-sky-500 bg-gray-800 overflow-hidden flex items-center justify-center relative">
+                <div className="w-24 h-24 rounded-lg border-2 border-red-500 bg-gray-800 overflow-hidden flex items-center justify-center relative">
                   {bannedBrawler ? (
                     <>
                       <Image 
-                        src={`/brawlers/${bannedBrawler}.png`}
+                        src={`/brawlers/${bannedBrawler}.png?t=${imageTimestamp}`}
                         alt={bannedBrawler}
                         width={96}
                         height={96}
@@ -196,14 +186,14 @@ export default function OBSBanpickDisplay({ data }) {
                       {/* 禁止樣式：45度紅色粗線，不超出方框（由外層 overflow-hidden 控制） */}
                       <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-4 bg-red-600 rotate-45 rounded"></div>
                     </>
-                  ) : null}
-                  <div 
-                    className="w-full h-full flex items-center justify-center text-gray-500 text-xs"
-                    data-fallback
-                    style={{ display: bannedBrawler ? 'none' : 'flex' }}
-                  >
-                    未選擇
-                  </div>
+                  ) : (
+                    <div 
+                      className="w-full h-full flex items-center justify-center text-gray-500 text-xs"
+                      data-fallback
+                    >
+                      未選擇
+                    </div>
+                  )}
                 </div>
               </div>
             );

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readdir } from 'fs/promises';
 import { join } from 'path';
+import { optimizeImage } from '@/lib/imageOptimizer';
 
 export async function GET() {
   try {
@@ -44,18 +45,13 @@ export async function POST(req) {
     const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // Check file signature or extension if needed, currently assuming .png from client or converting? 
-    // Plan Implementation says "Only supports .png for now".
-    // We will save as .png regardless of input name, or ensure input name has .png? 
-    // Plan says: "Save file to public/brawlers/[name].png"
+    // Optimize brawler image, keep as PNG for compatibility
+    const optimizedBuffer = await optimizeImage(buffer, { maxWidth: 500, quality: 90, format: 'png' });
     
     // Ensure directory exists (should exist if GET works, but good practice)
     // await mkdir(brawlersDir, { recursive: true }); // fs/promises needed if we want to ensure
-
-    // Use synchronous write or promise-based write. 
-    // Need to import writeFile from fs/promises.
     const { writeFile } = require('fs/promises'); 
-    await writeFile(join(brawlersDir, `${safeName}.png`), buffer);
+    await writeFile(join(brawlersDir, `${safeName}.png`), optimizedBuffer);
 
     return NextResponse.json({ ok: true, name: safeName });
   } catch (e) {

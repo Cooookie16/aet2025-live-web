@@ -64,10 +64,10 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const res = await fetch('/teams.json', { cache: 'no-store' });
+        const res = await fetch('/api/teams', { cache: 'no-store' });
         if (res.ok) {
-          const data = await res.json();
-          setTeamsData(data);
+          const body = await res.json();
+          setTeamsData(body.data || []);
         }
       } catch {
         // 靜默處理錯誤
@@ -98,7 +98,7 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
   useEffect(() => {
     const loadMaps = async () => {
       try {
-        const res = await fetch('/maps.json', { cache: 'no-store' });
+        const res = await fetch('/api/maps-config', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           setMapsData(data);
@@ -294,7 +294,7 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
                 return (
                   <div key={`mode-${map?.map || `mode-${index}`}`} className="w-24 h-12 bg-black p-2 flex items-center justify-center">
                     {showIcon ? (
-                      <Image src={iconPath} alt={modeEn || `第${index + 1}盤`} width={96} height={48} className="max-w-full max-h-full object-contain" />
+                      <Image src={`${iconPath}?t=${imageTimestamp}`} alt={modeEn || `第${index + 1}盤`} width={96} height={48} className="max-w-full max-h-full object-contain" />
                     ) : (
                       // 資料未就緒顯示空白；資料就緒但無 icon 顯示問號
                       iconsReady && mapsReady ? (

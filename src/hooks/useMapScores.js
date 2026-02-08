@@ -57,9 +57,9 @@ export function useMapScores() {
   useEffect(() => {
     const loadMaps = async () => {
       try {
-        const res = await fetch('/maps.json', { cache: 'no-store' });
+        const res = await fetch('/api/maps-config', { cache: 'no-store' });
         if (!res.ok) {
-          throw new Error('maps.json 載入失敗');
+          throw new Error('地圖資料載入失敗');
         }
         const data = await res.json();
         if (Array.isArray(data)) {

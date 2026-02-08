@@ -14,32 +14,35 @@ const KEYS = {
 
 export async function GET() {
   try {
+    // Default Values
+    const DEFAULT_BRACKET = {
+      qf: Array.from({ length: 4 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+      sf: Array.from({ length: 2 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+      f:  Array.from({ length: 1 }, () => ({ a: { team: '', score: '0' }, b: { team: '', score: '0' } })),
+      champ: { team: '', score: '0' }
+    };
+    const DEFAULT_BROADCAST = { stage: null, index: null };
+    const DEFAULT_DISPLAY = 'welcome';
+    const DEFAULT_MAP_SCORES = {};
+    const DEFAULT_BANPICK = {};
+    const DEFAULT_WELCOME = { bannerUrl: '/images/AET2025_full_title_logo.png' };
+
     const bracket = kvGet(KEYS.bracket);
     const broadcast = kvGet(KEYS.broadcast);
     const display = kvGet(KEYS.display);
     const mapScores = kvGet(KEYS.mapScores);
     const banpickData = kvGet(KEYS.banpickData);
-    
-    const responseData = {};
-    if (bracket) {
-      responseData.bracket = bracket;
-    }
-    if (broadcast && broadcast.stage !== null) {
-      responseData.currentBroadcast = broadcast;
-    }
-    if (display) {
-      responseData.currentDisplay = display;
-    }
-    if (mapScores) {
-      responseData.mapScores = mapScores;
-    }
-    if (banpickData) {
-      responseData.banpickData = banpickData;
-    }
     const welcomeConfig = kvGet(KEYS.welcomeConfig);
-    if (welcomeConfig) {
-      responseData.welcomeConfig = welcomeConfig;
-    }
+    
+    // Merge with defaults to ensure no empty values
+    const responseData = {
+      bracket: bracket || DEFAULT_BRACKET,
+      currentBroadcast: (broadcast && broadcast.stage !== null) ? broadcast : DEFAULT_BROADCAST,
+      currentDisplay: display || DEFAULT_DISPLAY,
+      mapScores: mapScores || DEFAULT_MAP_SCORES,
+      banpickData: banpickData || DEFAULT_BANPICK,
+      welcomeConfig: welcomeConfig || DEFAULT_WELCOME,
+    };
     
     return NextResponse.json({
       ok: true,

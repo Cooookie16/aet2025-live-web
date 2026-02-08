@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'AET2026直播控制台',
+  title: 'AET 直播控制台',
 };
 
 export default function DashboardLayout({ children }) {

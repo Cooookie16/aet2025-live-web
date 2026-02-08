@@ -21,10 +21,10 @@ export default function OBSBracketDisplay({ data }) {
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const res = await fetch('/teams.json', { cache: 'no-store' });
+        const res = await fetch('/api/teams', { cache: 'no-store' });
         if (res.ok) {
-          const data = await res.json();
-          setTeamsData(data);
+          const body = await res.json();
+          setTeamsData(body.data || []);
         }
       } catch {
         // 靜默處理錯誤

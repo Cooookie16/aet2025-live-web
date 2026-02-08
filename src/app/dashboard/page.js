@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import DisplaySelector from '@/components/dashboard/DisplaySelector';
 import BracketEditor from '@/components/dashboard/BracketEditor';
 import MapScoreEditor from '@/components/dashboard/MapScoreEditor';
@@ -29,10 +30,10 @@ export default function Dashboard() {
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const res = await fetch('/teams.json', { cache: 'no-store' });
+        const res = await fetch('/api/teams', { cache: 'no-store' });
         if (res.ok) {
-          const teams = await res.json();
-          setTeamOptions(teams);
+          const body = await res.json();
+          setTeamOptions(body.data || []);
         }
       } catch {
         setTeamOptions([]);
@@ -108,11 +109,13 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 sm:py-6 gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                AET2026 直播控制台
-              </h1>
+              <Link href="/" className="hover:opacity-80 transition-opacity">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                  AET 直播控制台
+                </h1>
+              </Link>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Website developed by Cookie
+                2026 2.0版 | 開發 by Cookie
               </p>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap w-full sm:w-auto">
@@ -127,16 +130,6 @@ export default function Dashboard() {
                 }`}></div>
                 <span>{isConnected ? '已連線' : '未連線'}</span>
               </div>
-              
-              {/* 前往 OBS 直播畫面按鈕 - 永遠顯示 */}
-              <a
-                href="/live/powertech/obs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 sm:px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors whitespace-nowrap"
-              >
-                直播畫面
-              </a>
 
               {/* 工具按鈕群組 - 桌面版全顯示，手機版使用 Dropdown */}
               <div className="hidden sm:flex items-center gap-2">
@@ -145,28 +138,28 @@ export default function Dashboard() {
                   rel="noopener noreferrer"
                   className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
                 >
-                  隊伍與選手
+                  編輯隊伍與選手
                 </a>
                 <a
                   href="/dashboard/editbanner"
                   rel="noopener noreferrer"
                   className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
                 >
-                  編輯 Banner
+                  編輯「歡迎圖片」
                 </a>
                 <a
                   href="/dashboard/brawlers"
                   rel="noopener noreferrer"
                   className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
                 >
-                  編輯 Brawlers
+                  編輯英雄列表
                 </a>
                 <a
                   href="/dashboard/maps"
                   rel="noopener noreferrer"
                   className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
                 >
-                  地圖與模式
+                  編輯地圖與模式
                 </a>
               </div>
 

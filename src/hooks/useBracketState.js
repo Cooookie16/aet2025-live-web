@@ -16,78 +16,37 @@ export function useBracketState() {
   // 載入狀態
   useEffect(() => {
     const loadState = async () => {
-      let apiData = {};
-      let localBracket = null;
-      let localBroadcast = null;
-      
-      // 同時從 localStorage 載入（同步操作）
       try {
-        const rawBracket = localStorage.getItem('dashboard:bracket');
-        if (rawBracket) {
-          localBracket = JSON.parse(rawBracket);
-        } else {
-        }
-      } catch {
-      }
-
-      try {
-        const rawBroadcast = localStorage.getItem('dashboard:currentBroadcast');
-        if (rawBroadcast) {
-          const parsed = JSON.parse(rawBroadcast);
-          if (parsed && parsed.stage !== null) {
-            localBroadcast = parsed;
-          }
-        }
-      } catch {
-      }
-      
-      // 從 API 載入
-      try {
+        // 嘗試從 API 載入，API 現在保證回傳完整結構 (含 defaults)
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (res.ok) {
-          const text = await res.text();
-          if (text) {
-            try {
-              const json = JSON.parse(text);
-              apiData = json?.data || {};
-            } catch {
-              apiData = {};
-            }
+          const json = await res.json();
+          const data = json?.data || {};
+          
+          if (data.bracket) {
+            setBracket(data.bracket);
+          }
+          if (data.currentBroadcast) {
+            setCurrentBroadcast(data.currentBroadcast);
           }
         }
       } catch {
+        // API 失敗時，嘗試讀取 localStorage
+        try {
+          const rawBracket = localStorage.getItem('dashboard:bracket');
+          if (rawBracket) {
+            setBracket(JSON.parse(rawBracket));
+          }
+          const rawBroadcast = localStorage.getItem('dashboard:currentBroadcast');
+          if (rawBroadcast) {
+             const parsed = JSON.parse(rawBroadcast);
+             // 簡單驗證結構
+             if (parsed && typeof parsed.stage !== 'undefined') {
+                setCurrentBroadcast(parsed);
+             }
+          }
+        } catch {}
       }
-      
-      // 載入 bracket：優先使用有資料的來源
-      if (apiData.bracket && Object.keys(apiData.bracket).length > 0) {
-        setBracket(apiData.bracket);
-      } else if (localBracket) {
-        setBracket(localBracket);
-      } else {
-      }
-      
-      // 載入 currentBroadcast：優先使用有資料的來源
-      const validStages = ['qf', 'sf', 'f'];
-      
-      if (apiData.currentBroadcast && apiData.currentBroadcast.stage !== null) {
-        // 驗證 API 資料的 stage 是否有效
-        if (validStages.includes(apiData.currentBroadcast.stage)) {
-          setCurrentBroadcast(apiData.currentBroadcast);
-        } else {
-          // 無效的 stage，重置為 null
-          setCurrentBroadcast({ stage: null, index: null });
-        }
-      } else if (localBroadcast) {
-        // 驗證 localStorage 資料的 stage 是否有效
-        if (validStages.includes(localBroadcast.stage)) {
-          setCurrentBroadcast(localBroadcast);
-        } else {
-          // 無效的 stage，重置為 null
-          setCurrentBroadcast({ stage: null, index: null });
-        }
-      }
-      
-      // 標記初始化完成
       setIsInitialized(true);
     };
     loadState();
