@@ -230,48 +230,46 @@ export default function ScoreBarPage() {
         }
       `}</style>
       
-      {/* 主要容器：黑色背景，圓角，陰影 */}
-      <div className="w-[1100px] h-[160px] bg-black text-white flex items-center justify-between px-2 box-border overflow-hidden rounded-3xl border-2 border-gray-600">
+      {/* 主要容器：分為左右兩邊 */}
+      <div className="w-[1100px] h-[160px] flex items-center justify-between px-0 box-border overflow-hidden rounded-3xl border-0">
         
-        {/* 左側：Team A 區域 */}
-        <div className="flex items-center gap-6">
-          {/* A 隊分數 (最左邊) */}
-          <div className="text-8xl font-black text-pink-500 w-[100px] text-center leading-none">
+        {/* 左側：Team A 區域 (藍色背景) */}
+        <div className="flex-1 h-full flex items-center gap-6 pl-8" style={{ backgroundColor: '#5050FF' }}>
+          {/* A 隊分數 */}
+          <div className="text-8xl font-extrabold text-white w-[100px] text-center leading-none">
             {scoreA}
           </div>
           
           {/* 分隔線 */}
-          <div className="w-px h-24 bg-gray-600"></div>
+          <div className="w-1 h-28 bg-white/30"></div>
 
-          {/* A 隊名稱：使用 AutoFitText */}
+          {/* A 隊名稱 */}
           <AutoFitText 
             text={teams.a} 
             align="left" 
-            className="text-4xl font-bold leading-tight text-white"
+            className="text-4xl font-medium leading-tight text-white"
           />
         </div>
 
-        {/* 中間分隔線或裝飾 (可選，這裡留空保持簡潔) */}
-        
-        {/* 右側：Team B 區域 */}
-        <div className="flex items-center gap-6 flex-row-reverse">
-          {/* B 隊分數 (最右邊) */}
-          <div className="text-8xl font-black text-pink-500 w-[100px] text-center leading-none">
+        {/* 右側：Team B 區域 (紅色背景) */}
+        <div className="flex-1 h-full flex items-center gap-6 flex-row-reverse pr-8" style={{ backgroundColor: '#FF4E7F' }}>
+          {/* B 隊分數 */}
+          <div className="text-8xl font-extrabold text-white w-[100px] text-center leading-none">
             {scoreB}
           </div>
 
           {/* 分隔線 */}
-          <div className="w-px h-24 bg-gray-600"></div>
+          <div className="w-1 h-28 bg-white/30"></div>
           
-          {/* B 隊名稱：使用 AutoFitText */}
+          {/* B 隊名稱 */}
           <AutoFitText 
             text={teams.b} 
             align="right" 
-            className="text-4xl font-bold leading-tight text-white"
+            className="text-4xl font-medium leading-tight text-white"
           />
         </div>
 
       </div>
     </>
   );
-}
+};

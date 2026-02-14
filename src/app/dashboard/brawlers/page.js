@@ -72,7 +72,9 @@ export default function BrawlersPage() {
         showToast({ title: '上傳成功!', variant: 'success' });
         await loadBrawlers();
       } else {
-        showToast({ title: '上傳失敗!', variant: 'error' });
+        const json = await res.json();
+        const errorMsg = res.status === 409 ? '英雄名稱已存在!' : '上傳失敗!';
+        showToast({ title: errorMsg, description: json.error, variant: 'error' });
       }
     } catch {
       showToast({ title: '上傳失敗!', variant: 'error' });
@@ -102,7 +104,7 @@ export default function BrawlersPage() {
         const res = await fetch('/api/brawlers', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ oldName: editingId, newName: editValue.trim() })
+            body: JSON.stringify({ oldName: editingId, newName: editValue.trim() }) // API will lowercase it
         });
         
         if (res.ok) {
@@ -111,7 +113,8 @@ export default function BrawlersPage() {
             showToast({ title: '重新命名成功!', variant: 'success' });
         } else {
             const json = await res.json();
-            showToast({ title: '重新命名失敗!', description: json.error || 'Unknown error', variant: 'error' });
+            const errorMsg = res.status === 409 ? '英雄名稱已存在!' : '重新命名失敗!';
+            showToast({ title: errorMsg, description: json.error || 'Unknown error', variant: 'error' });
         }
     } catch {
         showToast({ title: '重新命名失敗!', variant: 'error' });

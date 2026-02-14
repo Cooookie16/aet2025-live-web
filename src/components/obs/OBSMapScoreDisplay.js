@@ -279,7 +279,7 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
           <div className="flex gap-0">
             {/* 左側階段標籤（同寬 24） */}
             <div className="w-24 h-12 bg-black p-2 flex items-center justify-center">
-              <div className="text-sm font-bold text-white text-center leading-tight">
+              <div className="text-sm font-medium text-white text-center leading-tight">
                 {getStageLabel() || ''}
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
                     ) : (
                       // 資料未就緒顯示空白；資料就緒但無 icon 顯示問號
                       iconsReady && mapsReady ? (
-                        <div className="text-xl font-bold text-gray-500">?</div>
+                        <div className="text-xl font-extrabold text-gray-500">?</div>
                       ) : (
                         <div className="w-full h-full" />
                       )
@@ -308,7 +308,7 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
               })}
               {/* 額外欄位 */}
               <div className="w-24 h-12 bg-black p-2 flex items-center justify-center">
-                <div className="text-sm font-bold text-white">-</div>
+                <div className="text-sm font-medium text-white">-</div>
               </div>
             </div>
           </div>
@@ -321,10 +321,10 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
             {/* 左側：隊伍名稱上下排列 */}
             <div className="flex flex-col gap-0">
               {/* 隊伍 A */}
-              <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
+              <div className="w-24 h-24 p-2 flex flex-col justify-center items-center" style={{ backgroundColor: '#5050FF' }}>
                 <div className="text-sm font-bold text-white text-center leading-tight">{teams.a || '隊伍 A'}</div>
                 {getTeamMembers(teams.a) ? (
-                <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.a)}</div>
+                <div className="text-xs text-gray-200 text-center mt-1 leading-tight">{getTeamMembers(teams.a)}</div>
               ) : null}
             </div>
             
@@ -332,10 +332,10 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
             <div className="w-24 h-px bg-gray-600"></div>
             
             {/* 隊伍 B */}
-            <div className="w-24 h-24 bg-black p-2 flex flex-col justify-center items-center">
+            <div className="w-24 h-24 p-2 flex flex-col justify-center items-center" style={{ backgroundColor: '#FF4E7F' }}>
               <div className="text-sm font-bold text-white text-center leading-tight">{teams.b || '隊伍 B'}</div>
               {getTeamMembers(teams.b) ? (
-              <div className="text-xs text-gray-300 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
+              <div className="text-xs text-gray-200 text-center mt-1 leading-tight">{getTeamMembers(teams.b)}</div>
             ) : null}
           </div>
         </div>
@@ -360,13 +360,13 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
               return (
                 <div 
                   key={`map-${map?.map || `map-${index}`}`}
-                  className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center"
+                  className="w-24 h-48 bg-black flex flex-col justify-center items-center overflow-hidden"
                 >
                   {roundStarted ? (
                     // 已開始的盤：顯示分數佈局（移除模式名稱）
-                    <>
+                    <div className="w-full h-full flex flex-col">
                       {/* 隊伍 A 分數 */}
-                      <div className="h-24 flex flex-col justify-center items-center">
+                      <div className="h-24 w-full flex flex-col justify-center items-center" style={{ backgroundColor: '#5050FF' }}>
                         <div className="text-4xl font-extrabold text-white">
                           {formatScoreDisplay(map?.scoreA)}
                         </div>
@@ -376,15 +376,15 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
                       <div className="w-full h-px bg-gray-600"></div>
                       
                       {/* 隊伍 B 分數 */}
-                      <div className="h-24 flex flex-col justify-center items-center">
+                      <div className="h-24 w-full flex flex-col justify-center items-center" style={{ backgroundColor: '#FF4E7F' }}>
                         <div className="text-4xl font-extrabold text-white">
                           {formatScoreDisplay(map?.scoreB)}
                         </div>
                       </div>
-                    </>
+                    </div>
                   ) : (
                     // 未開始的盤：顯示地圖圖片或問號
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-full h-full flex items-center justify-center p-2">
                       {map ? (
                         hasMap && mapImagePath ? (
                           <div className="w-full h-full flex flex-col">
@@ -405,7 +405,7 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
                           </div>
                         ) : (
                           // 沒有地圖時顯示置中的問號
-                          <div className="text-4xl font-bold text-gray-500">?</div>
+                          <div className="text-4xl font-extrabold text-gray-500">?</div>
                         )
                       ) : (
                         // maps 尚未就緒：顯示空白
@@ -418,17 +418,17 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
             })}
             
             {/* 最右邊的總分欄位：上（A 總分）、中線、下（B 總分） */}
-            <div className="w-24 h-48 bg-black p-2 flex flex-col justify-center items-center">
-              <div className="h-24 flex flex-col justify-center items-center">
-                <div className="text-4xl font-black text-pink-500">
+            <div className="w-24 h-48 bg-black flex flex-col justify-center items-center overflow-hidden">
+              <div className="h-24 w-full flex flex-col justify-center items-center" style={{ backgroundColor: '#5050FF' }}>
+                <div className="text-4xl font-extrabold text-white">
                   {mapsReady ? getTeamMapsWon(maps, 'A') : ''}
                 </div>
               </div>
               
               <div className="w-full h-px bg-gray-600"></div>
               
-              <div className="h-24 flex flex-col justify-center items-center">
-                <div className="text-4xl font-black text-pink-500">
+              <div className="h-24 w-full flex flex-col justify-center items-center" style={{ backgroundColor: '#FF4E7F' }}>
+                <div className="text-4xl font-extrabold text-white">
                   {mapsReady ? getTeamMapsWon(maps, 'B') : ''}
                 </div>
               </div>

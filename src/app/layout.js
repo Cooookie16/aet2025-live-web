@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "AET2026 - 直播系統",
-  description: "AET直播控制系統 -- Developed By Cookie --",
+  description: "AET好用直播控制系統 -- Developed By Cookie --",
   robots: {
     index: false,
     follow: false,
@@ -18,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="zh-TW">
-      <body className={`AETLiveSystemByCookie`}>
+      <body>
         {children}
       </body>
     </html>

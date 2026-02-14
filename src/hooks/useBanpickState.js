@@ -156,4 +156,4 @@ export function useBanpickState() {
     resetMatchBanpick,
     getPlayerBans
   };
-}
+};

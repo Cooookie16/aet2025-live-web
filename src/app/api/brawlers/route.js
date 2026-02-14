@@ -41,17 +41,30 @@ export async function POST(req) {
     }
 
     const brawlersDir = join(process.cwd(), 'public', 'brawlers');
-    // Sanitize name to prevent path traversal and convert to lowercase
-    const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+    // Sanitize name via allowlist but allow spaces
+    const safeName = name.replace(/[^a-zA-Z0-9_\-\s]/g, '').toLowerCase().trim();
+    
+    if (!safeName) {
+        return NextResponse.json({ error: 'Invalid name' }, { status: 400 });
+    }
+
+    const targetPath = join(brawlersDir, `${safeName}.png`);
+    const { writeFile, stat } = require('fs/promises'); 
+
+    // Check for duplicates
+    try {
+        await stat(targetPath);
+        return NextResponse.json({ error: 'Brawler already exists' }, { status: 409 });
+    } catch {
+        // file does not exist, proceed
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
     
     // Optimize brawler image, keep as PNG for compatibility
     const optimizedBuffer = await optimizeImage(buffer, { maxWidth: 500, quality: 90, format: 'png' });
     
-    // Ensure directory exists (should exist if GET works, but good practice)
-    // await mkdir(brawlersDir, { recursive: true }); // fs/promises needed if we want to ensure
-    const { writeFile } = require('fs/promises'); 
-    await writeFile(join(brawlersDir, `${safeName}.png`), optimizedBuffer);
+    await writeFile(targetPath, optimizedBuffer);
 
     return NextResponse.json({ ok: true, name: safeName });
   } catch (e) {
@@ -70,7 +83,7 @@ export async function DELETE(req) {
       return NextResponse.json({ error: 'Missing name' }, { status: 400 });
     }
 
-    const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+    const safeName = name.replace(/[^a-zA-Z0-9_\-\s]/g, '').toLowerCase().trim();
     const filePath = join(process.cwd(), 'public', 'brawlers', `${safeName}.png`);
     
     const { unlink } = require('fs/promises');
@@ -93,9 +106,9 @@ export async function PUT(req) {
     }
 
     const brawlersDir = join(process.cwd(), 'public', 'brawlers');
-    // Sanitize and convert to lowercase
-    const safeOldName = oldName.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
-    const safeNewName = newName.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+    // Sanitize
+    const safeOldName = oldName.replace(/[^a-zA-Z0-9_\-\s]/g, '').toLowerCase().trim();
+    const safeNewName = newName.replace(/[^a-zA-Z0-9_\-\s]/g, '').toLowerCase().trim();
 
     if (!safeNewName) {
          return NextResponse.json({ error: 'Invalid new name' }, { status: 400 });
@@ -107,11 +120,13 @@ export async function PUT(req) {
     const { rename, stat } = require('fs/promises');
     
     // Check if new name exists
-    try {
-        await stat(newPath);
-        return NextResponse.json({ error: 'Name already exists' }, { status: 409 });
-    } catch {
-        // file does not exist, proceed
+    if (safeOldName !== safeNewName) {
+        try {
+            await stat(newPath);
+            return NextResponse.json({ error: 'Name already exists' }, { status: 409 });
+        } catch {
+            // file does not exist, proceed
+        }
     }
     
     // Check if old file exists

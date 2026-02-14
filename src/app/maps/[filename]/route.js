@@ -10,7 +10,7 @@ export async function GET(request, { params }) {
         return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
     }
 
-    const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+    const filePath = path.join(process.cwd(), 'public', 'maps', filename);
 
     if (!fs.existsSync(filePath)) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });
@@ -18,18 +18,15 @@ export async function GET(request, { params }) {
 
     const fileBuffer = fs.readFileSync(filePath);
     
-    // 根據副檔名判斷 Content-Type
     const ext = path.extname(filename).toLowerCase();
     let contentType = 'application/octet-stream';
     
     if (ext === '.webp') {
-      contentType = 'image/webp';
+        contentType = 'image/webp';
     } else if (ext === '.png') {
-      contentType = 'image/png';
+        contentType = 'image/png';
     } else if (ext === '.jpg' || ext === '.jpeg') {
-      contentType = 'image/jpeg';
-    } else if (ext === '.gif') {
-      contentType = 'image/gif';
+        contentType = 'image/jpeg';
     }
 
     return new NextResponse(fileBuffer, {
@@ -40,7 +37,7 @@ export async function GET(request, { params }) {
     });
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Error serving file:', error);
+    console.error('Error serving map file:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 };

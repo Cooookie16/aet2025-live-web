@@ -10,6 +10,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-team-blue: #5050FF;
+  --color-team-red: #FF4E7F;
 }
 
 @media (prefers-color-scheme: dark) {
