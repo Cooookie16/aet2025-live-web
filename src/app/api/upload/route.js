@@ -43,7 +43,10 @@ export async function POST(req) {
         data: { url, timestamp: Date.now() },
         timestamp: Date.now(),
       });
-    } catch {}
+    } catch (broadcastError) {
+       // eslint-disable-next-line no-console
+       console.error('Broadcast failed:', broadcastError);
+    }
 
     return NextResponse.json({ 
       ok: true, 

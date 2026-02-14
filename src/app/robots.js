@@ -5,4 +5,4 @@ export default function robots() {
       disallow: '/',
     },
   }
-}
+};

@@ -145,7 +145,7 @@ export default function Dashboard() {
                   rel="noopener noreferrer"
                   className="px-4 py-2 text-sm rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors whitespace-nowrap"
                 >
-                  編輯「歡迎圖片」
+                  編輯歡迎圖片
                 </a>
                 <a
                   href="/dashboard/brawlers"

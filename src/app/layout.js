@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "AET2026直播系統",
-  description: "AET直播控制系統 開發By餅乾",
+  title: "AET2026 - 直播系統",
+  description: "AET直播控制系統 -- Developed By Cookie --",
   robots: {
     index: false,
     follow: false,
