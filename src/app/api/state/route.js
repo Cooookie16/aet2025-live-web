@@ -12,6 +12,61 @@ const KEYS = {
   welcomeConfig: 'dashboard:welcomeConfig',
 };
 
+// ---- 輕量結構驗證：用來擋下明顯脏資料，避免寫入 DB 後讓 OBS 端崩潰 ----
+
+const VALID_DISPLAY_IDS = new Set(['welcome', 'bracket', 'banpick', 'map-score']);
+const VALID_STAGES = new Set(['qf', 'sf', 'f', 'champ']);
+
+function isPlainObject(v) {
+  return v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function validateBracket(b) {
+  if (!isPlainObject(b)) {return false;}
+  // qf / sf / f 為陣列；champ 為物件。允許長度與細節寬鬆，只要型別正確。
+  if (!Array.isArray(b.qf) || !Array.isArray(b.sf) || !Array.isArray(b.f)) {return false;}
+  if (!isPlainObject(b.champ)) {return false;}
+  return true;
+}
+
+function validateCurrentBroadcast(cb) {
+  if (!isPlainObject(cb)) {return false;}
+  // stage 允許 null 或合法 stage 字串
+  if (cb.stage !== null && cb.stage !== undefined && !VALID_STAGES.has(cb.stage)) {
+    return false;
+  }
+  // index 允許 null 或數字
+  if (cb.index !== null && cb.index !== undefined && typeof cb.index !== 'number') {
+    return false;
+  }
+  return true;
+}
+
+function validateCurrentDisplay(d) {
+  return typeof d === 'string' && VALID_DISPLAY_IDS.has(d);
+}
+
+function validateMapScores(m) {
+  // 必須是物件，鍵為 stage:index 字串，值為陣列
+  if (!isPlainObject(m)) {return false;}
+  for (const v of Object.values(m)) {
+    if (!Array.isArray(v)) {return false;}
+  }
+  return true;
+}
+
+function validateBanpickData(b) {
+  // 物件，每個值是 { teamA: { bans: [] }, teamB: { bans: [] } } 或類似
+  if (!isPlainObject(b)) {return false;}
+  return true;
+}
+
+function validateWelcomeConfig(w) {
+  if (!isPlainObject(w)) {return false;}
+  if (w.bannerUrl !== undefined && typeof w.bannerUrl !== 'string') {return false;}
+  return true;
+}
+
 export async function GET() {
   try {
     // Default Values
@@ -33,7 +88,7 @@ export async function GET() {
     const mapScores = kvGet(KEYS.mapScores);
     const banpickData = kvGet(KEYS.banpickData);
     const welcomeConfig = kvGet(KEYS.welcomeConfig);
-    
+
     // Merge with defaults to ensure no empty values
     const responseData = {
       bracket: bracket || DEFAULT_BRACKET,
@@ -43,7 +98,7 @@ export async function GET() {
       banpickData: banpickData || DEFAULT_BANPICK,
       welcomeConfig: welcomeConfig || DEFAULT_WELCOME,
     };
-    
+
     return NextResponse.json({
       ok: true,
       data: responseData,
@@ -60,15 +115,33 @@ export async function POST(request) {
     if (!text) {
       return NextResponse.json({ ok: false, error: 'EMPTY_BODY' }, { status: 400 });
     }
-    
+
     let body;
     try {
       body = JSON.parse(text);
     } catch (parseError) {
       return NextResponse.json({ ok: false, error: 'INVALID_JSON', details: parseError.message }, { status: 400 });
     }
-    
-    const { bracket, currentBroadcast, currentDisplay, mapScores, banpickData, welcomeConfig } = body || {};
+
+    if (!isPlainObject(body)) {
+      return NextResponse.json({ ok: false, error: 'INVALID_BODY' }, { status: 400 });
+    }
+
+    const { bracket, currentBroadcast, currentDisplay, mapScores, banpickData, welcomeConfig } = body;
+
+    // 收集驗證錯誤；任何一個欄位驗證失敗 → 整個請求拒絕（不部分寫入）
+    const errors = [];
+    if (bracket !== undefined && !validateBracket(bracket)) {errors.push('bracket');}
+    if (currentBroadcast !== undefined && !validateCurrentBroadcast(currentBroadcast)) {errors.push('currentBroadcast');}
+    if (currentDisplay !== undefined && !validateCurrentDisplay(currentDisplay)) {errors.push('currentDisplay');}
+    if (mapScores !== undefined && !validateMapScores(mapScores)) {errors.push('mapScores');}
+    if (banpickData !== undefined && !validateBanpickData(banpickData)) {errors.push('banpickData');}
+    if (welcomeConfig !== undefined && !validateWelcomeConfig(welcomeConfig)) {errors.push('welcomeConfig');}
+
+    if (errors.length) {
+      logger.warn('[API] POST /api/state 驗證失敗:', errors.join(','));
+      return NextResponse.json({ ok: false, error: 'VALIDATION_FAILED', fields: errors }, { status: 400 });
+    }
 
     if (bracket !== undefined) {
       kvSet(KEYS.bracket, bracket);

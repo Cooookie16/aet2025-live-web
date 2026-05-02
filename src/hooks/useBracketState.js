@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { fetchJsonSafe, postJsonWithRetry } from '@/lib/fetchWithRetry';
 
 // 賽程表狀態管理 hook
 export function useBracketState() {
@@ -16,22 +17,17 @@ export function useBracketState() {
   // 載入狀態
   useEffect(() => {
     const loadState = async () => {
-      try {
-        // 嘗試從 API 載入，API 現在保證回傳完整結構 (含 defaults)
-        const res = await fetch('/api/state', { cache: 'no-store' });
-        if (res.ok) {
-          const json = await res.json();
-          const data = json?.data || {};
-          
-          if (data.bracket) {
-            setBracket(data.bracket);
-          }
-          if (data.currentBroadcast) {
-            setCurrentBroadcast(data.currentBroadcast);
-          }
+      const json = await fetchJsonSafe('/api/state', { cache: 'no-store' }, null);
+      const data = json?.data;
+      if (data) {
+        if (data.bracket) {
+          setBracket(data.bracket);
         }
-      } catch {
-        // API 失敗時，嘗試讀取 localStorage
+        if (data.currentBroadcast) {
+          setCurrentBroadcast(data.currentBroadcast);
+        }
+      } else {
+        // API 完全失敗時，嘗試讀取 localStorage 後備
         try {
           const rawBracket = localStorage.getItem('dashboard:bracket');
           if (rawBracket) {
@@ -39,11 +35,10 @@ export function useBracketState() {
           }
           const rawBroadcast = localStorage.getItem('dashboard:currentBroadcast');
           if (rawBroadcast) {
-             const parsed = JSON.parse(rawBroadcast);
-             // 簡單驗證結構
-             if (parsed && typeof parsed.stage !== 'undefined') {
-                setCurrentBroadcast(parsed);
-             }
+            const parsed = JSON.parse(rawBroadcast);
+            if (parsed && typeof parsed.stage !== 'undefined') {
+              setCurrentBroadcast(parsed);
+            }
           }
         } catch {}
       }
@@ -57,21 +52,10 @@ export function useBracketState() {
     if (!isInitialized) {
       return;
     }
-    
-    try { 
-      localStorage.setItem('dashboard:bracket', JSON.stringify(bracket)); 
-    } catch {
-    }
-    (async () => {
-      try {
-        await fetch('/api/state', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bracket })
-        });
-      } catch {
-      }
-    })();
+    try {
+      localStorage.setItem('dashboard:bracket', JSON.stringify(bracket));
+    } catch {}
+    postJsonWithRetry('/api/state', { bracket });
   }, [bracket, isInitialized]);
 
   // 同步目前播報對戰到後端（只在初始化完成後才保存）
@@ -79,88 +63,71 @@ export function useBracketState() {
     if (!isInitialized) {
       return;
     }
-    
     try { localStorage.setItem('dashboard:currentBroadcast', JSON.stringify(currentBroadcast)); } catch {}
-    (async () => {
-      try {
-        await fetch('/api/state', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentBroadcast })
-        });
-      } catch {}
-    })();
+    postJsonWithRetry('/api/state', { currentBroadcast });
   }, [currentBroadcast, isInitialized]);
 
   // 監聽地圖分數變化並自動更新 Bracket 總分
   useEffect(() => {
     const checkMapScoresAndUpdateBracket = async () => {
-      try {
-        const res = await fetch('/api/state', { cache: 'no-store' });
-        if (res.ok) {
-          const text = await res.text();
-          if (text) {
-            const json = JSON.parse(text);
-            const mapScores = json?.data?.mapScores || {};
-            
-            // 檢查每個對戰的地圖分數並計算總分
-            Object.keys(mapScores).forEach(key => {
-              const [stage, index] = key.split(':');
-              const maps = mapScores[key];
-              
-              if (Array.isArray(maps)) {
-                // 計算贏得的地圖數量
-                const mapsWonA = maps.reduce((count, map) => {
-                  const scoreA = parseInt(map.scoreA || '0');
-                  const scoreB = parseInt(map.scoreB || '0');
-                  return count + (scoreA > scoreB ? 1 : 0);
-                }, 0);
-                
-                const mapsWonB = maps.reduce((count, map) => {
-                  const scoreA = parseInt(map.scoreA || '0');
-                  const scoreB = parseInt(map.scoreB || '0');
-                  return count + (scoreB > scoreA ? 1 : 0);
-                }, 0);
-                
-                // 檢查是否需要更新 Bracket 中的總分
-                setBracket(prev => {
-                  const updated = { ...prev };
-                  let needsUpdate = false;
-                  
-                  if (stage === 'champ') {
-                    if (updated.champ.score !== String(mapsWonA)) {
-                      updated.champ.score = String(mapsWonA);
-                      needsUpdate = true;
-                    }
-                  } else if (updated[stage] && Array.isArray(updated[stage]) && parseInt(index) < updated[stage].length) {
-                    const match = updated[stage][parseInt(index)];
-                    if (match && (match.a.score !== String(mapsWonA) || match.b.score !== String(mapsWonB))) {
-                      updated[stage][parseInt(index)] = {
-                        ...match,
-                        a: { ...match.a, score: String(mapsWonA) },
-                        b: { ...match.b, score: String(mapsWonB) }
-                      };
-                      needsUpdate = true;
-                    }
-                  }
-                  
-                  return needsUpdate ? updated : prev;
-                });
-              }
-            });
-          }
-        }
-      } catch {
-        // 靜默處理錯誤
+      const json = await fetchJsonSafe('/api/state', { cache: 'no-store' }, null);
+      const mapScores = json?.data?.mapScores;
+      if (!mapScores) {
+        return;
       }
+      // 檢查每個對戰的地圖分數並計算總分
+      Object.keys(mapScores).forEach(key => {
+        const [stage, index] = key.split(':');
+        const maps = mapScores[key];
+
+        if (Array.isArray(maps)) {
+          // 計算贏得的地圖數量
+          const mapsWonA = maps.reduce((count, map) => {
+            const scoreA = parseInt(map.scoreA || '0');
+            const scoreB = parseInt(map.scoreB || '0');
+            return count + (scoreA > scoreB ? 1 : 0);
+          }, 0);
+
+          const mapsWonB = maps.reduce((count, map) => {
+            const scoreA = parseInt(map.scoreA || '0');
+            const scoreB = parseInt(map.scoreB || '0');
+            return count + (scoreB > scoreA ? 1 : 0);
+          }, 0);
+
+          // 檢查是否需要更新 Bracket 中的總分
+          setBracket(prev => {
+            const updated = { ...prev };
+            let needsUpdate = false;
+
+            if (stage === 'champ') {
+              if (updated.champ.score !== String(mapsWonA)) {
+                updated.champ.score = String(mapsWonA);
+                needsUpdate = true;
+              }
+            } else if (updated[stage] && Array.isArray(updated[stage]) && parseInt(index) < updated[stage].length) {
+              const match = updated[stage][parseInt(index)];
+              if (match && (match.a.score !== String(mapsWonA) || match.b.score !== String(mapsWonB))) {
+                updated[stage][parseInt(index)] = {
+                  ...match,
+                  a: { ...match.a, score: String(mapsWonA) },
+                  b: { ...match.b, score: String(mapsWonB) }
+                };
+                needsUpdate = true;
+              }
+            }
+
+            return needsUpdate ? updated : prev;
+          });
+        }
+      });
     };
 
     // 每 2 秒檢查一次地圖分數變化
     const interval = setInterval(checkMapScoresAndUpdateBracket, 2000);
-    
+
     // 初始檢查
     checkMapScoresAndUpdateBracket();
-    
+
     return () => clearInterval(interval);
   }, []);
 

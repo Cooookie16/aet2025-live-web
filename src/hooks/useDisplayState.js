@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { fetchJsonSafe, postJsonWithRetry } from '@/lib/fetchWithRetry';
 
 // 顯示介面狀態管理 hook
 export function useDisplayState() {
@@ -37,45 +38,22 @@ export function useDisplayState() {
   // 載入狀態
   useEffect(() => {
     const loadState = async () => {
-      try {
-        const res = await fetch('/api/state', { cache: 'no-store' });
-        if (res.ok) {
-          const text = await res.text();
-          if (text) {
-            try {
-              const json = JSON.parse(text);
-              const d = json?.data || {};
-              // 先嘗試使用後端值；若沒有再嘗試 localStorage
-              let nextDisplay = sanitizeDisplay(d.currentDisplay);
-              if (!nextDisplay) {
-                try {
-                  const rawDisplay = localStorage.getItem('dashboard:currentDisplay');
-                  const cleaned = sanitizeDisplay(rawDisplay);
-                  if (cleaned) {
-                    nextDisplay = cleaned;
-                  }
-                } catch {}
-              }
-              if (nextDisplay) {
-                setCurrentDisplay(nextDisplay);
-              }
-              setDisplayLoaded(true);
-              return;
-            } catch {
-              // 靜默處理錯誤
-            }
+      const json = await fetchJsonSafe('/api/state', { cache: 'no-store' }, null);
+      const d = json?.data || {};
+      // 先嘗試使用後端值；若沒有再嘗試 localStorage
+      let nextDisplay = sanitizeDisplay(d.currentDisplay);
+      if (!nextDisplay) {
+        try {
+          const rawDisplay = localStorage.getItem('dashboard:currentDisplay');
+          const cleaned = sanitizeDisplay(rawDisplay);
+          if (cleaned) {
+            nextDisplay = cleaned;
           }
-        }
-      } catch {}
-      
-      // 後備：從 localStorage 載入
-      try {
-        const rawDisplay = localStorage.getItem('dashboard:currentDisplay');
-        const cleaned = sanitizeDisplay(rawDisplay);
-        if (cleaned) {
-          setCurrentDisplay(cleaned);
-        }
-      } catch {}
+        } catch {}
+      }
+      if (nextDisplay) {
+        setCurrentDisplay(nextDisplay);
+      }
       setDisplayLoaded(true);
     };
     loadState();
@@ -87,30 +65,14 @@ export function useDisplayState() {
       return; // 尚未載入前不要覆蓋後端的已存值
     }
     try { localStorage.setItem('dashboard:currentDisplay', currentDisplay); } catch {}
-    (async () => {
-      try {
-        await fetch('/api/state', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentDisplay })
-        });
-      } catch {}
-    })();
-  }, [currentDisplay, displayLoaded, sanitizeDisplay]);
+    postJsonWithRetry('/api/state', { currentDisplay });
+  }, [currentDisplay, displayLoaded]);
 
   // 切換顯示介面
   const switchDisplay = (displayId) => {
     setCurrentDisplay(displayId);
     // 立即同步到後端，觸發 SSE，確保 OBS 立刻更新畫面
-    (async () => {
-      try {
-        await fetch('/api/state', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentDisplay: displayId })
-        });
-      } catch {}
-    })();
+    postJsonWithRetry('/api/state', { currentDisplay: displayId });
   };
 
   return {

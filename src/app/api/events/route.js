@@ -10,75 +10,95 @@ export async function GET(request) {
 
   const stream = new ReadableStream({
     start(controller) {
-      // 心跳（保護 enqueue）
-      heartbeat = setInterval(() => {
+      const safeEnqueue = (chunk) => {
         if (isClosed) {
-          return;
+          return false;
         }
         try {
-          controller.enqueue(encoder.encode(`: heartbeat\n\n`));
+          controller.enqueue(chunk);
+          return true;
         } catch {
           isClosed = true;
           try { clearInterval(heartbeat); } catch {}
           try { unsubscribe(); } catch {}
           try { controller.close(); } catch {}
+          return false;
         }
+      };
+
+      // 心跳（保護 enqueue）
+      heartbeat = setInterval(() => {
+        if (isClosed) {
+          return;
+        }
+        safeEnqueue(encoder.encode(`: heartbeat\n\n`));
       }, 10000);
 
       // 初始訊息
-      try {
-        controller.enqueue(encoder.encode(`event: connected\n`));
-        controller.enqueue(encoder.encode(`id: ${getLastEventId()}\n`));
-        controller.enqueue(encoder.encode(`data: {"message":"SSE connected"}\n\n`));
-      } catch {
-        isClosed = true;
-      }
+      safeEnqueue(encoder.encode(`event: connected\n`));
+      safeEnqueue(encoder.encode(`id: ${getLastEventId()}\n`));
+      safeEnqueue(encoder.encode(`data: {"message":"SSE connected"}\n\n`));
 
-      // 立即推送目前的畫面狀態（避免客戶端刷新後回到 welcome）
+      // 斷線回放：如客戶端帶 Last-Event-ID，回補缺漏事件；超出緩衝則發送 resync 信號
+      let shouldSendStateSnapshot = true;
       try {
-        const currentDisplay = kvGet('dashboard:currentDisplay');
-        if (currentDisplay) {
-          const snapshot = JSON.stringify({
-            action: 'broadcast',
-            type: 'display-change',
-            data: { displayId: currentDisplay },
-            timestamp: Date.now(),
-          });
-          controller.enqueue(encoder.encode(`id: ${getLastEventId()}\n`));
-          controller.enqueue(encoder.encode(`data: ${snapshot}\n\n`));
+        const lastIdHeader = request.headers.get('last-event-id') || request.headers.get('Last-Event-ID');
+        if (lastIdHeader) {
+          const { events: missed, lostEvents } = getSince(lastIdHeader);
+          if (lostEvents) {
+            // 緩衝外的事件已遺失 → 通知客戶端執行全量同步（拉 /api/state）
+            const resyncPayload = JSON.stringify({
+              action: 'broadcast',
+              type: 'resync',
+              data: { reason: 'buffer_overflow' },
+              timestamp: Date.now(),
+            });
+            safeEnqueue(encoder.encode(`id: ${getLastEventId()}\n`));
+            safeEnqueue(encoder.encode(`data: ${resyncPayload}\n\n`));
+            shouldSendStateSnapshot = false;
+          } else if (missed.length) {
+            for (const record of missed) {
+              safeEnqueue(encoder.encode(`id: ${record.id}\n`));
+              safeEnqueue(encoder.encode(`data: ${record.payload}\n\n`));
+            }
+            shouldSendStateSnapshot = false;
+          } else {
+            // 沒漏事件，不需重送 snapshot
+            shouldSendStateSnapshot = false;
+          }
         }
       } catch {}
+
+      // 首次連線（沒有 Last-Event-ID）：推送目前的畫面狀態，避免客戶端刷新後回到 welcome
+      if (shouldSendStateSnapshot) {
+        try {
+          const currentDisplay = kvGet('dashboard:currentDisplay');
+          if (currentDisplay) {
+            const snapshot = JSON.stringify({
+              action: 'broadcast',
+              type: 'display-change',
+              data: { displayId: currentDisplay },
+              timestamp: Date.now(),
+            });
+            safeEnqueue(encoder.encode(`id: ${getLastEventId()}\n`));
+            safeEnqueue(encoder.encode(`data: ${snapshot}\n\n`));
+          }
+        } catch {}
+      }
 
       // 推送函式
       const send = (record) => {
         if (isClosed) {
           return;
         }
-        try {
-          controller.enqueue(encoder.encode(`id: ${record.id}\n`));
-          controller.enqueue(encoder.encode(`data: ${record.payload}\n\n`));
-        } catch {
-          isClosed = true;
-          try { clearInterval(heartbeat); } catch {}
-          try { unsubscribe(); } catch {}
-          try { controller.close(); } catch {}
+        if (!safeEnqueue(encoder.encode(`id: ${record.id}\n`))) {
+          return;
         }
+        safeEnqueue(encoder.encode(`data: ${record.payload}\n\n`));
       };
 
       // 訂閱
       unsubscribe = subscribe(send);
-
-      // 斷線回放：如客戶端帶 Last-Event-ID，回補缺漏事件
-      try {
-        const lastId = request.headers.get('last-event-id') || request.headers.get('Last-Event-ID');
-        const missed = getSince(lastId);
-        if (missed?.length) {
-          for (const record of missed) {
-            controller.enqueue(encoder.encode(`id: ${record.id}\n`));
-            controller.enqueue(encoder.encode(`data: ${record.payload}\n\n`));
-          }
-        }
-      } catch {}
 
       // 嘗試監聽 abort（改用 request.signal）
       try {

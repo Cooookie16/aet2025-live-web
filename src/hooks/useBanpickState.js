@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { fetchJsonSafe, postJsonWithRetry } from '@/lib/fetchWithRetry';
 
 // Banpick狀態管理 hook
 export function useBanpickState() {
@@ -11,15 +12,9 @@ export function useBanpickState() {
   // 載入角色資料
   useEffect(() => {
     const loadBrawlers = async () => {
-      try {
-        // 從檔案系統讀取角色列表
-        const res = await fetch('/api/brawlers', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          setBrawlersData(data);
-        }
-      } catch {
-        // 靜默處理錯誤
+      const data = await fetchJsonSafe('/api/brawlers', { cache: 'no-store' }, null);
+      if (Array.isArray(data)) {
+        setBrawlersData(data);
       }
     };
     loadBrawlers();
@@ -28,43 +23,23 @@ export function useBanpickState() {
   // 載入banpick資料
   useEffect(() => {
     const loadBanpickData = async () => {
-      let apiData = {};
       let localData = null;
-      
-      // 從 localStorage 載入
       try {
         const rawBanpickData = localStorage.getItem('dashboard:banpickData');
         if (rawBanpickData) {
           localData = JSON.parse(rawBanpickData);
         }
-      } catch {
-      }
-      
-      // 從 API 載入
-      try {
-        const res = await fetch('/api/state', { cache: 'no-store' });
-        if (res.ok) {
-          const text = await res.text();
-          if (text) {
-            try {
-              const json = JSON.parse(text);
-              apiData = json?.data || {};
-            } catch {
-            }
-          }
-        }
-      } catch {
-      }
-      
-      // 優先使用有資料的來源
+      } catch {}
+
+      const json = await fetchJsonSafe('/api/state', { cache: 'no-store' }, null);
+      const apiData = json?.data || {};
+
       if (apiData.banpickData && Object.keys(apiData.banpickData).length > 0) {
         setBanpickData(apiData.banpickData);
       } else if (localData) {
         setBanpickData(localData);
-      } else {
       }
-      
-      // 標記初始化完成
+
       setIsInitialized(true);
     };
     loadBanpickData();
@@ -75,31 +50,36 @@ export function useBanpickState() {
     if (!isInitialized) {
       return;
     }
-    
     try {
       localStorage.setItem('dashboard:banpickData', JSON.stringify(banpickData));
-    } catch {
-    }
-    
-    // 同步到後端
-    (async () => {
-      try {
-        await fetch('/api/state', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ banpickData })
-        });
-      } catch {
-      }
-    })();
+    } catch {}
+    postJsonWithRetry('/api/state', { banpickData });
   }, [banpickData, isInitialized]);
+
+  // 建立空的 match 結構（含個人 bans 與每隊兩個全局 ban）
+  const buildEmptyMatch = () => ({
+    teamA: { bans: ['', '', ''], globalBans: ['', ''] },
+    teamB: { bans: ['', '', ''], globalBans: ['', ''] }
+  });
+
+  // 確保隊伍結構含 globalBans 欄位（向後相容舊資料）
+  const ensureTeamShape = (team) => {
+    const next = team ? { ...team } : { bans: ['', '', ''], globalBans: ['', ''] };
+    if (!Array.isArray(next.bans) || next.bans.length !== 3) {
+      next.bans = ['', '', ''];
+    }
+    if (!Array.isArray(next.globalBans) || next.globalBans.length !== 2) {
+      next.globalBans = ['', ''];
+    }
+    return next;
+  };
 
   // 取得目前對戰的banpick資料
   const getCurrentMatchBanpick = (currentBroadcast) => {
     if (!currentBroadcast) {
       return null;
     }
-    
+
     const matchKey = `${currentBroadcast.stage}:${currentBroadcast.index}`;
     return banpickData[matchKey] || null;
   };
@@ -109,18 +89,38 @@ export function useBanpickState() {
     if (!currentBroadcast) {
       return;
     }
-    
+
     const matchKey = `${currentBroadcast.stage}:${currentBroadcast.index}`;
     const newBanpickData = { ...banpickData };
-    
-    if (!newBanpickData[matchKey]) {
-      newBanpickData[matchKey] = {
-        teamA: { bans: ['', '', ''] },
-        teamB: { bans: ['', '', ''] }
-      };
+
+    const existing = newBanpickData[matchKey] || buildEmptyMatch();
+    const team = ensureTeamShape(existing[teamSide]);
+    const nextBans = [...team.bans];
+    nextBans[playerIndex] = brawlerName;
+    newBanpickData[matchKey] = {
+      ...existing,
+      [teamSide]: { ...team, bans: nextBans },
+    };
+    setBanpickData(newBanpickData);
+  };
+
+  // 更新全局 Ban（每隊兩個，共四個）
+  const updateGlobalBan = (currentBroadcast, teamSide, banIndex, brawlerName) => {
+    if (!currentBroadcast) {
+      return;
     }
-    
-    newBanpickData[matchKey][teamSide].bans[playerIndex] = brawlerName;
+
+    const matchKey = `${currentBroadcast.stage}:${currentBroadcast.index}`;
+    const newBanpickData = { ...banpickData };
+
+    const existing = newBanpickData[matchKey] || buildEmptyMatch();
+    const team = ensureTeamShape(existing[teamSide]);
+    const nextGlobals = [...team.globalBans];
+    nextGlobals[banIndex] = brawlerName;
+    newBanpickData[matchKey] = {
+      ...existing,
+      [teamSide]: { ...team, globalBans: nextGlobals },
+    };
     setBanpickData(newBanpickData);
   };
 
@@ -129,10 +129,10 @@ export function useBanpickState() {
     if (!currentBroadcast) {
       return;
     }
-    
+
     const matchKey = `${currentBroadcast.stage}:${currentBroadcast.index}`;
     const newBanpickData = { ...banpickData };
-    
+
     if (newBanpickData[matchKey]) {
       delete newBanpickData[matchKey];
       setBanpickData(newBanpickData);
@@ -145,7 +145,16 @@ export function useBanpickState() {
     if (!matchData || !matchData[teamSide]) {
       return '';
     }
-    return matchData[teamSide].bans[playerIndex] || '';
+    return matchData[teamSide].bans?.[playerIndex] || '';
+  };
+
+  // 取得全局 Ban
+  const getGlobalBan = (currentBroadcast, teamSide, banIndex) => {
+    const matchData = getCurrentMatchBanpick(currentBroadcast);
+    if (!matchData || !matchData[teamSide]) {
+      return '';
+    }
+    return matchData[teamSide].globalBans?.[banIndex] || '';
   };
 
   return {
@@ -153,7 +162,9 @@ export function useBanpickState() {
     brawlersData,
     getCurrentMatchBanpick,
     updatePlayerBan,
+    updateGlobalBan,
     resetMatchBanpick,
-    getPlayerBans
+    getPlayerBans,
+    getGlobalBan
   };
 };

@@ -1,12 +1,25 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+
+const DEFAULT_BANNER = '/images/AET2025_full_title_logo.png';
 
 // OBS 優化的歡迎畫面組件
 export default function OBSWelcomeDisplay({ data, imageTimestamp = Date.now() }) {
-  const bannerUrl = data?.welcomeConfig?.bannerUrl || '/images/AET2025_full_title_logo.png';
-  // 添加時間戳參數強制重新載入圖片
-  const bannerUrlWithTimestamp = bannerUrl.includes('?') ? `${bannerUrl}&t=${imageTimestamp}` : `${bannerUrl}?t=${imageTimestamp}`;
+  const requestedBanner = data?.welcomeConfig?.bannerUrl || DEFAULT_BANNER;
+  const [errored, setErrored] = useState(false);
+
+  // src 改變時重置錯誤狀態
+  useEffect(() => {
+    setErrored(false);
+  }, [requestedBanner]);
+
+  // 載入失敗時退回預設 logo，避免 OBS 顯示破圖示
+  const bannerUrl = errored ? DEFAULT_BANNER : requestedBanner;
+  const bannerUrlWithTimestamp = bannerUrl.includes('?')
+    ? `${bannerUrl}&t=${imageTimestamp}`
+    : `${bannerUrl}?t=${imageTimestamp}`;
 
   // 判斷是否為預設圖片，預設圖片使用 Next/Image 優化，自定義圖片使用一般 img 標籤避免 domain 限制
   const isDefault = bannerUrl.startsWith('/');
@@ -23,6 +36,7 @@ export default function OBSWelcomeDisplay({ data, imageTimestamp = Date.now() })
             height={1080}
             priority
             className="w-full h-auto object-contain"
+            onError={() => setErrored(true)}
           />
         ) : (
           /* eslint-disable-next-line @next/next/no-img-element */
@@ -30,6 +44,7 @@ export default function OBSWelcomeDisplay({ data, imageTimestamp = Date.now() })
             src={bannerUrlWithTimestamp}
             alt="Welcome Banner"
             className="w-full h-auto object-contain"
+            onError={() => setErrored(true)}
           />
         )}
       </div>

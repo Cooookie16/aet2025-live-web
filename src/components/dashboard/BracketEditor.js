@@ -91,45 +91,75 @@ export default function BracketEditor({
       {/* 對戰樹佈局：三欄（八強/四強/冠亞+冠軍） */}
       <div className="w-full overflow-x-auto">
         <div className="min-w-[900px] grid grid-cols-3 gap-8">
-          {/* 八強（4 場） */}
+          {/* 八強（4 場）— space-y-10 (40px)；每對 (0,1) 與 (2,3) 用垂直線連接 */}
           <div className="space-y-10 flex flex-col justify-center">
-            {bracket.qf.map((m, i) => (
-              <div key={generateMatchKey('qf', m, i)} className="relative">
-                {/* 連接線（往四強） */}
-                <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                <MatchEditor
-                  stage="qf"
-                  index={i}
-                  match={m}
-                  teams={teamOptions}
-                  onChange={onMatchChange}
-                  label={`八強 ${i + 1}`}
-                  isCurrent={isCurrentMatch('qf', i)}
-                  onSetCurrent={onSetBroadcastMatch}
-                />
-              </div>
-            ))}
+            {bracket.qf.map((m, i) => {
+              const isPairTop = i % 2 === 0; // 0、2 為 pair 上半
+              return (
+                <div key={generateMatchKey('qf', m, i)} className="relative">
+                  {/* 水平連接線（往四強） */}
+                  <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                  {/* 垂直連接線：上半向下延伸到 pair 中點；下半從 pair 中點向上 */}
+                  {isPairTop ? (
+                    <div
+                      className="hidden md:block absolute right-[-16px] w-px bg-gray-300 dark:bg-gray-600"
+                      style={{ top: '50%', height: 'calc(50% + 20px)' }}
+                    />
+                  ) : (
+                    <div
+                      className="hidden md:block absolute right-[-16px] w-px bg-gray-300 dark:bg-gray-600"
+                      style={{ top: '-20px', height: 'calc(50% + 20px)' }}
+                    />
+                  )}
+                  <MatchEditor
+                    stage="qf"
+                    index={i}
+                    match={m}
+                    teams={teamOptions}
+                    onChange={onMatchChange}
+                    label={`八強 ${i + 1}`}
+                    isCurrent={isCurrentMatch('qf', i)}
+                    onSetCurrent={onSetBroadcastMatch}
+                  />
+                </div>
+              );
+            })}
           </div>
 
-          {/* 四強 */}
+          {/* 四強 — space-y-28 (112px)；兩場用垂直線連接到冠亞賽 */}
           <div className="space-y-28 flex flex-col justify-center">
-            {bracket.sf.map((m, i) => (
-              <div key={generateMatchKey('sf', m, i)} className="relative">
-                {/* 連接線（左方彙入 & 往決賽） */}
-                <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
-                <MatchEditor
-                  stage="sf"
-                  index={i}
-                  match={m}
-                  teams={teamOptions}
-                  onChange={onMatchChange}
-                  label={`四強 ${i + 1}`}
-                  isCurrent={isCurrentMatch('sf', i)}
-                  onSetCurrent={onSetBroadcastMatch}
-                />
-              </div>
-            ))}
+            {bracket.sf.map((m, i) => {
+              const isPairTop = i % 2 === 0; // 0 為 pair 上半，1 為 pair 下半
+              return (
+                <div key={generateMatchKey('sf', m, i)} className="relative">
+                  {/* 水平連接線（左方彙入 & 往決賽） */}
+                  <div className="hidden md:block absolute left-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                  <div className="hidden md:block absolute right-[-16px] top-1/2 w-4 border-t border-gray-300 dark:border-gray-600"></div>
+                  {/* 垂直連接線（右側往冠亞賽彙整） */}
+                  {isPairTop ? (
+                    <div
+                      className="hidden md:block absolute right-[-16px] w-px bg-gray-300 dark:bg-gray-600"
+                      style={{ top: '50%', height: 'calc(50% + 56px)' }}
+                    />
+                  ) : (
+                    <div
+                      className="hidden md:block absolute right-[-16px] w-px bg-gray-300 dark:bg-gray-600"
+                      style={{ top: '-56px', height: 'calc(50% + 56px)' }}
+                    />
+                  )}
+                  <MatchEditor
+                    stage="sf"
+                    index={i}
+                    match={m}
+                    teams={teamOptions}
+                    onChange={onMatchChange}
+                    label={`四強 ${i + 1}`}
+                    isCurrent={isCurrentMatch('sf', i)}
+                    onSetCurrent={onSetBroadcastMatch}
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {/* 冠亞賽與冠軍（同欄） */}

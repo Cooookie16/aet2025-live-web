@@ -70,12 +70,26 @@ export default function OBSBracketDisplay({ data }) {
         <h2 className="text-3xl font-bold mb-4 text-pink-300">目前賽程 Bracket</h2>
         <div className="relative w-full overflow-hidden">
           <div className="w-full grid grid-cols-4 gap-4">
-            {/* 八強（4 場） */}
+            {/* 八強（4 場）— space-y-3 (12px)；每對 (0,1) 與 (2,3) 用垂直線連接 */}
             <div className="space-y-3 flex flex-col justify-center">
-              {qf.map((m, i) => (
+              {qf.map((m, i) => {
+                const isPairTop = i % 2 === 0;
+                return (
                 <div key={generateMatchKey('qf', m, i)} className="relative">
                   {/* 往四強的水平連接線 */}
                   <div className="hidden md:block absolute right-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
+                  {/* 垂直連接線：上半向下延伸；下半向上延伸到 pair 中點 */}
+                  {isPairTop ? (
+                    <div
+                      className="hidden md:block absolute right-[-6px] w-px bg-pink-300"
+                      style={{ top: '50%', height: 'calc(50% + 6px)' }}
+                    />
+                  ) : (
+                    <div
+                      className="hidden md:block absolute right-[-6px] w-px bg-pink-300"
+                      style={{ top: '-6px', height: 'calc(50% + 6px)' }}
+                    />
+                  )}
                   <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('qf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
                     {isLive('qf', i) ? (
                       <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
@@ -103,15 +117,30 @@ export default function OBSBracketDisplay({ data }) {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
-            {/* 四強 */}
+            {/* 四強 — space-y-28 (112px)；兩場用垂直線連接到冠亞賽 */}
             <div className="space-y-28 flex flex-col justify-center">
-              {sf.map((m, i) => (
+              {sf.map((m, i) => {
+                const isPairTop = i % 2 === 0;
+                return (
                 <div key={generateMatchKey('sf', m, i)} className="relative">
                   <div className="hidden md:block absolute left-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
                   <div className="hidden md:block absolute right-[-6px] top-1/2 w-1.5 border-t border-pink-300"></div>
+                  {/* 垂直連接線（往冠亞賽彙整） */}
+                  {isPairTop ? (
+                    <div
+                      className="hidden md:block absolute right-[-6px] w-px bg-pink-300"
+                      style={{ top: '50%', height: 'calc(50% + 56px)' }}
+                    />
+                  ) : (
+                    <div
+                      className="hidden md:block absolute right-[-6px] w-px bg-pink-300"
+                      style={{ top: '-56px', height: 'calc(50% + 56px)' }}
+                    />
+                  )}
                   <div className={`relative rounded-lg bg-white p-1.5 min-w-0 ${isLive('sf', i) ? 'border-2 border-pink-500 shadow-[0_0_0_2px_rgba(236,72,153,0.3)]' : 'border border-pink-300'}`}>
                     {isLive('sf', i) ? (
                       <div className="absolute -top-1 -right-1 bg-pink-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow">LIVE</div>
@@ -135,7 +164,8 @@ export default function OBSBracketDisplay({ data }) {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* 冠亞賽 */}

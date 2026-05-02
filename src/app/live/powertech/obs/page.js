@@ -22,7 +22,7 @@ if (typeof window !== 'undefined') {
   } catch {}
 }
 
-function BigspaceContent() {
+function OBSLiveContent() {
   const {
     currentDisplay,
     displayData,
@@ -34,7 +34,7 @@ function BigspaceContent() {
     lastEventTime,
   } = useObsLiveData();
 
-  useHeartbeat({ source: 'obs-bigspace' });
+  useHeartbeat({ source: 'obs-powertech' });
 
   const renderDisplay = () => {
     if (!currentDisplay) {
@@ -88,7 +88,7 @@ export default function OBSLiveUI() {
     <ErrorBoundary
       renderFallback={() => <ReconnectingOverlay mode="error" status="open" />}
     >
-      <BigspaceContent />
+      <OBSLiveContent />
     </ErrorBoundary>
   );
 }

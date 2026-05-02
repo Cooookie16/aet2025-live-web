@@ -7,11 +7,13 @@ export default function BanpickEditor({
   teamOptions = [],
   bracket
 }) {
-  const { 
-    brawlersData, 
-    updatePlayerBan, 
-    resetMatchBanpick, 
-    getPlayerBans 
+  const {
+    brawlersData,
+    updatePlayerBan,
+    updateGlobalBan,
+    resetMatchBanpick,
+    getPlayerBans,
+    getGlobalBan
   } = useBanpickState();
 
   // 取得目前對戰的隊伍資訊
@@ -48,6 +50,11 @@ export default function BanpickEditor({
   // 處理選手ban角選擇
   const handleBrawlerSelect = (teamSide, playerIndex, brawlerName) => {
     updatePlayerBan(currentBroadcast, teamSide, playerIndex, brawlerName);
+  };
+
+  // 處理全局 Ban 選擇（每隊 2 個）
+  const handleGlobalBanSelect = (teamSide, banIndex, brawlerName) => {
+    updateGlobalBan(currentBroadcast, teamSide, banIndex, brawlerName);
   };
 
   // 重置目前對戰的banpick資料
@@ -142,6 +149,34 @@ export default function BanpickEditor({
                   </div>
                 ))}
               </div>
+
+              {/* 隊伍A 全局 Ban（兩個） */}
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <div className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-3">
+                  全局 Ban（共 2 個）
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[0, 1].map((banIdx) => (
+                    <div key={`teamA-global-${banIdx}`}>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        全局 Ban {banIdx + 1}:
+                      </label>
+                      <select
+                        value={getGlobalBan(currentBroadcast, 'teamA', banIdx)}
+                        onChange={(e) => handleGlobalBanSelect('teamA', banIdx, e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">請選擇角色</option>
+                        {brawlersData.map((brawler) => (
+                          <option key={`brawler-tA-g-${brawler}`} value={brawler}>
+                            {brawler}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* 隊伍B區域 */}
@@ -181,6 +216,34 @@ export default function BanpickEditor({
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* 隊伍B 全局 Ban（兩個） */}
+              <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                <div className="text-sm font-semibold text-red-700 dark:text-red-300 mb-3">
+                  全局 Ban（共 2 個）
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[0, 1].map((banIdx) => (
+                    <div key={`teamB-global-${banIdx}`}>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        全局 Ban {banIdx + 1}:
+                      </label>
+                      <select
+                        value={getGlobalBan(currentBroadcast, 'teamB', banIdx)}
+                        onChange={(e) => handleGlobalBanSelect('teamB', banIdx, e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                      >
+                        <option value="">請選擇角色</option>
+                        {brawlersData.map((brawler) => (
+                          <option key={`brawler-tB-g-${brawler}`} value={brawler}>
+                            {brawler}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -294,7 +294,14 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
                 return (
                   <div key={`mode-${map?.map || `mode-${index}`}`} className="w-24 h-12 bg-black p-2 flex items-center justify-center">
                     {showIcon ? (
-                      <Image src={`${iconPath}?t=${imageTimestamp}`} alt={modeEn || `第${index + 1}盤`} width={96} height={48} className="max-w-full max-h-full object-contain" />
+                      <Image
+                        src={`${iconPath}?t=${imageTimestamp}`}
+                        alt={modeEn || `第${index + 1}盤`}
+                        width={96}
+                        height={48}
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => { try { e.target.style.visibility = 'hidden'; } catch {} }}
+                      />
                     ) : (
                       // 資料未就緒顯示空白；資料就緒但無 icon 顯示問號
                       iconsReady && mapsReady ? (
@@ -389,12 +396,13 @@ export default function OBSMapScoreDisplay({ data, imageTimestamp = Date.now() }
                         hasMap && mapImagePath ? (
                           <div className="w-full h-full flex flex-col">
                             <div className="flex-1 flex items-center justify-center">
-                              <Image 
-                                src={mapImagePath ? `${mapImagePath}?t=${imageTimestamp}` : mapImagePath} 
+                              <Image
+                                src={mapImagePath ? `${mapImagePath}?t=${imageTimestamp}` : mapImagePath}
                                 alt={map.map || `第${index + 1}盤`}
                                 width={200}
                                 height={200}
                                 className="max-w-full max-h-full object-contain"
+                                onError={(e) => { try { e.target.style.visibility = 'hidden'; } catch {} }}
                               />
                             </div>
                             <div className="h-8 flex items-center justify-center px-1">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { fetchJsonSafe, postJsonWithRetry } from '@/lib/fetchWithRetry';
 
 // 地圖比數狀態管理 hook
 export function useMapScores() {
@@ -11,43 +12,19 @@ export function useMapScores() {
   // 載入狀態
   useEffect(() => {
     const loadState = async () => {
-      let apiDataLoaded = false;
-      
-      // 優先從 API 載入
-      try {
-        const res = await fetch('/api/state', { cache: 'no-store' });
-        if (res.ok) {
-          const text = await res.text();
-          if (text) {
-            try {
-              const json = JSON.parse(text);
-              const d = json?.data || {};
-              if (d.mapScores) {
-                setMapScores(d.mapScores || {});
-                apiDataLoaded = true;
-              }
-            } catch {
-              // 靜默處理錯誤
-            }
-          }
-        }
-      } catch {
-        // 靜默處理錯誤
-      }
-      
-      // 只有在 API 載入失敗時才使用 localStorage 作為後備
-      if (!apiDataLoaded) {
+      const json = await fetchJsonSafe('/api/state', { cache: 'no-store' }, null);
+      const d = json?.data;
+      if (d?.mapScores) {
+        setMapScores(d.mapScores || {});
+      } else {
+        // API 失敗時使用 localStorage 後備
         try {
           const rawMapScores = localStorage.getItem('dashboard:mapScores');
           if (rawMapScores) {
             setMapScores(JSON.parse(rawMapScores));
           }
-        } catch {
-          // 靜默處理錯誤
-        }
+        } catch {}
       }
-      
-      // 載入完成後設定初始化標記
       setIsInitialized(true);
     };
     loadState();
@@ -56,17 +33,10 @@ export function useMapScores() {
   // 載入地圖資料庫
   useEffect(() => {
     const loadMaps = async () => {
-      try {
-        const res = await fetch('/api/maps-config', { cache: 'no-store' });
-        if (!res.ok) {
-          throw new Error('地圖資料載入失敗');
-        }
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setMapsData(data);
-        }
-      } catch {
-        // 靜默處理錯誤
+      const data = await fetchJsonSafe('/api/maps-config', { cache: 'no-store' }, []);
+      if (Array.isArray(data)) {
+        setMapsData(data);
+      } else {
         setMapsData([]);
       }
     };
@@ -79,17 +49,9 @@ export function useMapScores() {
     if (!isInitialized) {
       return;
     }
-    
+
     try { localStorage.setItem('dashboard:mapScores', JSON.stringify(mapScores)); } catch {}
-    (async () => {
-      try {
-        await fetch('/api/state', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mapScores })
-        });
-      } catch {}
-    })();
+    postJsonWithRetry('/api/state', { mapScores });
   }, [mapScores, isInitialized]);
 
   // 取得可用的模式選項
@@ -158,41 +120,22 @@ export function useMapScores() {
 
   // 同步總分到 Bracket
   const syncTotalScoreToBracket = async (stage, index, scoreA, scoreB) => {
-    try {
-      // 先取得目前的 bracket 資料
-      const res = await fetch('/api/state', { cache: 'no-store' });
-      if (res.ok) {
-        const text = await res.text();
-        if (text) {
-          const json = JSON.parse(text);
-          const bracket = json?.data?.bracket;
-          
-          if (bracket) {
-            const updatedBracket = { ...bracket };
-            
-            // 更新對應位置的總分
-            if (stage === 'champ') {
-              updatedBracket.champ.score = String(scoreA);
-            } else if (updatedBracket[stage] && Array.isArray(updatedBracket[stage]) && index < updatedBracket[stage].length) {
-              updatedBracket[stage][index] = {
-                ...updatedBracket[stage][index],
-                a: { ...updatedBracket[stage][index].a, score: String(scoreA) },
-                b: { ...updatedBracket[stage][index].b, score: String(scoreB) }
-              };
-            }
-            
-            // 更新 bracket 資料
-            await fetch('/api/state', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ bracket: updatedBracket })
-            });
-          }
-        }
-      }
-    } catch {
-      // 靜默處理錯誤
+    const json = await fetchJsonSafe('/api/state', { cache: 'no-store' }, null);
+    const bracket = json?.data?.bracket;
+    if (!bracket) {
+      return;
     }
+    const updatedBracket = { ...bracket };
+    if (stage === 'champ') {
+      updatedBracket.champ.score = String(scoreA);
+    } else if (updatedBracket[stage] && Array.isArray(updatedBracket[stage]) && index < updatedBracket[stage].length) {
+      updatedBracket[stage][index] = {
+        ...updatedBracket[stage][index],
+        a: { ...updatedBracket[stage][index].a, score: String(scoreA) },
+        b: { ...updatedBracket[stage][index].b, score: String(scoreB) }
+      };
+    }
+    postJsonWithRetry('/api/state', { bracket: updatedBracket });
   };
 
   // 重置地圖比數

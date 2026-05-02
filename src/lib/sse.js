@@ -4,8 +4,9 @@ import logger from '@/lib/logger';
 const subscribers = new Set();
 
 // 事件序號與環形緩存（用於斷線回放）
+// 使用者很少，記憶體成本極低；放大緩衝降低斷線過長導致狀態不一致機率
 let nextEventId = 1;
-const RING_CAPACITY = 200;
+const RING_CAPACITY = 2000;
 /** @type {{ id: number, payload: string }[]} */
 const ringBuffer = [];
 
@@ -48,10 +49,34 @@ export function getSubscriberCount() {
   return subscribers.size;
 }
 
+/**
+ * 取得 lastEventId 之後的事件。
+ * 回傳 { events, lostEvents }：
+ *   - events: 緩衝中比 lastEventId 還新的事件
+ *   - lostEvents: true 代表 lastEventId 已不在緩衝範圍內（客戶端應做全量同步）
+ */
 export function getSince(lastEventId) {
   const since = Number(lastEventId);
-  if (!Number.isFinite(since) || since < 0) {return [...ringBuffer];}
-  return ringBuffer.filter(r => r.id > since);
+  if (!Number.isFinite(since) || since < 0) {
+    return { events: [], lostEvents: false };
+  }
+  if (ringBuffer.length === 0) {
+    return { events: [], lostEvents: false };
+  }
+  const oldestId = ringBuffer[0].id;
+  const newestId = ringBuffer[ringBuffer.length - 1].id;
+  // 已經是最新或更新（不可能但以防萬一）
+  if (since >= newestId) {
+    return { events: [], lostEvents: false };
+  }
+  // 斷線太久，緩衝裡最舊的事件 id 已經比 since 還新 → 中間有漏，需 resync
+  if (since < oldestId - 1) {
+    return { events: [], lostEvents: true };
+  }
+  return {
+    events: ringBuffer.filter(r => r.id > since),
+    lostEvents: false,
+  };
 }
 
 export function getLastEventId() {

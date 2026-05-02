@@ -21,7 +21,7 @@ export default function Dashboard() {
   const { selectedDisplayId, displayOptions, switchDisplay } = useDisplayState();
   const { bracket, currentBroadcast, handleMatchChange, setBroadcastMatch, handleResetBrackets, getCurrentBroadcastTeams } = useBracketState();
   const { mapsData, modeOptions, getCurrentMatchMaps, updateCurrentMatchMap, handleResetMapScores } = useMapScores();
-  const { isConnected } = useConnectionState();
+  const { isConnected, obsOnline, obsClients } = useConnectionState();
 
   // 從檔案載入隊伍清單
   const [teamOptions, setTeamOptions] = useState([]);
@@ -119,16 +119,29 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap w-full sm:w-auto">
-              {/* 連線狀態 */}
+              {/* 連線狀態（伺服器 SSE） */}
               <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
-                isConnected 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                isConnected
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                   : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
               }`}>
                 <div className={`w-2 h-2 rounded-full ${
                   isConnected ? 'bg-green-500' : 'bg-red-500'
                 }`}></div>
                 <span>{isConnected ? '已連線' : '未連線'}</span>
+              </div>
+
+              {/* OBS 來源狀態（基於心跳） */}
+              <div
+                title={obsOnline ? obsClients.map((c) => `${c.source}（${Math.round(c.ageMs / 1000)}s 前）`).join('\n') : '未偵測到任何 OBS 來源心跳'}
+                className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
+                  obsOnline
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                }`}
+              >
+                <div className={`w-2 h-2 rounded-full ${obsOnline ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                <span>{obsOnline ? `OBS 在線 (${obsClients.length})` : 'OBS 離線'}</span>
               </div>
 
               {/* 工具按鈕群組 - 桌面版全顯示，手機版使用 Dropdown */}
@@ -235,7 +248,7 @@ export default function Dashboard() {
 
             {/* 地圖與比數 區域 */}
             <div id="map-scores">
-              <MapScoreEditor 
+              <MapScoreEditor
                 currentBroadcast={currentBroadcast}
                 currentMatchMaps={currentMatchMaps}
                 modeOptions={modeOptions}
@@ -244,6 +257,9 @@ export default function Dashboard() {
                 onResetMapScores={handleResetMapScores}
               />
             </div>
+
+            {/* 底部留白：避免內容被浮動 StatusBar 遮擋 */}
+            <div aria-hidden="true" className="h-[200px]" />
           </div>
         </div>
 
@@ -293,7 +309,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="map-scores">
-              <MapScoreEditor 
+              <MapScoreEditor
                 currentBroadcast={currentBroadcast}
                 currentMatchMaps={currentMatchMaps}
                 modeOptions={modeOptions}
@@ -303,15 +319,20 @@ export default function Dashboard() {
               />
             </TabsContent>
           </Tabs>
+
+          {/* 底部留白：避免內容被浮動 StatusBar 遮擋 */}
+          <div aria-hidden="true" className="h-[200px]" />
         </div>
       </div>
       
-      <StatusBar 
-        stageLabel={currentBroadcast?.stage ? getStageLabel(currentBroadcast.stage) : ''} 
-        teamA={currentBroadcastTeams.a} 
-        teamB={currentBroadcastTeams.b} 
-        displayName={displayOptions.find(opt => opt.id === selectedDisplayId)?.name || '歡迎畫面'} 
-        isConnected={isConnected} 
+      <StatusBar
+        stageLabel={currentBroadcast?.stage ? getStageLabel(currentBroadcast.stage) : ''}
+        teamA={currentBroadcastTeams.a}
+        teamB={currentBroadcastTeams.b}
+        displayName={displayOptions.find(opt => opt.id === selectedDisplayId)?.name || '歡迎畫面'}
+        isConnected={isConnected}
+        obsOnline={obsOnline}
+        obsCount={obsClients.length}
       />
       </div>
     </div>
