@@ -154,7 +154,7 @@ function ScoreBarContent() {
         html, body {
           margin: 0;
           padding: 0;
-          width: 1500px;
+          width: 1410px;
           height: 160px;
           overflow: hidden;
           background: transparent !important;
@@ -164,8 +164,8 @@ function ScoreBarContent() {
         }
       `}</style>
 
-      {/* 主要容器：藍色與紅色區塊中間留 450px 透明間隔 */}
-      <div className="w-[1500px] h-[160px] flex items-center px-0 box-border gap-[450px]">
+      {/* 主要容器：藍色與紅色區塊中間留 360px 透明間隔 */}
+      <div className="w-[1410px] h-[160px] flex items-center px-0 box-border gap-[360px]">
 
         {/* 左側：Team A 區域 (藍色背景) */}
         <div
